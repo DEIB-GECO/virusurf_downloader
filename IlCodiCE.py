@@ -10,7 +10,7 @@ def add_variant(sequence_id, pos, length, original,  mutated, variant_type):
 #     print(sequence_id, pos, length, original,  mutated, variant_type)
     return [sequence_id, pos, length, original,  mutated, variant_type]
 
-def alignment(sequence_id = 1, seq1 = "attaaaggtttataccttcccaggtaaca", seq2 = "acccdccdcdccaacaca"):
+def alignment(sequence_id = 1, seq1 = "attaaaggtttataccttcccaggtaaca", seq2 = "acccdccdcdccaacaca", add_variant=add_variant):
     variants=[]
     indel_score = -1
     match_score = 2

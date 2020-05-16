@@ -21,32 +21,33 @@ class ExperimentType(base):
     coverage = Column(String)
                             
 
-class SequenceProject(base):  
-    __tablename__ = 'sequence_project'
+class SequencingProject(base):  
+    __tablename__ = 'sequencing_project'
     
-    sequence_project_id = Column(Integer, primary_key=True)
+    sequencing_project_id = Column(Integer, primary_key=True)
                             
     sequencing_lab = Column(String)
     submission_date = Column(Date)
-    bioproject_id = Column(String)
     database_source = Column(String)
+    bioproject_id = Column(String)
     
                                     
 class Virus(base):
     __tablename__ = 'virus'
-    #     
-    virus_taxonomy_id = Column(Integer, primary_key=True, autoincrement=False)
+    #  
+    virus_id = Column(Integer, primary_key=True)
+    
+    taxon_id = Column(Integer)
+    taxon_name = Column(String)
     
     family = Column(String)
     sub_family = Column(String)
     genus  = Column(String)
-    species_name = Column(String)
-    species_taxon_id = Column(String)
-    genbank_acronym = Column(String)
+    species = Column(String)
     equivalent_list = Column(String)
     molecule_type = Column(String)
-    is_single_stranded = Column(String)
-    is_positive_stranded = Column(String)
+    is_single_stranded = Column(Boolean)
+    is_positive_stranded = Column(Boolean)
     
     
 class HostSample(base):
@@ -54,14 +55,20 @@ class HostSample(base):
     
     host_sample_id = Column(Integer, primary_key=True)
     
-    species = Column(String)
-    species_taxon_id = Column(Integer)
-    collection_date = Column(Integer)
+    host_taxon_id = Column(Integer)
+    host_taxon_name = Column(String)
+    
+    collection_date = Column(String)
     isolation_source  = Column(String)
     originating_lab = Column(String)
     country = Column(String)
     region = Column(String)
     geo_group = Column(String)
+    
+#     extra 
+    age = Column(Integer)
+    gender = Column(String)
+    
 
     
 
@@ -70,9 +77,12 @@ class Sequence(base):
     __tablename__ = 'sequence'
     
     sequence_id = Column(Integer, primary_key=True)
+    # FKs     
     experiment_type_id = Column(Integer, ForeignKey(ExperimentType.experiment_type_id), nullable=False)
-    sequence_project_id = Column(Integer, ForeignKey(SequenceProject.sequence_project_id), nullable=False)
-
+    virus_id = Column(Integer, ForeignKey(Virus.virus_id), nullable=False)
+    host_sample_id = Column(Integer, ForeignKey(HostSample.host_sample_id), nullable=False)
+    sequencing_project_id = Column(Integer, ForeignKey(SequencingProject.sequencing_project_id), nullable=False)
+    
     accession_id = Column(String, unique=True, nullable=False)
     alternative_accession_id = Column(String, unique=True, nullable=False)
     strain_name = Column(String)
@@ -104,15 +114,15 @@ class Variant(base):
     variant_id = Column(Integer, primary_key=True)
     sequence_id = Column(Integer, ForeignKey(Sequence.sequence_id), nullable=False)
     
-    start = Column(Integer)
-#     start2 = Column(Integer)
-    length = Column(Integer, nullable=False)
-    original_sequence = Column(String, nullable=False)
-    alternative_sequence = Column(String, nullable=False)
+    sequence_original = Column(String, nullable=False)
+    sequence_alternative = Column(String, nullable=False)
+    start_original = Column(Integer)
+    start_alternative = Column(Integer)
+    variant_length = Column(Integer, nullable=False)
     variant_type = Column(String, nullable=False)
 
     def get_list(self):
-        return [self.start, self.length, self.original_sequence, self.alt_sequence, self.variant_type]
+        return [self.start_original, self.variant_length, self.sequence_original, self.sequence_alternative, self.variant_type]
     def get_list_columns():
-        return ['start', 'length', 'original_sequence', 'alt_sequence',  'variant_type']
+        return ['start', 'length', 'sequence_original', 'alt_sequence',  'variant_type']
     
