@@ -1,6 +1,6 @@
 # The following table is formatted as tab separated values. 
 #GeneName	GeneId	TranscriptId	BioType	variants_impact_HIGH	variants_impact_MODERATE	variants_impact_MODIFIER	variants_effect_frameshift_variant	variants_effect_missense_variant	variants_effect_upstream_gene_variant
 E	GU280_gp04	GU280_gp04	protein_coding	0	0	2	0	0	2
-ORF1ab	GU280_gp01	GU280_gp01	protein_coding	1	1	0	1	1	0
+ORF1ab	GU280_gp01	GU280_gp01	protein_coding	1	1	1	1	1	1
 ORF3a	GU280_gp03	GU280_gp03	protein_coding	0	0	2	0	0	2
 S	GU280_gp02	GU280_gp02	protein_coding	0	0	2	0	0	2
