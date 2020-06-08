@@ -2,6 +2,7 @@ import numpy as np
 from Bio import pairwise2
 import os
 
+
 def add_variant(sequence_id, pos_ref, pos_seq,  length, original,  mutated, variant_type, reference, sequence):
     #return [sequence_id, pos_ref, pos_seq, length, original,  mutated, variant_type]
     if variant_type == "INS":
@@ -144,15 +145,17 @@ def create_aligner_to_reference(reference):
             variants.append(v)
             
         
-        with open("./tmp_snpeff/{}.vcf".format(sequence_id), "w") as f:
+        variant_file = "./tmp_snpeff/{}.vcf".format(sequence_id)
+        with open(variant_file, "w") as f:
             for m in variants:
                 f.write(m+'\n')
             
-        os.system("java -jar ./tmp_snpeff/snpEff/snpEff.jar  covid  ./tmp_snpeff/MN000998.vcf > ./tmp_snpeff/output_{}.vcf".format(sequence_id, sequence_id))
+        os.system("java -jar ./tmp_snpeff/snpEff/snpEff.jar  covid  {} > ./tmp_snpeff/output_{}.vcf".format(variant_file, sequence_id))
         
         
         with open("./tmp_snpeff/output_{}.vcf".format(sequence_id)) as f:
             annotated_variants = [line for line in f if not line.startswith("#")]
+        os.remove("./tmp_snpeff/{}.vcf".format(sequence_id))
         
         return annotated_variants
         
