@@ -84,7 +84,7 @@ class Sequence(base):
     sequencing_project_id = Column(Integer, ForeignKey(SequencingProject.sequencing_project_id), nullable=False)
     
     accession_id = Column(String, unique=True, nullable=False)
-    alternative_accession_id = Column(String, unique=True, nullable=False)
+    alternative_accession_id = Column(String, unique=True, nullable=True)
     strain_name = Column(String)
     is_reference = Column(Boolean, nullable=False)
     is_complete = Column(Boolean)
@@ -92,6 +92,8 @@ class Sequence(base):
     strand = Column(String)
     length = Column(Integer)
     gc_percentage = Column(Float)
+    linage = Column(String)
+    clade = Column(String)
 
 
 class Annotation(base):  
@@ -108,7 +110,7 @@ class Annotation(base):
     external_reference = Column(String)
     
     
-class Variant(base):  
+class Variant(base):
     __tablename__ = 'variant'
  
     variant_id = Column(Integer, primary_key=True)
