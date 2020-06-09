@@ -161,3 +161,20 @@ def create_aligner_to_reference(reference):
         
     
     return inner_fun
+
+
+def parse_annotated_variants(annotated_variants):
+    result = []
+    for variant in annotated_variants:
+        _, start_original, _, _, _, _, others, _ = variant.split("\t")
+
+        variant_type, start_alternative, variant_length, sequence_original, sequence_alternative = others.split(',')
+
+        result.append({'sequence_original': sequence_original,
+                       'sequence_alternative': sequence_alternative,
+                       'start_original': start_original,
+                       'start_alternative': start_alternative,
+                       'variant_length': variant_length,
+                       'variant_type': variant_type,
+                       })
+    return result

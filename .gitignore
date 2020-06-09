@@ -1,3 +1,8 @@
+/tmp_snpeff/*.vcf
+
+/snpEff_genes.txt
+/snpEff_summary.html
+
 #########IDEA#########
 .idea/
 
