@@ -5,63 +5,49 @@ from typing import List
 # noinspection PyPackageRequirements
 from Bio import Entrez
 from lxml import etree
+from tqdm import tqdm
+
 from database import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation
 from locations import *
 from virus_sample import VirusSample
 from xml_helper import *
+import string
+import random
+from loguru import logger
 
-# Set of methods that create the corresponding rows in the Virus Conceptual Model database tables
-
+# Set of MOCK methods that create the corresponding rows in the Virus Conceptual Model database tables
+logger.warning('You are using a mocked version of the VCM: You can use it to develop the DB and test the flow of operations'
+               ' but the data inserted are just meaningless examples.\n'
+               'If you want to use real data, import vcm.py instead.')
 
 #   #############################    VCM    ############################
 def create_or_get_virus(session, tax_tree):
-    taxon_id = text_at_node(tax_tree, './Taxon/TaxId')
-    scientific_name = text_at_node(tax_tree, './Taxon/ScientificName')
-
-    family = text_at_node(tax_tree, './/LineageEx/Taxon[./Rank/text() = "family"]/ScientificName')
-    subfamily = text_at_node(tax_tree, './/LineageEx/Taxon[./Rank/text() = "subfamily"]/ScientificName')
-    genus = text_at_node(tax_tree, './/LineageEx/Taxon[./Rank/text() = "genus"]/ScientificName')
-    species = text_at_node(tax_tree, './/LineageEx/Taxon[./Rank/text() = "species"]/ScientificName')
-    #     species_taxon_id = text_at_node(tax_tree, './/LineageEx/Taxon[./Rank/text() = "species"]/TaxId')
-
-    genbank_acronym = text_at_node(tax_tree, './/GenbankAcronym')
-    equivalent_names = tax_tree.xpath('.//EquivalentName')
-    equivalent_names = [x.text for x in equivalent_names]
-    if genbank_acronym:
-        equivalent_names.insert(0, genbank_acronym)
-    equivalent_names = list(OrderedDict.fromkeys(equivalent_names))
-    equivalent_names = ", ".join(equivalent_names)
-
-    print(family, subfamily, genus, species, genbank_acronym, equivalent_names)
-
-    molecule_type = 'RNA'
-    is_single_stranded = True
-    is_positive_stranded = True
-
-    virus = session.query(Virus).filter(Virus.taxon_id == taxon_id).one_or_none()
+    virus = session.query(Virus).filter(Virus.taxon_id == 101).one_or_none()
 
     if not virus:
-        #         print("not exists")
-        virus = Virus(taxon_id=taxon_id,
-                      taxon_name=scientific_name,
-                      family=family,
-                      sub_family=subfamily,
-                      genus=genus,
-                      species=species,
-                      equivalent_list=equivalent_names,
-                      molecule_type=molecule_type,
-                      is_single_stranded=is_single_stranded,
-                      is_positive_stranded=is_positive_stranded
+        virus = Virus(taxon_id=101,
+                      taxon_name='a_taxon_name',
+                      family='a_family',
+                      sub_family='a_subfamily',
+                      genus='a_genus',
+                      species='a_specie',
+                      equivalent_list='equivalent_names',
+                      molecule_type='a_molecule_type',
+                      is_single_stranded=True,
+                      is_positive_stranded=True
                       )
         session.add(virus)
-
+        session.flush()
+        print('virus added')
+    else:
+        print('virus with taxon id 101 already_present')
     return virus
 
 
 def create_or_get_experiment(session, sample: VirusSample):
-    sequencing_technology = sample.sequencing_technology()
-    assembly_method = sample.assembly_method()
-    coverage = sample.coverage()
+    sequencing_technology = 'a_seq_technology',
+    assembly_method = 'an_assembly_method',
+    coverage = 'some_coverage'
 
     experiment = session.query(ExperimentType).filter(ExperimentType.sequencing_technology == sequencing_technology,
                                                       ExperimentType.assembly_method == assembly_method,
@@ -72,39 +58,18 @@ def create_or_get_experiment(session, sample: VirusSample):
             assembly_method=assembly_method,
             coverage=coverage)
         session.add(experiment)
+        session.flush()
+        print('experiment type added')
+    else:
+        print('experiment type already existing')
     return experiment
 
 
 def create_or_get_sequencing_project(session, sample: VirusSample):
-    tree = sample.underlying_xml_element_tree()
-
-    references = tree.xpath('.//INSDReference[./INSDReference_title/text() = "Direct Submission"]')
-
-    assert len(references) > 0, 'there must be at least one direct submission'
-    reference = references[0]
-    #     authors = reference.xpath('.//INSDAuthor')
-    #     authors = [x.text for x in authors]
-    #     authors = ", ".join(authors)
-    #     title = text_at_node(reference, "./INSDReference_title")
-    #     journal = text_at_node(reference, "./INSDReference_journal")
-    #     publication_date = None
-    #     pubmed_id = text_at_node(reference, "./INSDReference_pubmed" , mandatory=False)
-    #     popset = None
-
-    journal = text_at_node(reference, "./INSDReference_journal")
-    #     print(journal)
-    #     assert journal.startswith("Submitted "), 'Cannot find submitted in the Journal of direct submission reference'
-    journal_split = re.split("[()]", journal, maxsplit=2)
-    assert len(journal_split) == 3, f"Journal value problem '{journal}' {journal_split}"
-    submitted, submission_date, sequencing_lab = journal_split
-    assert submitted == "Submitted ", "Journal value submitted"
-    submission_date = datetime.strptime(submission_date, '%d-%b-%Y')
-
-    keyword = text_at_node(tree, ".//INSDKeyword", mandatory=False)
-    is_reference = keyword == "RefSeq"
-
-    bioproject_id = text_at_node(tree, './/INSDXref[./INSDXref_dbname/text() = "BioProject"]/INSDXref_id', mandatory=False)
-    database_source = "RefSeq" if is_reference else "GenBank"
+    sequencing_lab = 'a_laboratory'
+    submission_date = 'a_date'
+    bioproject_id = 'a_bioproject_id'
+    database_source = 'a_db_source'
 
     sequencing_project = session.query(SequencingProject).filter(SequencingProject.sequencing_lab == sequencing_lab,
                                                                  SequencingProject.submission_date == submission_date,
@@ -118,53 +83,25 @@ def create_or_get_sequencing_project(session, sample: VirusSample):
                                                bioproject_id=bioproject_id,
                                                database_source=database_source)
         session.add(sequencing_project)
+        session.flush()
+        print('sequencing project added')
+    else:
+        print('sequencing project already existing')
     return sequencing_project
 
 
 def create_or_get_host_sample(session, sample: VirusSample):
-    tree = sample.underlying_xml_element_tree()
-    
-    references = tree.xpath('.//INSDReference[./INSDReference_title/text() = "Direct Submission"]')
-    assert len(references) > 0, 'there must be at least one direct submission'
-    reference = references[0]
-    journal = text_at_node(reference, "./INSDReference_journal")
-    journal_split = re.split("[()]", journal, maxsplit=2)
-    assert len(journal_split) == 3, f"Journal value problem '{journal}' {journal_split}"
-    submitted, submission_date, originating_lab = journal_split
 
-    originating_lab = None
-
-    host = text_at_node(tree, '..//INSDQualifier[./INSDQualifier_name/text() = "host"]/INSDQualifier_value', mandatory=False)
-    host = [x.strip() for x in host.split(";")] if host else []
-
-    host_taxon_name = host[0] if len(host) else None
-
-    host = [x.lower() for x in host]
-    gender = 'male' if 'male' in host else 'female' if 'female' in host else None
-    age = next(filter(lambda x: 'age' in x, host), None)
-    if age:
-        age = int(age.replace("age", '').strip())
-
-    host_taxon_id = 9606 if host_taxon_name == 'Homo sapiens' else None
-
-    collection_date = text_at_node(tree,
-                                   '..//INSDQualifier[./INSDQualifier_name/text() = "collection_date"]/INSDQualifier_value',
-                                   mandatory=False)
-    isolation_source = text_at_node(tree,
-                                    '..//INSDQualifier[./INSDQualifier_name/text() = "isolation_source"]/INSDQualifier_value',
-                                    mandatory=False)
-
-    country = None
-    region = None
-    geo_group = None
-
-    country_pre = text_at_node(tree,
-                               '..//INSDQualifier[./INSDQualifier_name/text() = "country"]/INSDQualifier_value',
-                               mandatory=False)
-    if country_pre:
-        country_pre = country_pre.split(":")
-        country = country_pre[0]
-        region = country_pre[1] if len(country_pre) > 1 else None
+    host_taxon_id = 222
+    host_taxon_name = 'a_name'
+    collection_date = 'a_date'
+    isolation_source = 'a_source'
+    originating_lab = 'a_lab'
+    country = 'a_country'
+    region = 'a_region'
+    geo_group = 'a_geo_group'
+    age = 40
+    gender = 'a_gender'
 
     host_sample = session.query(HostSample).filter(HostSample.host_taxon_id == host_taxon_id,
                                                    HostSample.host_taxon_name == host_taxon_name,
@@ -181,7 +118,6 @@ def create_or_get_host_sample(session, sample: VirusSample):
                                                    ).one_or_none()
 
     if not host_sample:
-        #         print("not exists")
         host_sample = HostSample(host_taxon_id=host_taxon_id,
                                  host_taxon_name=host_taxon_name,
 
@@ -195,22 +131,25 @@ def create_or_get_host_sample(session, sample: VirusSample):
                                  age=age,
                                  gender=gender,
                                  )
-
         session.add(host_sample)
+        session.flush()
+        print('host sample added')
+    else:
+        print('host_sample_already existing')
     return host_sample
 
 
 def create_or_get_sequence(session, virus_sample, virus_id: int, experiment: ExperimentType, host_sample: HostSample, sequencing_project: SequencingProject):
     # data from sample
-    accession_id = virus_sample.primary_accession_number()
-    alternative_accession_id = virus_sample.alternative_accession_number()
-    strain_name = virus_sample.strain()
-    is_reference = virus_sample.is_reference()
-    is_complete = virus_sample.is_complete()
-    nucleotide_sequence = virus_sample.nucleotide_sequence()
-    strand = virus_sample.strand()
-    length = virus_sample.length()
-    gc_percentage = virus_sample.gc_percent()
+    accession_id = 'primary_accession_id'
+    alternative_accession_id = 'alternativea_accession_id'
+    strain_name = 'a_strain'
+    is_reference = False
+    is_complete = False
+    nucleotide_sequence = 'a_nuc_sequence'
+    strand = '+'
+    length = '10'
+    gc_percentage = '0.44'
     # foreign keys
     experiment_type_id = experiment.experiment_type_id
     sequencing_project_id = sequencing_project.sequencing_project_id
@@ -245,6 +184,7 @@ def create_or_get_sequence(session, virus_sample, virus_id: int, experiment: Exp
                             virus_id=virus_id,
                             host_sample_id=host_sample_id)
         session.add(sequence)
+        session.flush()
         print('sequence added')
     else:
         print('sequence already existing')
@@ -252,57 +192,37 @@ def create_or_get_sequence(session, virus_sample, virus_id: int, experiment: Exp
 
 
 def create_or_get_annotation(session, sample: VirusSample, sequence: Sequence):
-    tree = sample.underlying_xml_element_tree()
+    # sample data
+    feature_type = 'a_type'
+    start = 1
+    stop = 2
+    gene_name = 'a_name'
+    product = 'a_product'
+    external_reference = 'a_reference'
+    # foreign keys
+    sequence_id = sequence.sequence_id
 
-    def get_annotation():
-        start, stop = merge_intervals(e)
-        feature_type = text_at_node(e, './/INSDFeature_key')
-        gene_name = text_at_node(e, './/INSDQualifier[./INSDQualifier_name/text() = "gene"]/INSDQualifier_value', False)
-
-        product = text_at_node(e, './/INSDQualifier[./INSDQualifier_name/text() = "product"]/INSDQualifier_value',
-                               False)
-        db_xref = text_at_node(e, './/INSDQualifier[./INSDQualifier_name/text() = "db_xref"]/INSDQualifier_value',
-                               False)
-
-        protein_id = text_at_node(e, './/INSDQualifier[./INSDQualifier_name/text() = "protein_id"]/INSDQualifier_value',
-                                  False)
-
-        if protein_id:
-            protein_id = "ProteinID:" + protein_id
-
-        # merge with comma
-        db_xref_merged = [x for x in [protein_id, db_xref] if x is not None]
-
-        db_xref_merged = ','.join(db_xref_merged)
-        #  select one of them:
-        #         db_xref_merged = coalesce(db_xref_merged,'db_xref', mandatory=False, multiple=True)
-
-        res = (start, stop, feature_type, gene_name, product, db_xref_merged)
-        #         print(res)
-        if feature_type != 'source':
-            annotation = Annotation(feature_type=feature_type,
-                                    start=start,
-                                    stop=stop,
-                                    gene_name=gene_name,
-                                    product=product,
-                                    external_reference=db_xref_merged,
-                                    sequence_id=sequence.sequence_id)
-            session.add(annotation)
-            return res
-        else:
-            return None
-
-    annotations = []
-    for e in tree.xpath(".//INSDFeature"):
-        try:
-            annotation = get_annotation()
-        except AssertionError:
-            pass
-        else:
-            if annotation:
-                annotations.append(annotation)
-
-    return annotations
+    annotation = session.query(Annotation).filter(Annotation.sequence_id == sequence_id,
+                                                  Annotation.feature_type == feature_type,
+                                                  Annotation.start ==  start,
+                                                  Annotation.stop == stop,
+                                                  Annotation.gene_name == gene_name,
+                                                  Annotation.product == product,
+                                                  Annotation.external_reference == external_reference).one_or_none()
+    if not annotation:
+        annotation = Annotation(sequence_id=sequence_id,
+                                feature_type=feature_type,
+                                start=start,
+                                stop=stop,
+                                gene_name=gene_name,
+                                product=product,
+                                external_reference=external_reference)
+        session.add(annotation)
+        session.flush()
+        print('annotation added')
+    else:
+        print('annotation already existing')
+    return [annotation]
 
 
 #   ##############################      HELPER METHODS  #################à#
@@ -385,3 +305,7 @@ def merge_intervals(e):
     else:
         None
     return len(intervals)
+
+
+def random_string():
+    return ''.join(random.choices(string.ascii_uppercase, k=4))
