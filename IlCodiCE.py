@@ -1,5 +1,7 @@
 import numpy as np
 from Bio import pairwise2
+from Bio import Seq
+from Bio.Data import CodonTable
 import os
 
 
@@ -35,14 +37,38 @@ def add_variant(sequence_id, pos_ref, pos_seq,  length, original,  mutated, vari
                       ",".join(map(str, [variant_type,pos_seq,length, original, mutated])) ]))
 
 
-def create_aligner_to_reference(reference):
+def create_aligner_to_reference(reference, annotation_file):
+    
+    table = CodonTable.ambiguous_dna_by_id[1]
+    reference_annotations = []
+    
+    with open(annotation_file) as f:
+        for line in f:
+            s = line.strip().split("\t")
+            name = s[0]
+            start = int(s[1])
+            stop = int(s[2])
+            reference_annotations.append((name, start, stop))
+    
+    #for a in reference_annotations:
+        #print(a[0], reference[a[1]])
     
     def inner_fun(sequence, sequence_id = 1):
         variants = []
         
+        #name, type, start, stop, Aminoacidsequence
+        annotations = []
+        
+        #name, pos, alt, type
+        aa_variants = []
+        
         alignments = pairwise2.align.globalms(reference, sequence, 2, -1, -1, -.5)
         ref_aligned = alignments[0][0]
         seq_aligned = alignments[0][1]
+        
+        #print(ref_aligned)
+        #print(seq_aligned)
+        
         
         ref_positions = np.zeros(len(seq_aligned), dtype=int)
         pos = 0
@@ -50,6 +76,7 @@ def create_aligner_to_reference(reference):
             if ref_aligned[i] != '-':
                 pos +=1
             ref_positions[i] = pos
+        
             
         seq_positions = np.zeros(len(seq_aligned), dtype=int)
         pos = 0
@@ -57,6 +84,63 @@ def create_aligner_to_reference(reference):
             if seq_aligned[i] != '-':
                 pos += 1
             seq_positions[i] = pos
+        
+        paired_positions = list(zip(ref_positions, seq_positions))
+        for a in reference_annotations:
+            name = a[0]
+            ann_type = "gene"
+            start_ref = a[1]
+            stop_ref = a[2]
+            ann_pos = [s for (r,s) in paired_positions if r >= start_ref and r <= stop_ref]
+            seq_start = ann_pos[0]
+            seq_stop = ann_pos[-1]
+            dna_seq = sequence[seq_start-1:seq_stop].replace("-", "")
+            dna_ref = reference[start_ref-1:stop_ref]
+            
+            try:
+                aa_ref = Seq._translate_str(dna_ref, table, cds=True)
+                aa_seq = Seq._translate_str(dna_seq, table, cds=True)
+                alignment_aa = pairwise2.align.globalms(aa_ref, aa_seq, 2, -1, -1, -.5)
+                
+                ref_aligned_aa = alignment_aa[0][0]
+                seq_aligned_aa = alignment_aa[0][1]
+                                
+                ref_positions_aa = np.zeros(len(seq_aligned_aa), dtype=int)
+                pos = 0
+                for i in range(len(ref_aligned_aa)):
+                    if ref_aligned_aa[i] != '-':
+                        pos +=1
+                    ref_positions_aa[i] = pos
+                    
+                aligned_aa = list(zip(ref_positions_aa, ref_aligned_aa, seq_aligned_aa))
+                mut_set = set()
+                for t in aligned_aa:
+                    if t[2] == "-":
+                        mutpos = t[0]
+                        alternative = t[2]
+                        mut_type = "DEL"
+                        mut_set.add((name, mutpos, alternative, mut_type))
+                    elif t[1] != t[2]:
+                        mutpos = t[0]
+                        alternative = t[2]
+                        mut_type = "SUB"
+                        mut_set.add((name, mutpos, alternative, mut_type))
+                    elif t[1] == "-":
+                        mutpos = t[0]
+                        alternative = "".join([s for (p,r,f) in aligned_aa if p == mutpos])
+                        mut_type = "SUB"
+                        mut_set.add((name, mutpos, alternative, mut_type))
+                for mut in mut_set:
+                    aa_variants.append(mut)
+                        
+                    
+                
+                
+            except:
+                seq_start = None
+                seq_stop = None
+                aa_seq = None
+            annotations.append((name, ann_type, seq_start, seq_stop, aa_seq))
            
         ins_open = False
         ins_len = 0
@@ -157,7 +241,8 @@ def create_aligner_to_reference(reference):
             annotated_variants = [line for line in f if not line.startswith("#")]
         os.remove("./tmp_snpeff/{}.vcf".format(sequence_id))
         
-        return annotated_variants
+
+        return (annotated_variants, annotations, aa_variants)
         
     
     return inner_fun
