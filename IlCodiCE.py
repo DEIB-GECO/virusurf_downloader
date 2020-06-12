@@ -59,7 +59,7 @@ def create_aligner_to_reference(reference, annotation_file):
         #name, type, start, stop, Aminoacidsequence
         annotations = []
         
-        #name, pos, alt, type
+        #name, pos, original, alt, type
         aa_variants = []
         
         alignments = pairwise2.align.globalms(reference, sequence, 2, -1, -1, -.5)
@@ -88,7 +88,7 @@ def create_aligner_to_reference(reference, annotation_file):
         paired_positions = list(zip(ref_positions, seq_positions))
         for a in reference_annotations:
             name = a[0]
-            ann_type = "gene"
+            ann_type = "CDS"
             start_ref = a[1]
             stop_ref = a[2]
             ann_pos = [s for (r,s) in paired_positions if r >= start_ref and r <= stop_ref]
@@ -96,6 +96,7 @@ def create_aligner_to_reference(reference, annotation_file):
             seq_stop = ann_pos[-1]
             dna_seq = sequence[seq_start-1:seq_stop].replace("-", "")
             dna_ref = reference[start_ref-1:stop_ref]
+            aa_variants_gene = []
             
             try:
                 aa_ref = Seq._translate_str(dna_ref, table, cds=True)
@@ -117,21 +118,25 @@ def create_aligner_to_reference(reference, annotation_file):
                 for t in aligned_aa:
                     if t[2] == "-":
                         mutpos = t[0]
+                        original = t[1]
                         alternative = t[2]
                         mut_type = "DEL"
-                        mut_set.add((name, mutpos, alternative, mut_type))
-                    elif t[1] != t[2]:
+                        mut_set.add((name, mutpos, original, alternative, mut_type))
+                    elif t[1] != t[2] :
                         mutpos = t[0]
-                        alternative = t[2]
+                        original = [r for (p,r,s) in aligned_aa if p == mutpos if r!="-"][0]
+                        alternative = "".join([s for (p,r,s) in aligned_aa if p == mutpos])
                         mut_type = "SUB"
-                        mut_set.add((name, mutpos, alternative, mut_type))
+                        mut_set.add((name, mutpos, original, alternative, mut_type))
                     elif t[1] == "-":
                         mutpos = t[0]
-                        alternative = "".join([s for (p,r,f) in aligned_aa if p == mutpos])
+                        original = t[1]
+                        alternative = t[2]
                         mut_type = "SUB"
-                        mut_set.add((name, mutpos, alternative, mut_type))
+                        mut_set.add((name, mutpos, original, alternative, mut_type))
                 for mut in mut_set:
                     aa_variants.append(mut)
+                    aa_variants_gene.append(mut)
                         
                     
                 
@@ -140,7 +145,8 @@ def create_aligner_to_reference(reference, annotation_file):
                 seq_start = None
                 seq_stop = None
                 aa_seq = None
-            annotations.append((name, ann_type, seq_start, seq_stop, aa_seq))
+                
+            annotations.append((name, ann_type, seq_start, seq_stop, aa_seq, aa_variants_gene))
            
         ins_open = False
         ins_len = 0
