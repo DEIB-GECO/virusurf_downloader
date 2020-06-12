@@ -108,6 +108,7 @@ class Annotation(base):
     gene_name = Column(String)
     product = Column(String)
     external_reference = Column(String)
+    aminoacid_sequence = Column(String)
     
     
 class Variant(base):
@@ -127,4 +128,18 @@ class Variant(base):
         return [self.start_original, self.variant_length, self.sequence_original, self.sequence_alternative, self.variant_type]
     def get_list_columns():
         return ['start', 'length', 'sequence_original', 'alt_sequence',  'variant_type']
-    
+
+
+class AminoacidVariant(base):
+    __tablename__ = 'aminoacid_variant'
+
+    aminoacid_variant_id = Column(Integer, primary_key=True)
+    annotation_id = Column(Integer, ForeignKey(Annotation.annotation_id), nullable=False)
+
+    sequence_aa_original = Column(String, nullable=False)
+    sequence_aa_alternative = Column(String, nullable=False)
+    start_aa_original = Column(Integer)
+    start_aa_alternative = Column(Integer)
+    variant_aa_length = Column(Integer, nullable=False)
+    variant_aa_type = Column(String, nullable=False)
+
