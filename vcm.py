@@ -318,11 +318,6 @@ def create_or_get_annotation(session, sample: VirusSample, sequence: Sequence):
     return annotations
 
 
-def create_or_get_nucleotide_variants(session, sample: VirusSample):
-    if sample.is_reference():
-        aligner = create_aligner_to_reference(reference_sequence)
-
-
 #   ##############################      HELPER METHODS  #################à#
 def download_virus_taxonomy_as_xml(taxon_id):
     # write taxonomy tree
