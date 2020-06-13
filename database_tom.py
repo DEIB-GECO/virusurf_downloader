@@ -26,8 +26,8 @@ def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch
     try:
         if recreate_db_from_scratch:
             _base.metadata.drop_all(_db_engine, tables=[ExperimentType.__table__, SequencingProject.__table__, Virus.__table__,
-                                                        HostSample.__table__, Sequence.__table__, Annotation.__table__,
-                                                        Variant.__table__])
+                                                        HostSample.__table__, Sequence.__table__, AminoacidVariant.__table__,
+                                                        Annotation.__table__, Variant.__table__])
 
         # create tables if not existing
         _base.metadata.create_all(_db_engine)   # throws sqlalchemy.exc.OperationalError if connection is not available
@@ -169,6 +169,7 @@ class Annotation(_base):
     gene_name = Column(String)
     product = Column(String)
     external_reference = Column(String)
+    aminoacid_sequence = Column(String)
 
 
 class Variant(_base):
@@ -190,3 +191,17 @@ class Variant(_base):
 
     def get_list_columns(self):
         return ['start', 'length', 'sequence_original', 'alt_sequence', 'variant_type']
+
+
+class AminoacidVariant(_base):
+    __tablename__ = 'aminoacid_variant'
+
+    aminoacid_variant_id = Column(Integer, primary_key=True)
+    annotation_id = Column(Integer, ForeignKey(Annotation.annotation_id), nullable=False)
+
+    sequence_aa_original = Column(String, nullable=False)
+    sequence_aa_alternative = Column(String, nullable=False)
+    start_aa_original = Column(Integer)
+    start_aa_alternative = Column(Integer)
+    variant_aa_length = Column(Integer, nullable=False)
+    variant_aa_type = Column(String, nullable=False)

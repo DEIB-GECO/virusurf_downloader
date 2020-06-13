@@ -2,10 +2,11 @@ import sys
 import locations
 from loguru import logger
 import database_tom
-import vcm_mock as vcm
+import vcm as vcm
 from virus_sample import VirusSample, download_virus_sample_as_xml
 from sqlalchemy.orm.session import Session
 from Bio import Entrez
+import IlCodiCE
 from tqdm import tqdm
 Entrez.email = "Your.Name.Here@example.org"
 
@@ -57,10 +58,13 @@ def run():
 
     # get associated sequence accession ids
     logger.info(f'getting accession ids for virus sequences')
+    logger.warning('Two sequence accession ids are hardcoded in lines 63,64 of main.py. Uncomment line 62 to download '
+                   'all the sequence accession ids of this virus from NCBI.')
     # refseq_accession_id, non_refseq_accession_ids = vcm.get_virus_sample_accession_ids(sars_cov2_taxonomy_id)     # commented to save time
     refseq_accession_id = 1798174254      # hardcoded value for tests
-    random_non_refseq_accession_ids = 1850952215
-    sequence_accession_ids = [refseq_accession_id, random_non_refseq_accession_ids]
+    non_refseq_accession_ids = [1850952215]
+    sequence_accession_ids = [refseq_accession_id] + non_refseq_accession_ids
+    aligner = None
 
     # import each sequence into the VCM
     def import_virus_sequence(session: Session, virus_seq_accession_id):
@@ -72,10 +76,24 @@ def run():
         sequencing_project = vcm.create_or_get_sequencing_project(session, sample)
         sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment, host_sample, sequencing_project)
         annotation = vcm.create_or_get_annotation(session, sample, sequence)
-        # TODO nucleotide_variant
+
+        # sorry, I hadn't time to look at the nucleotide variant part
+        nonlocal aligner
+        if aligner is None and sample.is_reference():
+            logger.info('generating the aligner to the reference sequence...')
+            aligner = IlCodiCE.create_aligner_to_reference(sequence, 'sars_cov_2_annotations.tsv')
+            logger.info('done')
+        else:
+            # ... ?
+            logger.info('finding nucleotide variants')
+            logger.warning(':( this feature is not yet implemented. Exiting')
+            sys.exit(0)
+            pass
+
+
         # TODO amino acid variant
 
-    logger.info(f'importing virus sequences')
+    logger.info(f'importing virus sequences and related tables')
     for virus_seq_acc_id in sequence_accession_ids:
         database_tom.try_py_function(import_virus_sequence, virus_seq_acc_id)
 

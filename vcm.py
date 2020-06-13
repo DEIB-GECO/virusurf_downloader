@@ -5,8 +5,9 @@ from typing import List
 # noinspection PyPackageRequirements
 from Bio import Entrez
 from lxml import etree
-from database import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation
+from database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation
 from locations import *
+from tqdm import tqdm
 from virus_sample import VirusSample
 from xml_helper import *
 
@@ -54,7 +55,7 @@ def create_or_get_virus(session, tax_tree):
                       is_positive_stranded=is_positive_stranded
                       )
         session.add(virus)
-
+        session.flush()
     return virus
 
 
@@ -72,6 +73,7 @@ def create_or_get_experiment(session, sample: VirusSample):
             assembly_method=assembly_method,
             coverage=coverage)
         session.add(experiment)
+        session.flush()
     return experiment
 
 
@@ -92,13 +94,13 @@ def create_or_get_sequencing_project(session, sample: VirusSample):
     #     popset = None
 
     journal = text_at_node(reference, "./INSDReference_journal")
-    #     print(journal)
-    #     assert journal.startswith("Submitted "), 'Cannot find submitted in the Journal of direct submission reference'
+    # print(f'JOURNAL: {journal}')
+    assert journal.startswith("Submitted "), 'Cannot find submitted in the Journal of direct submission reference'
     journal_split = re.split("[()]", journal, maxsplit=2)
     assert len(journal_split) == 3, f"Journal value problem '{journal}' {journal_split}"
     submitted, submission_date, sequencing_lab = journal_split
     assert submitted == "Submitted ", "Journal value submitted"
-    submission_date = datetime.strptime(submission_date, '%d-%b-%Y')
+    submission_date = str(datetime.strptime(submission_date, '%d-%b-%Y'))
 
     keyword = text_at_node(tree, ".//INSDKeyword", mandatory=False)
     is_reference = keyword == "RefSeq"
@@ -118,6 +120,7 @@ def create_or_get_sequencing_project(session, sample: VirusSample):
                                                bioproject_id=bioproject_id,
                                                database_source=database_source)
         session.add(sequencing_project)
+        session.flush()
     return sequencing_project
 
 
@@ -197,13 +200,14 @@ def create_or_get_host_sample(session, sample: VirusSample):
                                  )
 
         session.add(host_sample)
+        session.flush()
     return host_sample
 
 
 def create_or_get_sequence(session, virus_sample, virus_id: int, experiment: ExperimentType, host_sample: HostSample, sequencing_project: SequencingProject):
     # data from sample
     accession_id = virus_sample.primary_accession_number()
-    alternative_accession_id = virus_sample.alternative_accession_number()
+    alternative_accession_id = str(virus_sample.alternative_accession_number())
     strain_name = virus_sample.strain()
     is_reference = virus_sample.is_reference()
     is_complete = virus_sample.is_complete()
@@ -245,6 +249,7 @@ def create_or_get_sequence(session, virus_sample, virus_id: int, experiment: Exp
                             virus_id=virus_id,
                             host_sample_id=host_sample_id)
         session.add(sequence)
+        session.flush()
         print('sequence added')
     else:
         print('sequence already existing')
@@ -278,16 +283,24 @@ def create_or_get_annotation(session, sample: VirusSample, sequence: Sequence):
         #         db_xref_merged = coalesce(db_xref_merged,'db_xref', mandatory=False, multiple=True)
 
         res = (start, stop, feature_type, gene_name, product, db_xref_merged)
-        #         print(res)
         if feature_type != 'source':
-            annotation = Annotation(feature_type=feature_type,
-                                    start=start,
-                                    stop=stop,
-                                    gene_name=gene_name,
-                                    product=product,
-                                    external_reference=db_xref_merged,
-                                    sequence_id=sequence.sequence_id)
-            session.add(annotation)
+            annotation = session.query(Annotation).filter(Annotation.feature_type == feature_type,
+                                                          Annotation.start == start,
+                                                          Annotation.stop == stop,
+                                                          Annotation.gene_name == gene_name,
+                                                          Annotation.product == product,
+                                                          Annotation.external_reference == db_xref_merged,
+                                                          Annotation.sequence_id == sequence.sequence_id).one_or_none()
+            if not annotation:
+                annotation = Annotation(feature_type=feature_type,
+                                        start=start,
+                                        stop=stop,
+                                        gene_name=gene_name,
+                                        product=product,
+                                        external_reference=db_xref_merged,
+                                        sequence_id=sequence.sequence_id)
+                session.add(annotation)
+                session.flush()
             return res
         else:
             return None
@@ -303,6 +316,11 @@ def create_or_get_annotation(session, sample: VirusSample, sequence: Sequence):
                 annotations.append(annotation)
 
     return annotations
+
+
+def create_or_get_nucleotide_variants(session, sample: VirusSample):
+    if sample.is_reference():
+        aligner = create_aligner_to_reference(reference_sequence)
 
 
 #   ##############################      HELPER METHODS  #################à#
