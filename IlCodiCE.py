@@ -303,7 +303,13 @@ def call_aa_variants(aa_ref, aa_seq, name):
 def parse_annotated_variants(annotated_variants):
     result = []
     for variant in annotated_variants:
-        _, start_original, _, _, _, _, others, _ = variant.split("\t")
+        _, start_original, _, _, _, _, others, snpeff_ann = variant.split("\t")
+        
+        annotations = []
+        for ann in snpeff_ann.split(","):
+            s = ann.split("|")
+            annotations.append([s[1], s[2], s[3]])
+        
 
         variant_type, start_alternative, variant_length, sequence_original, sequence_alternative = others.split(',')
 
@@ -313,5 +319,6 @@ def parse_annotated_variants(annotated_variants):
                        'start_alternative': start_alternative,
                        'variant_length': variant_length,
                        'variant_type': variant_type,
+                       'annotations' : annotations
                        })
     return result
