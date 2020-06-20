@@ -62,7 +62,7 @@ def create_aligner_to_reference(reference, annotation_file, is_gisaid = False):
         #name, pos, original, alt, type
         aa_variants = []
         
-        alignments = pairwise2.align.globalms(reference, sequence, 2, -1, -1, -.5)
+        alignments = pairwise2.align.globalms(reference, sequence, 2, -1, -1, -.5, one_alignment_only=True)
         ref_aligned = alignments[0][0]
         seq_aligned = alignments[0][1]
         

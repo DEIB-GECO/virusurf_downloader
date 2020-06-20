@@ -100,7 +100,7 @@ def create_or_get_sequencing_project(session, sample: VirusSample):
     assert len(journal_split) == 3, f"Journal value problem '{journal}' {journal_split}"
     submitted, submission_date, sequencing_lab = journal_split
     assert submitted == "Submitted ", "Journal value submitted"
-    submission_date = str(datetime.strptime(submission_date, '%d-%b-%Y'))
+    submission_date = datetime.strptime(submission_date, '%d-%b-%Y')
 
     keyword = text_at_node(tree, ".//INSDKeyword", mandatory=False)
     is_reference = keyword == "RefSeq"
@@ -250,9 +250,6 @@ def create_or_get_sequence(session, virus_sample, virus_id: int, experiment: Exp
                             host_sample_id=host_sample_id)
         session.add(sequence)
         session.flush()
-        print('sequence added')
-    else:
-        print('sequence already existing')
     return sequence
 
 

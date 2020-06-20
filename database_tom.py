@@ -87,8 +87,7 @@ class SequencingProject(_base):
     sequencing_project_id = Column(Integer, primary_key=True, autoincrement=True)
 
     sequencing_lab = Column(String)
-    # submission_date = Column(Date)
-    submission_date = Column(String)
+    submission_date = Column(Date)
     database_source = Column(String)
     bioproject_id = Column(String)
 

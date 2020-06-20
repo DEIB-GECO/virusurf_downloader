@@ -41,7 +41,7 @@ locations.create_local_folders()
 
 #   ###################################     FILL DB WITH VIRUS SEQUENCES    ###############
 # init database
-database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_db_from_scratch=False)
+database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_db_from_scratch=True)
 
 
 def run():
@@ -58,11 +58,11 @@ def run():
 
     # get associated sequence accession ids
     logger.info(f'getting accession ids for virus sequences')
-    logger.warning('Two sequence accession ids are hardcoded in lines 63,64 of main.py. Uncomment line 62 to download '
-                   'all the sequence accession ids of this virus from NCBI.')
-    # refseq_accession_id, non_refseq_accession_ids = vcm.get_virus_sample_accession_ids(sars_cov2_taxonomy_id)     # commented to save time
-    refseq_accession_id = 1798174254      # hardcoded value for tests
-    non_refseq_accession_ids = [1850952215]
+    refseq_accession_id, non_refseq_accession_ids = vcm.get_virus_sample_accession_ids(sars_cov2_taxonomy_id)
+    # logger.warning('Two sequence accession ids are hardcoded in lines 63,64 of main.py. Uncomment line 62 to download '
+    #                'all the sequence accession ids of this virus from NCBI.')
+    # refseq_accession_id = 1798174254      # hardcoded value for tests
+    # non_refseq_accession_ids = [1850952215]
     sequence_accession_ids = [refseq_accession_id] + non_refseq_accession_ids
     aligner = None
 
@@ -77,24 +77,27 @@ def run():
         sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment, host_sample, sequencing_project)
         annotation = vcm.create_or_get_annotation(session, sample, sequence)
 
-        # sorry, I hadn't time to look at the nucleotide variant part
         nonlocal aligner
         if aligner is None and sample.is_reference():
-            logger.info('generating the aligner to the reference sequence...')
-            aligner = IlCodiCE.create_aligner_to_reference(sequence, 'sars_cov_2_annotations.tsv')
-            logger.info('done')
+            aligner = IlCodiCE.create_aligner_to_reference(reference=sequence.nucleotide_sequence, annotation_file='sars_cov_2_annotations.tsv', is_gisaid=False)
+            logger.info('sequence aligner generated')
         else:
-            # ... ?
-            logger.info('finding nucleotide variants')
-            logger.warning(':( this feature is not yet implemented. Exiting')
-            sys.exit(0)
+            # logger.info(f'doing global alignment of sequence accession id {virus_seq_accession_id}')
+
+            # annotated_variants = aligner(sequence=sequence.nucleotide_sequence, sequence_id=virus_seq_accession_id)
+            # print('annotated variants')
+            # print(annotated_variants)
+
+            # TODO row generated from parse_annotated_variants is incompatible with the table schema of Table 'variant'.
+            # TODO fix table schema or function
+            # nucleotide_variants = IlCodiCE.parse_annotated_variants(aligner)
+            # print('nucleotide variants')
+            # print(nucleotide_variants)
+            # sys.exit(0)
             pass
 
-
-        # TODO amino acid variant
-
     logger.info(f'importing virus sequences and related tables')
-    for virus_seq_acc_id in sequence_accession_ids:
+    for virus_seq_acc_id in tqdm(sequence_accession_ids):
         database_tom.try_py_function(import_virus_sequence, virus_seq_acc_id)
 
 
