@@ -7,6 +7,7 @@ from sqlalchemy.orm.session import Session
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from loguru import logger
+from time import sleep
 
 # https://www.compose.com/articles/using-postgresql-through-sqlalchemy/
 
@@ -25,6 +26,10 @@ def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch
 
     try:
         if recreate_db_from_scratch:
+            logger.warning(
+                'Removal of all table records in 10 seconds. Stop the execution if that\'s not the desired behaviour, and '
+                'rerun by setting "recreate_db_from_scratch" to False in module main.py.')
+            sleep(10)
             logger.info('removal of all table records in progress...')
             _base.metadata.drop_all(_db_engine, tables=[ExperimentType.__table__, SequencingProject.__table__, Virus.__table__,
                                                         HostSample.__table__, Sequence.__table__, AminoacidVariant.__table__,
@@ -35,6 +40,7 @@ def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch
     except sqlalchemy.exc.OperationalError as e:
         logger.error('DB connection not available')
         raise e
+
     _session_factory = sessionmaker(_db_engine)
     logger.info('db configured')
 
