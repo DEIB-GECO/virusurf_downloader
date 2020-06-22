@@ -3,7 +3,7 @@ from collections import Counter
 from decimal import Decimal
 
 import lxml
-from typing import Tuple
+from typing import Tuple, Callable, Generator
 from Bio import Entrez
 from loguru import logger
 from lxml import etree
@@ -227,6 +227,18 @@ class VirusSample:
     def bioproject_id(self):
         return text_at_node(self.sample_xml, './/INSDXref[./INSDXref_dbname/text() = "BioProject"]/INSDXref_id', mandatory=False)
 
+    def call_variants(self, aligner: Callable) -> Generator[Tuple[str], None, None]:
+        """
+        Return a generator that iterates over the variants produced by snpEff and each time it yields a tuple of values
+        describing a row of the table NucleotideVariant. The tuple reports in order:
+        sequence original, sequence alternative, start original, start alternative, variant length, variant type.
+        """
+        variants: Tuple = aligner(sequence=self.nucleotide_sequence(), sequence_id=self.internal_accession_id)
+        snpEff_annotated_variants = variants[0]
+        for variant in snpEff_annotated_variants:
+            _, start_original, _, _, _, _, others, _ = variant.split("\t")
+            variant_type, start_alternative, variant_length, sequence_original, sequence_alternative = others.split(',')
+            yield sequence_original, sequence_alternative, start_original, start_alternative, variant_length, variant_type
 
 
 def structured_comment(el, key):

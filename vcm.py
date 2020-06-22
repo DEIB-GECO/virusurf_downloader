@@ -3,7 +3,7 @@ from typing import List
 # noinspection PyPackageRequirements
 from Bio import Entrez
 from lxml import etree
-from database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation
+from database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, Variant
 from locations import *
 from tqdm import tqdm
 from virus_sample import VirusSample
@@ -257,6 +257,25 @@ def create_or_get_annotation(session, sample: VirusSample, sequence: Sequence):
                 annotations.append(annotation)
 
     return annotations
+
+
+def create_or_get_nucleotide_variants(session, sample: VirusSample, sequence: Sequence, aligner):
+    if aligner is None:
+        raise Exception("Can't create nucleotide variants because the aligner is None")
+    sequence_variants: list = session.query(Variant).filter(Variant.sequence_id == sequence.sequence_id).all()
+    if not sequence_variants:
+        for (sequence_original, sequence_alternative, start_original, start_alternative, variant_length, variant_type) in sample.call_variants(aligner):
+            row = Variant(sequence_id=sequence.sequence_id,
+                          sequence_original=sequence_original,
+                          sequence_alternative=sequence_alternative,
+                          start_original=start_original,
+                          start_alternative=start_alternative,
+                          variant_length=variant_length,
+                          variant_type=variant_type)
+            session.add(row)
+            sequence_variants.append(row)
+        session.flush()
+    return sequence_variants
 
 
 #   ##############################      HELPER METHODS  #################à#
