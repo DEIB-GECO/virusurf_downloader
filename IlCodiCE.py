@@ -1,3 +1,5 @@
+from typing import Callable, Tuple
+
 import numpy as np
 from Bio import pairwise2
 from Bio import Seq
@@ -37,7 +39,7 @@ def add_variant(sequence_id, pos_ref, pos_seq,  length, original,  mutated, vari
                       ",".join(map(str, [variant_type,pos_seq,length, original, mutated])) ]))
 
 
-def create_aligner_to_reference(reference, annotation_file, is_gisaid = False):
+def create_aligner_to_reference(reference, annotation_file, is_gisaid = False) -> Callable[[str, int], Tuple]:
     
     table = CodonTable.ambiguous_dna_by_id[1]
     reference_annotations = []

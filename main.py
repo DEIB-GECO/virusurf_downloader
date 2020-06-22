@@ -1,6 +1,6 @@
 import sys
-from typing import Tuple, Callable, Optional
-
+from typing import Callable, Optional
+import concurrent.futures
 import locations
 from loguru import logger
 import database_tom
@@ -57,6 +57,7 @@ database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_d
 virus_taxon_ids = {
     'sars_cov2_taxonomy_id': 2697049
 }
+import_virus_sequences_in_parallel = True
 
 
 def run():
@@ -93,6 +94,12 @@ def run():
             # sys.exit(0)
             pass
 
+    def try_import_virus_sequence(seq_acc_id):
+        try:
+            database_tom.try_py_function(import_virus_sequence, seq_acc_id)
+        except:
+            logger.exception(f'exception occurred while working on virus sample {seq_acc_id}.xml')
+
     for virus in virus_taxon_ids:
         # IMPORT VIRUS TAXON DATA
         logger.info(f'importing virus {virus}')
@@ -101,22 +108,30 @@ def run():
 
         # FIND VIRUS SEQUENCES
         logger.info(f'getting accession ids for virus sequences')
-        # refseq_accession_id, non_refseq_accession_ids = vcm.get_virus_sample_accession_ids(sars_cov2_taxonomy_id)
-        logger.warning('Two sequence accession ids are hardcoded in lines 63,64 of main.py. Uncomment line 62 to download '
-                       'all the sequence accession ids of this virus from NCBI.')
-        refseq_accession_id = 1798174254      # hardcoded value for tests
-        non_refseq_accession_ids = [1859094271]
+        refseq_accession_id, non_refseq_accession_ids = vcm.get_virus_sample_accession_ids(virus_taxon_ids[virus])
+        # logger.warning('Two sequence accession ids are hardcoded in lines 63,64 of main.py. Uncomment line 62 to download '
+        #                'all the sequence accession ids of this virus from NCBI.')
+        # refseq_accession_id = 1798174254      # hardcoded value for tests
+        # non_refseq_accession_ids = [1859094271, 1800242657, 1800242655, 1858732922, 1858732909]
         sequence_accession_ids = [refseq_accession_id] + non_refseq_accession_ids
 
         aligner: Optional[Callable] = None
 
-        # IMPORT VIRUS SEQUENCES
+        # # IMPORT VIRUS SEQUENCES
         logger.info(f'importing virus sequences and related tables')
-        for virus_seq_acc_id in tqdm(sequence_accession_ids):
-            try:
-                database_tom.try_py_function(import_virus_sequence, virus_seq_acc_id)
-            except:
-                logger.exception(f'exception occurred while working on virus sample {virus_seq_acc_id}.xml')
+        if import_virus_sequences_in_parallel:
+            with tqdm(total=len(sequence_accession_ids)) as pbar:
+                # import reference sequence first because it creates the nucleotide variant aligner
+                try_import_virus_sequence(refseq_accession_id)
+                pbar.update()
+                # import other sequences
+                with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+                    future_generator = executor.map(try_import_virus_sequence, non_refseq_accession_ids)
+                    for virus_seq_acc_id in future_generator:
+                        pbar.update()
+        else:
+            for virus_seq_acc_id in tqdm(sequence_accession_ids):
+                try_import_virus_sequence(virus_seq_acc_id)
 
 
 run()
