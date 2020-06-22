@@ -104,6 +104,13 @@ class VirusSample:
         gc_percentage = round(gc_percentage, 2)
         return gc_percentage
 
+    def n_percent(self):
+        c = Counter(self.nucleotide_sequence().lower())
+        n_percentage = (c['n']) / self.length() * 100
+        n_percentage = Decimal(n_percentage)
+        n_percentage = round(n_percentage, 2)
+        return n_percentage
+
     def sequencing_technology(self):
         return structured_comment(self.sample_xml, 'Sequencing Technology')
 
@@ -239,6 +246,66 @@ class VirusSample:
             _, start_original, _, _, _, _, others, _ = variant.split("\t")
             variant_type, start_alternative, variant_length, sequence_original, sequence_alternative = others.split(',')
             yield sequence_original, sequence_alternative, start_original, start_alternative, variant_length, variant_type
+
+    def annotations(self) -> [Tuple]:
+        """
+        :return: a list of annotations for the Annotation table. Each element of the list is a tuple of values expressed
+        in this order: start, stop, feature_type, gene_name, product, external_reference, amino_acid_sequence
+        """
+        def merge_intervals(e):
+            intervals = e.xpath(".//INSDInterval")
+            intervals2 = []
+            for i in intervals:
+                start = int(text_at_node(i, './/INSDInterval_from'))
+                stop = int(text_at_node(i, './/INSDInterval_to'))
+                intervals2.append((start, stop))
+
+            if intervals:
+                min_start = min(x[0] for x in intervals2)
+                max_stop = max(x[1] for x in intervals2)
+                return min_start, max_stop
+            else:
+                return None, None
+
+        def get_annotation(e):
+            start, stop = merge_intervals(e)
+            feature_type = text_at_node(e, './/INSDFeature_key')
+            gene_name = text_at_node(e, './/INSDQualifier[./INSDQualifier_name/text() = "gene"]/INSDQualifier_value',
+                                     False)
+
+            product = text_at_node(e, './/INSDQualifier[./INSDQualifier_name/text() = "product"]/INSDQualifier_value',
+                                   False)
+            db_xref = text_at_node(e, './/INSDQualifier[./INSDQualifier_name/text() = "db_xref"]/INSDQualifier_value',
+                                   False)
+            protein_id = text_at_node(e,
+                                      './/INSDQualifier[./INSDQualifier_name/text() = "protein_id"]/INSDQualifier_value',
+                                      False)
+            amino_acid_sequence = text_at_node(e,
+                                              './/INSDQualifier[./INSDQualifier_name/text() = "translation"]/INSDQualifier_value',
+                                              False)
+
+            if protein_id:
+                protein_id = "ProteinID:" + protein_id
+
+            # merge with comma
+            db_xref_merged = [x for x in [protein_id, db_xref] if x is not None]
+
+            db_xref_merged = ','.join(db_xref_merged)
+            #  select one of them:
+            #         db_xref_merged = coalesce(db_xref_merged,'db_xref', mandatory=False, multiple=True)
+
+            return start, stop, feature_type, gene_name, product, db_xref_merged, amino_acid_sequence
+
+        annotations_res = []
+        for a_feature in self.sample_xml.xpath(".//INSDFeature"):
+            try:
+                annotation = get_annotation(a_feature)
+            except AssertionError:
+                pass
+            else:
+                if annotation:
+                    annotations_res.append(annotation)
+        return annotations_res
 
 
 def structured_comment(el, key):

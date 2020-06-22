@@ -198,32 +198,8 @@ def create_or_get_sequence(session, virus_sample, virus_id: int, experiment: Exp
 
 
 def create_or_get_annotation(session, sample: VirusSample, sequence: Sequence):
-    tree = sample.underlying_xml_element_tree()
-
-    def get_annotation():
-        start, stop = merge_intervals(e)
-        feature_type = text_at_node(e, './/INSDFeature_key')
-        gene_name = text_at_node(e, './/INSDQualifier[./INSDQualifier_name/text() = "gene"]/INSDQualifier_value', False)
-
-        product = text_at_node(e, './/INSDQualifier[./INSDQualifier_name/text() = "product"]/INSDQualifier_value',
-                               False)
-        db_xref = text_at_node(e, './/INSDQualifier[./INSDQualifier_name/text() = "db_xref"]/INSDQualifier_value',
-                               False)
-
-        protein_id = text_at_node(e, './/INSDQualifier[./INSDQualifier_name/text() = "protein_id"]/INSDQualifier_value',
-                                  False)
-
-        if protein_id:
-            protein_id = "ProteinID:" + protein_id
-
-        # merge with comma
-        db_xref_merged = [x for x in [protein_id, db_xref] if x is not None]
-
-        db_xref_merged = ','.join(db_xref_merged)
-        #  select one of them:
-        #         db_xref_merged = coalesce(db_xref_merged,'db_xref', mandatory=False, multiple=True)
-
-        res = (start, stop, feature_type, gene_name, product, db_xref_merged)
+    annotations = []
+    for start, stop, feature_type, gene_name, product, db_xref_merged, amino_acid_sequence in sample.annotations():
         if feature_type != 'source':
             annotation = session.query(Annotation).filter(Annotation.feature_type == feature_type,
                                                           Annotation.start == start,
@@ -231,7 +207,8 @@ def create_or_get_annotation(session, sample: VirusSample, sequence: Sequence):
                                                           Annotation.gene_name == gene_name,
                                                           Annotation.product == product,
                                                           Annotation.external_reference == db_xref_merged,
-                                                          Annotation.sequence_id == sequence.sequence_id).one_or_none()
+                                                          Annotation.sequence_id == sequence.sequence_id,
+                                                          Annotation.aminoacid_sequence == amino_acid_sequence).one_or_none()
             if not annotation:
                 annotation = Annotation(feature_type=feature_type,
                                         start=start,
@@ -239,23 +216,11 @@ def create_or_get_annotation(session, sample: VirusSample, sequence: Sequence):
                                         gene_name=gene_name,
                                         product=product,
                                         external_reference=db_xref_merged,
-                                        sequence_id=sequence.sequence_id)
+                                        sequence_id=sequence.sequence_id,
+                                        aminoacid_sequence=amino_acid_sequence)
                 session.add(annotation)
-                session.flush()
-            return res
-        else:
-            return None
-
-    annotations = []
-    for e in tree.xpath(".//INSDFeature"):
-        try:
-            annotation = get_annotation()
-        except AssertionError:
-            pass
-        else:
-            if annotation:
-                annotations.append(annotation)
-
+            annotations.append(annotation)
+    session.flush()
     return annotations
 
 
@@ -340,21 +305,3 @@ def get_virus_sample_accession_ids(virus_specie_taxon_id: int) -> (int, List[int
             progress_bar.update(RECORDS_PER_PAGE if page_number*RECORDS_PER_PAGE < total_records else total_records-((page_number-1)*RECORDS_PER_PAGE))
     assert len(non_refseq_accessions_ids) == total_records, 'Some of the non-refseq accession ids were not correctly downloaded'
     return refseq_accession_id, non_refseq_accessions_ids
-
-
-# TODO fix statement without effect
-def merge_intervals(e):
-    intervals = e.xpath(".//INSDInterval")
-    intervals2 = []
-    for i in intervals:
-        start = int(text_at_node(i, './/INSDInterval_from'))
-        stop = int(text_at_node(i, './/INSDInterval_to'))
-        intervals2.append((start, stop))
-
-    if intervals:
-        min_start = min(x[0] for x in intervals2)
-        max_stop = max(x[1] for x in intervals2)
-        return min_start, max_stop
-    else:
-        None
-    return len(intervals)
