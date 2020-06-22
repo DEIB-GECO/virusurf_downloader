@@ -1,6 +1,4 @@
-import re
 from collections import OrderedDict
-from datetime import datetime
 from typing import List
 # noinspection PyPackageRequirements
 from Bio import Entrez
@@ -16,7 +14,7 @@ from xml_helper import *
 
 #   #############################    VCM    ############################
 def create_or_get_virus(session, tax_tree):
-    taxon_id = text_at_node(tax_tree, './Taxon/TaxId')
+    taxon_id = int(text_at_node(tax_tree, './Taxon/TaxId'))
     scientific_name = text_at_node(tax_tree, './Taxon/ScientificName')
 
     family = text_at_node(tax_tree, './/LineageEx/Taxon[./Rank/text() = "family"]/ScientificName')
@@ -78,35 +76,13 @@ def create_or_get_experiment(session, sample: VirusSample):
 
 
 def create_or_get_sequencing_project(session, sample: VirusSample):
-    tree = sample.underlying_xml_element_tree()
 
-    references = tree.xpath('.//INSDReference[./INSDReference_title/text() = "Direct Submission"]')
-
-    assert len(references) > 0, 'there must be at least one direct submission'
-    reference = references[0]
-    #     authors = reference.xpath('.//INSDAuthor')
-    #     authors = [x.text for x in authors]
-    #     authors = ", ".join(authors)
-    #     title = text_at_node(reference, "./INSDReference_title")
-    #     journal = text_at_node(reference, "./INSDReference_journal")
-    #     publication_date = None
-    #     pubmed_id = text_at_node(reference, "./INSDReference_pubmed" , mandatory=False)
-    #     popset = None
-
-    journal = text_at_node(reference, "./INSDReference_journal")
-    # print(f'JOURNAL: {journal}')
-    assert journal.startswith("Submitted "), 'Cannot find submitted in the Journal of direct submission reference'
-    journal_split = re.split("[()]", journal, maxsplit=2)
-    assert len(journal_split) == 3, f"Journal value problem '{journal}' {journal_split}"
-    submitted, submission_date, sequencing_lab = journal_split
+    submitted = sample.submitted()
     assert submitted == "Submitted ", "Journal value submitted"
-    submission_date = datetime.strptime(submission_date, '%d-%b-%Y')
-
-    keyword = text_at_node(tree, ".//INSDKeyword", mandatory=False)
-    is_reference = keyword == "RefSeq"
-
-    bioproject_id = text_at_node(tree, './/INSDXref[./INSDXref_dbname/text() = "BioProject"]/INSDXref_id', mandatory=False)
-    database_source = "RefSeq" if is_reference else "GenBank"
+    submission_date = sample.submission_date()
+    sequencing_lab = sample.sequencing_lab()
+    bioproject_id = sample.bioproject_id()
+    database_source = sample.database_source()
 
     sequencing_project = session.query(SequencingProject).filter(SequencingProject.sequencing_lab == sequencing_lab,
                                                                  SequencingProject.submission_date == submission_date,
@@ -125,49 +101,17 @@ def create_or_get_sequencing_project(session, sample: VirusSample):
 
 
 def create_or_get_host_sample(session, sample: VirusSample):
-    tree = sample.underlying_xml_element_tree()
-    
-    references = tree.xpath('.//INSDReference[./INSDReference_title/text() = "Direct Submission"]')
-    assert len(references) > 0, 'there must be at least one direct submission'
-    reference = references[0]
-    journal = text_at_node(reference, "./INSDReference_journal")
-    journal_split = re.split("[()]", journal, maxsplit=2)
-    assert len(journal_split) == 3, f"Journal value problem '{journal}' {journal_split}"
-    submitted, submission_date, originating_lab = journal_split
 
-    originating_lab = None
+    host_taxon_name = sample.taxon_name()
+    host_taxon_id = sample.taxon_id()
+    gender = sample.gender()
+    age = sample.age()
 
-    host = text_at_node(tree, '..//INSDQualifier[./INSDQualifier_name/text() = "host"]/INSDQualifier_value', mandatory=False)
-    host = [x.strip() for x in host.split(";")] if host else []
+    originating_lab = sample.originating_lab()
+    collection_date = sample.collection_date()
+    isolation_source = sample.isolation_source()
 
-    host_taxon_name = host[0] if len(host) else None
-
-    host = [x.lower() for x in host]
-    gender = 'male' if 'male' in host else 'female' if 'female' in host else None
-    age = next(filter(lambda x: 'age' in x, host), None)
-    if age:
-        age = int(age.replace("age", '').strip())
-
-    host_taxon_id = 9606 if host_taxon_name == 'Homo sapiens' else None
-
-    collection_date = text_at_node(tree,
-                                   '..//INSDQualifier[./INSDQualifier_name/text() = "collection_date"]/INSDQualifier_value',
-                                   mandatory=False)
-    isolation_source = text_at_node(tree,
-                                    '..//INSDQualifier[./INSDQualifier_name/text() = "isolation_source"]/INSDQualifier_value',
-                                    mandatory=False)
-
-    country = None
-    region = None
-    geo_group = None
-
-    country_pre = text_at_node(tree,
-                               '..//INSDQualifier[./INSDQualifier_name/text() = "country"]/INSDQualifier_value',
-                               mandatory=False)
-    if country_pre:
-        country_pre = country_pre.split(":")
-        country = country_pre[0]
-        region = country_pre[1] if len(country_pre) > 1 else None
+    country, region, geo_group = sample.country__region__geo_group()
 
     host_sample = session.query(HostSample).filter(HostSample.host_taxon_id == host_taxon_id,
                                                    HostSample.host_taxon_name == host_taxon_name,

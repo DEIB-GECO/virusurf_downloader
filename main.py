@@ -3,7 +3,7 @@ import locations
 from loguru import logger
 import database_tom
 import vcm as vcm
-from virus_sample import VirusSample, download_virus_sample_as_xml
+from virus_sample import VirusSample, download_or_get_virus_sample_as_xml
 from sqlalchemy.orm.session import Session
 from Bio import Entrez
 import IlCodiCE
@@ -62,13 +62,13 @@ def run():
     # logger.warning('Two sequence accession ids are hardcoded in lines 63,64 of main.py. Uncomment line 62 to download '
     #                'all the sequence accession ids of this virus from NCBI.')
     # refseq_accession_id = 1798174254      # hardcoded value for tests
-    # non_refseq_accession_ids = [1850952215]
+    # non_refseq_accession_ids = [1829777589]
     sequence_accession_ids = [refseq_accession_id] + non_refseq_accession_ids
     aligner = None
 
     # import each sequence into the VCM
     def import_virus_sequence(session: Session, virus_seq_accession_id):
-        virus_sample_file_path = download_virus_sample_as_xml(virus_seq_accession_id)
+        virus_sample_file_path = download_or_get_virus_sample_as_xml(virus_seq_accession_id)
         sample = VirusSample(virus_sample_file_path, virus_seq_accession_id)
 
         experiment = vcm.create_or_get_experiment(session, sample)
@@ -98,7 +98,10 @@ def run():
 
     logger.info(f'importing virus sequences and related tables')
     for virus_seq_acc_id in tqdm(sequence_accession_ids):
-        database_tom.try_py_function(import_virus_sequence, virus_seq_acc_id)
+        try:
+            database_tom.try_py_function(import_virus_sequence, virus_seq_acc_id)
+        except:
+            logger.exception(f'exception occurred while working on virus sample {virus_seq_acc_id}.xml')
 
 
 run()

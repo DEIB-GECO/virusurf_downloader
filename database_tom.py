@@ -25,6 +25,7 @@ def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch
 
     try:
         if recreate_db_from_scratch:
+            logger.info('removal of all table records in progress...')
             _base.metadata.drop_all(_db_engine, tables=[ExperimentType.__table__, SequencingProject.__table__, Virus.__table__,
                                                         HostSample.__table__, Sequence.__table__, AminoacidVariant.__table__,
                                                         Annotation.__table__, Variant.__table__])
@@ -61,14 +62,25 @@ def try_py_function(func, *args, **kwargs):
         session.commit()
         return result
     except SQLAlchemyError as e:
-        try:
-            session.rollback()
-        except SQLAlchemyError:
-            logger.exception('An error occurred during DB transaction. Rollback failed')
+        rollback(session)
         raise e
+    except RollbackTransactionWithoutError as e:
+        rollback(session)
+        if e.args is not None and e.args[0] is not None:
+            logger.info(e.args[0])
     finally:
         session.close()
 
+
+def rollback(session):
+    try:
+        session.rollback()
+    except SQLAlchemyError:
+        logger.exception('An error occurred during DB transaction. Rollback failed')
+
+
+class RollbackTransactionWithoutError(Exception):
+    pass
 
 
 class ExperimentType(_base):
@@ -152,7 +164,7 @@ class Sequence(_base):
     strand = Column(String)
     length = Column(Integer)
     gc_percentage = Column(Float)
-    linage = Column(String)
+    lineage = Column(String)
     clade = Column(String)
 
 
