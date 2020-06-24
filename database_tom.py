@@ -70,6 +70,9 @@ def try_py_function(func, *args, **kwargs):
     except SQLAlchemyError as e:
         rollback(session)
         raise e
+    except RollbackTransactionAndRaise as e:
+        rollback(session)
+        raise e
     except RollbackTransactionWithoutError as e:
         rollback(session)
         if e.args is not None and e.args[0] is not None:
@@ -86,6 +89,9 @@ def rollback(session):
 
 
 class RollbackTransactionWithoutError(Exception):
+    pass
+
+class RollbackTransactionAndRaise(Exception):
     pass
 
 
@@ -192,7 +198,7 @@ class Annotation(_base):
 class NucleotideVariant(_base):
     __tablename__ = 'nucleotide_variant'
 
-    variant_id = Column(Integer, primary_key=True)
+    nucleotide_variant_id = Column(Integer, primary_key=True)
     sequence_id = Column(Integer, ForeignKey(Sequence.sequence_id), nullable=False)
 
     sequence_original = Column(String, nullable=False)
@@ -214,7 +220,7 @@ class VariantImpact(_base):
     __tablename__ = 'variant_impact'
 
     variant_impact_id = Column(Integer, primary_key=True)
-    nucleotide_variant_id = Column(Integer, ForeignKey(NucleotideVariant.variant_id), nullable=False)
+    nucleotide_variant_id = Column(Integer, ForeignKey(NucleotideVariant.nucleotide_variant_id), nullable=False)
 
     effect = Column(String)
     putative_impact = Column(String)

@@ -1,12 +1,10 @@
 import sys
 from typing import Callable, Optional, List, Tuple
-import concurrent.futures
-from concurrent.futures import as_completed
 import locations
 from loguru import logger
 import database_tom
 import vcm as vcm
-from virus_sample import VirusSample, download_or_get_virus_sample_as_xml
+from virus_sample import VirusSample, download_or_get_virus_sample_as_xml, DoNotImportSample, delete_virus_sample_xml
 from sqlalchemy.orm.session import Session
 from Bio import Entrez
 import IlCodiCE
@@ -30,20 +28,22 @@ except Exception:
 #   ###################################      SETUP LOGGER    ##############################
 logger.remove()  # removes default logger to stderr with level DEBUG
 # choose what to print on console
-# logger.add(sink=sys.stderr,
-#            level='TRACE',
-#            format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
-#                   "<level>{level: <8}</level> | "
-#                   "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
-#            colorize=True,
-#            backtrace=True,
-#            diagnose=True)
 logger.add(sink=lambda msg: tqdm.write(msg, end=''),
            level='TRACE',
            format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
                   "<level>{level: <8}</level> | "
                   "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
            colorize=True,
+           backtrace=True,
+           diagnose=True)
+# log to file any message of any security level
+logger.add("./logs/log_{time}.log",
+           level='TRACE',
+           rotation='100 MB',
+           format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+                  "<level>{level: <8}</level> | "
+                  "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+           colorize=False,
            backtrace=True,
            diagnose=True)
 
@@ -58,7 +58,6 @@ database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_d
 virus_taxon_ids = {
     'sars_cov2': 2697049
 }
-import_virus_sequences_in_parallel = True
 
 
 def run():
@@ -76,7 +75,7 @@ def run():
         host_sample = vcm.create_or_get_host_sample(session, sample)
         sequencing_project = vcm.create_or_get_sequencing_project(session, sample)
         sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment, host_sample, sequencing_project)
-        annotation = vcm.create_or_get_annotation_and_aa_variants(session, sample, sequence, reference_sample)
+        vcm.create_annotation_and_aa_variants(session, sample, sequence, reference_sample)
 
         nonlocal aligner
         if aligner is None and sample.is_reference():
@@ -84,11 +83,16 @@ def run():
             reference_sample = sample
             logger.info('reference sequence imported')
         else:
-            nucleotide_variants = vcm.create_or_get_nucleotide_variants_and_impacts(session, sample, sequence, aligner)
+            vcm.create_nucleotide_variants_and_impacts(session, sample, sequence, aligner)
 
     def try_import_virus_sequence(seq_acc_id):
+        nonlocal successful_imports
         try:
             database_tom.try_py_function(import_virus_sequence, seq_acc_id)
+            successful_imports += 1
+        except DoNotImportSample:
+            delete_virus_sample_xml(seq_acc_id)
+            logger.info(f'virus sample with accession id {seq_acc_id} has not been imported and was removed from disk')
         except:
             logger.exception(f'exception occurred while working on virus sample {seq_acc_id}.xml')
 
@@ -103,7 +107,7 @@ def run():
         refseq_accession_id, non_refseq_accession_ids = vcm.get_virus_sample_accession_ids(virus_taxon_ids[virus])
         # logger.warning('Sequence accession ids are hardcoded in main.py.')
         # refseq_accession_id = 1798174254      # hardcoded value for tests
-        # non_refseq_accession_ids = [1800242657, 1859094271, 1800242655, 1858732922, 1858732909]
+        # non_refseq_accession_ids = [1852393386]#, 1852393360, 1852393373,  1852393398, 1859035944, 1859035892, 1800242649, 1800242657, 1858732896, 1799706760]#, 1800242651, 1800242659, 1858732909, 1799706762, 1800242653, 1800242661, 1858732922, 1800242639, 1800242655, 1850952215, 1859094271]
         sequence_accession_ids = [refseq_accession_id] + non_refseq_accession_ids
 
         aligner: Optional[Callable] = None
@@ -111,24 +115,10 @@ def run():
 
         # # IMPORT VIRUS SEQUENCES
         logger.info(f'importing virus sequences and related tables')
-        if import_virus_sequences_in_parallel:
-            with tqdm(total=len(sequence_accession_ids)) as pbar:
-                # import reference sequence first because it creates the nucleotide variant aligner
-                try_import_virus_sequence(refseq_accession_id)
-                pbar.update()
-                # import other sequences
-                with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-                    future_generator = executor.map(try_import_virus_sequence, non_refseq_accession_ids)
-                    for future_completed in future_generator:
-                        pbar.update()
-                # -- or --
-                # with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-                #     futures = [executor.submit(try_import_virus_sequence, seq_acc_id) for seq_acc_id in non_refseq_accession_ids]
-                #     for f in as_completed(futures):
-                #         pbar.update()
-        else:
-            for virus_seq_acc_id in tqdm(sequence_accession_ids):
-                try_import_virus_sequence(virus_seq_acc_id)
+        successful_imports = 0
+        for virus_seq_acc_id in tqdm(sequence_accession_ids):
+            try_import_virus_sequence(virus_seq_acc_id)
+        logger.info(f'successful imports: {successful_imports}')
 
 
 run()

@@ -32,8 +32,6 @@ def create_or_get_virus(session, tax_tree):
     equivalent_names = list(OrderedDict.fromkeys(equivalent_names))
     equivalent_names = ", ".join(equivalent_names)
 
-    print(family, subfamily, genus, species, genbank_acronym, equivalent_names)
-
     molecule_type = 'RNA'
     is_single_stranded = True
     is_positive_stranded = True
@@ -198,8 +196,7 @@ def create_or_get_sequence(session, virus_sample, virus_id: int, experiment: Exp
     return sequence
 
 
-def create_or_get_annotation_and_aa_variants(session, sample: VirusSample, sequence: Sequence, reference_sample: VirusSample):
-    annotations = []
+def create_annotation_and_aa_variants(session, sample: VirusSample, sequence: Sequence, reference_sample: VirusSample):
     for start, stop, feature_type, gene_name, product, db_xref_merged, amino_acid_sequence, aa_variants in sample.annotations_and_amino_acid_variants(reference_sample):
         annotation = session.query(Annotation).filter(Annotation.start == start,
                                                       Annotation.stop == stop,
@@ -230,29 +227,20 @@ def create_or_get_annotation_and_aa_variants(session, sample: VirusSample, seque
                                                   variant_aa_type=mut_type)
                     session.add(aa_variant)
             session.flush()
-        annotations.append(annotation)
-    return annotations
 
 
-# def create_or_get_amino_acid_variant(session, sample: VirusSample, annotations: List[Annotation], reference_sample: VirusSample):
-#         for ann in annotations:
-#             if ann.gene_name and ann.aminoacid_sequence:
-#
-#
-#         common_gene_aa = []
-#         for _, _, _, gene_name, _, _, amino_acid_sequence in sample.annotations():
-#             for reference_gene_name, reference_aa_sequence in reference:
-#                 if gene_name == reference_gene_name:
-#                     common_gene_aa.append((gene_name, amino_acid_sequence, reference_aa_sequence))
-
-
-
-def create_or_get_nucleotide_variants_and_impacts(session, sample: VirusSample, sequence: Sequence, aligner):
+def create_nucleotide_variants_and_impacts(session, sample: VirusSample, sequence: Sequence, aligner):
     if aligner is None:
-        raise Exception("Can't create nucleotide variants because the aligner is None")
-    sequence_variants: list = session.query(NucleotideVariant).filter(NucleotideVariant.sequence_id == sequence.sequence_id).all()
-    if not sequence_variants:
-        for (sequence_original, sequence_alternative, start_original, start_alternative, variant_length, variant_type, variant_impacts) in sample.call_nucleotide_variants(aligner):
+        raise AttributeError("Can't create nucleotide variants because the aligner is None")
+    for (sequence_original, sequence_alternative, start_original, start_alternative, variant_length, variant_type, variant_impacts) in sample.nucleotide_variants_and_effects(aligner):
+        nuc_variant_db_row = session.query(NucleotideVariant).filter(NucleotideVariant.sequence_id == sequence.sequence_id,
+                                                                     NucleotideVariant.sequence_original == sequence_original,
+                                                                     NucleotideVariant.sequence_alternative == sequence_alternative,
+                                                                     NucleotideVariant.start_original == start_original,
+                                                                     NucleotideVariant.start_alternative == start_alternative,
+                                                                     NucleotideVariant.variant_length == variant_length,
+                                                                     NucleotideVariant.variant_type == variant_type).one_or_none()
+        if not nuc_variant_db_row:
             # insert nucleotide variant
             nuc_variant_db_row = NucleotideVariant(sequence_id=sequence.sequence_id,
                                                    sequence_original=sequence_original,
@@ -263,26 +251,13 @@ def create_or_get_nucleotide_variants_and_impacts(session, sample: VirusSample, 
                                                    variant_type=variant_type)
             session.add(nuc_variant_db_row)
             session.flush()
-            # insert related impact if not already existing
-            # TODO I'm testing that nucleotide variant impacts are unique inside each variant. If this is true, we can skip the query below
-            impact_db_rows = []
+            # insert related impact
             for effect, putative_impact, impact_gene_name in variant_impacts:
-                impact_db_row = \
-                    session.query(VariantImpact)\
-                    .filter(VariantImpact.nucleotide_variant_id == nuc_variant_db_row.variant_id,
-                            VariantImpact.effect == effect,
-                            VariantImpact.putative_impact == putative_impact,
-                            VariantImpact.impact_gene_name == impact_gene_name).one_or_none()
-                if not impact_db_row:
-                    impact_db_row = VariantImpact(nucleotide_variant_id=nuc_variant_db_row.variant_id,
-                                                  effect=effect,
-                                                  putative_impact=putative_impact,
-                                                  impact_gene_name=impact_gene_name)
-                    session.add(impact_db_row)
-                    session.flush()
-                impact_db_rows.append(impact_db_row)
-            sequence_variants.append((nuc_variant_db_row, impact_db_rows))
-    return sequence_variants
+                impact_db_row = VariantImpact(nucleotide_variant_id=nuc_variant_db_row.nucleotide_variant_id,
+                                              effect=effect,
+                                              putative_impact=putative_impact,
+                                              impact_gene_name=impact_gene_name)
+                session.add(impact_db_row)
 
 
 #   ##############################      HELPER METHODS  #################à#
@@ -347,7 +322,3 @@ def get_virus_sample_accession_ids(virus_specie_taxon_id: int) -> (int, List[int
             progress_bar.update(RECORDS_PER_PAGE if page_number*RECORDS_PER_PAGE < total_records else total_records-((page_number-1)*RECORDS_PER_PAGE))
     assert len(non_refseq_accessions_ids) == total_records, 'Some of the non-refseq accession ids were not correctly downloaded'
     return refseq_accession_id, non_refseq_accessions_ids
-
-
-# def get_persistent_annotations(annotations: List[Annotation]):
-#     persistent_obj = [annotations.]
