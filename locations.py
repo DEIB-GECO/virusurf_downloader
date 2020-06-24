@@ -1,10 +1,10 @@
 import os
 
-download_folder = "downloads/"
-local_folder = download_folder + "entrez_api/"
-local_folder_taxonomy = download_folder + "entrez_api_taxonomy/"
-local_folder_variant = download_folder + "variant/"
-local_folder_sequence = download_folder +"sequence/"
+download_folder = f".{os.path.sep}/downloads{os.path.sep}"
+local_folder = download_folder + f"entrez_api{os.path.sep}"
+local_folder_taxonomy = download_folder + f"entrez_api_taxonomy{os.path.sep}"
+local_folder_variant = download_folder + f"variant{os.path.sep}"
+local_folder_sequence = download_folder + f"sequence{os.path.sep}"
 
 
 def create_local_folders():

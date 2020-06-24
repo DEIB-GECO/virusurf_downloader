@@ -1,6 +1,7 @@
 import sys
-from typing import Callable, Optional
+from typing import Callable, Optional, List, Tuple
 import concurrent.futures
+from concurrent.futures import as_completed
 import locations
 from loguru import logger
 import database_tom
@@ -51,7 +52,7 @@ locations.create_local_folders()
 
 #   ###################################     FILL DB WITH VIRUS SEQUENCES    ###############
 # init database
-database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_db_from_scratch=False)
+database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_db_from_scratch=True)
 
 #   ###################################     VIRUSES TO IMPORT    ###############
 virus_taxon_ids = {
@@ -69,21 +70,21 @@ def run():
     def import_virus_sequence(session: Session, virus_seq_accession_id):
         virus_sample_file_path = download_or_get_virus_sample_as_xml(virus_seq_accession_id)
         sample = VirusSample(virus_sample_file_path, virus_seq_accession_id)
+        nonlocal reference_sample
 
         experiment = vcm.create_or_get_experiment(session, sample)
         host_sample = vcm.create_or_get_host_sample(session, sample)
         sequencing_project = vcm.create_or_get_sequencing_project(session, sample)
         sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment, host_sample, sequencing_project)
-        annotation = vcm.create_or_get_annotation(session, sample, sequence)
+        annotation = vcm.create_or_get_annotation_and_aa_variants(session, sample, sequence, reference_sample)
 
         nonlocal aligner
         if aligner is None and sample.is_reference():
             aligner = IlCodiCE.create_aligner_to_reference(reference=sequence.nucleotide_sequence, annotation_file='sars_cov_2_annotations.tsv', is_gisaid=False)
-            logger.info('sequence aligner generated')
+            reference_sample = sample
+            logger.info('reference sequence imported')
         else:
-            nucleotide_variants = vcm.create_or_get_nucleotide_variants(session, sample, sequence, aligner)
-
-            # TODO what about 'annotations' in ILcodiCE.parse_annotated_variants ?
+            nucleotide_variants = vcm.create_or_get_nucleotide_variants_and_impacts(session, sample, sequence, aligner)
 
     def try_import_virus_sequence(seq_acc_id):
         try:
@@ -100,13 +101,13 @@ def run():
         # FIND VIRUS SEQUENCES
         logger.info(f'getting accession ids for virus sequences')
         refseq_accession_id, non_refseq_accession_ids = vcm.get_virus_sample_accession_ids(virus_taxon_ids[virus])
-        # logger.warning('Two sequence accession ids are hardcoded in lines 63,64 of main.py. Uncomment line 62 to download '
-        #                'all the sequence accession ids of this virus from NCBI.')
+        # logger.warning('Sequence accession ids are hardcoded in main.py.')
         # refseq_accession_id = 1798174254      # hardcoded value for tests
-        # non_refseq_accession_ids = [1859094271]#, 1800242657, 1800242655, 1858732922, 1858732909]
+        # non_refseq_accession_ids = [1800242657, 1859094271, 1800242655, 1858732922, 1858732909]
         sequence_accession_ids = [refseq_accession_id] + non_refseq_accession_ids
 
         aligner: Optional[Callable] = None
+        reference_sample: Optional[VirusSample] = None
 
         # # IMPORT VIRUS SEQUENCES
         logger.info(f'importing virus sequences and related tables')
@@ -120,6 +121,11 @@ def run():
                     future_generator = executor.map(try_import_virus_sequence, non_refseq_accession_ids)
                     for future_completed in future_generator:
                         pbar.update()
+                # -- or --
+                # with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                #     futures = [executor.submit(try_import_virus_sequence, seq_acc_id) for seq_acc_id in non_refseq_accession_ids]
+                #     for f in as_completed(futures):
+                #         pbar.update()
         else:
             for virus_seq_acc_id in tqdm(sequence_accession_ids):
                 try_import_virus_sequence(virus_seq_acc_id)

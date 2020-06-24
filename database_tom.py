@@ -33,7 +33,7 @@ def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch
             logger.info('removal of all table records in progress...')
             _base.metadata.drop_all(_db_engine, tables=[ExperimentType.__table__, SequencingProject.__table__, Virus.__table__,
                                                         HostSample.__table__, Sequence.__table__, AminoacidVariant.__table__,
-                                                        Annotation.__table__, Variant.__table__])
+                                                        Annotation.__table__, NucleotideVariant.__table__, VariantImpact.__table__])
 
         # create tables if not existing
         _base.metadata.create_all(_db_engine)   # throws sqlalchemy.exc.OperationalError if connection is not available
@@ -189,8 +189,8 @@ class Annotation(_base):
     aminoacid_sequence = Column(String)
 
 
-class Variant(_base):
-    __tablename__ = 'variant'
+class NucleotideVariant(_base):
+    __tablename__ = 'nucleotide_variant'
 
     variant_id = Column(Integer, primary_key=True)
     sequence_id = Column(Integer, ForeignKey(Sequence.sequence_id), nullable=False)
@@ -210,6 +210,17 @@ class Variant(_base):
         return ['start', 'length', 'sequence_original', 'alt_sequence', 'variant_type']
 
 
+class VariantImpact(_base):
+    __tablename__ = 'variant_impact'
+
+    variant_impact_id = Column(Integer, primary_key=True)
+    nucleotide_variant_id = Column(Integer, ForeignKey(NucleotideVariant.variant_id), nullable=False)
+
+    effect = Column(String)
+    putative_impact = Column(String)
+    impact_gene_name = Column(String)
+
+
 class AminoacidVariant(_base):
     __tablename__ = 'aminoacid_variant'
 
@@ -219,6 +230,5 @@ class AminoacidVariant(_base):
     sequence_aa_original = Column(String, nullable=False)
     sequence_aa_alternative = Column(String, nullable=False)
     start_aa_original = Column(Integer)
-    start_aa_alternative = Column(Integer)
     variant_aa_length = Column(Integer, nullable=False)
     variant_aa_type = Column(String, nullable=False)
