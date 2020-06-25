@@ -45,6 +45,10 @@ def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch
     logger.info('db configured')
 
 
+def get_session() -> Session:
+    return _session_factory()
+
+
 def try_py_function(func, *args, **kwargs):
     """
     Use this function to perform any action on the database.
@@ -176,6 +180,7 @@ class Sequence(_base):
     strand = Column(String)
     length = Column(Integer)
     gc_percentage = Column(Float)
+    n_percentage = Column(Float)
     lineage = Column(String)
     clade = Column(String)
 

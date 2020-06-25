@@ -63,6 +63,7 @@ class VirusSample:
         self._journal = None
         self._host_value_list = None
         self._annotations = None
+        self._nuc_seq = None
 
 
     def underlying_xml_element_tree(self):
@@ -75,8 +76,11 @@ class VirusSample:
         return self.internal_accession_id
 
     def strain(self):
-        return text_at_node(self.sample_xml, './/INSDQualifier[./INSDQualifier_name/text() = "strain"]/INSDQualifier_value',
-                            False)
+        strain = text_at_node(self.sample_xml, './/INSDQualifier[./INSDQualifier_name/text() = "strain"]/INSDQualifier_value', False)
+        if not strain:
+            # try to get the strain from the filed FEATURES -> SOURCE -> /isolate
+            strain = text_at_node(self.sample_xml, './/INSDQualifier[./INSDQualifier_name/text() = "isolate"]/INSDQualifier_value', False)
+        return strain
 
     def is_reference(self):
         return text_at_node(self.sample_xml, './/INSDKeyword', mandatory=False) == 'RefSeq'
@@ -95,10 +99,12 @@ class VirusSample:
             return None
 
     def nucleotide_sequence(self):
-        try:
-            return text_at_node(self.sample_xml, './/INSDSeq_sequence')
-        except AssertionError:
-            raise RollbackTransactionWithoutError(f'Insertion of sequence {self.internal_accession_id} skipped because of missing nucleotide seq.')
+        if not self._nuc_seq:
+            try:
+                self._nuc_seq = text_at_node(self.sample_xml, './/INSDSeq_sequence')
+            except AssertionError:
+                raise RollbackTransactionWithoutError(f'Insertion of sequence {self.internal_accession_id} skipped because of missing nucleotide seq.')
+        return self._nuc_seq
 
     # noinspection PyMethodMayBeStatic
     def strand(self):
@@ -352,6 +358,10 @@ class VirusSample:
             for el in self._annotations:
                 yield el
 
+    def cache_nucleotide_sequence_and_release_source_xml_reference(self):
+        self.nucleotide_sequence()
+        self.sample_xml = None
+
 
 def _structured_comment(el, key):
     comment = text_at_node(el, './/INSDSeq_comment' , False)
@@ -394,7 +404,7 @@ def _call_aa_variants(aa_ref, aa_seq) -> List[Tuple]:
     For every pair of amino acid sequences, returns in order:
     start position, reference amino acid(s), altenative amino acid(s), variant length, variant type
     """
-    alignment_aa = pairwise2.align.globalms(aa_ref, aa_seq, 2, -1, -1, -.5)
+    alignment_aa = pairwise2.align.globalms(aa_ref, aa_seq, 2, -1, -1, -.5, one_alignment_only=True)
     ref_aligned_aa = alignment_aa[0][0]
     seq_aligned_aa = alignment_aa[0][1]
 

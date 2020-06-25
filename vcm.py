@@ -147,7 +147,7 @@ def create_or_get_host_sample(session, sample: VirusSample):
     return host_sample
 
 
-def create_or_get_sequence(session, virus_sample, virus_id: int, experiment: ExperimentType, host_sample: HostSample, sequencing_project: SequencingProject):
+def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, experiment: ExperimentType, host_sample: HostSample, sequencing_project: SequencingProject):
     # data from sample
     accession_id = virus_sample.primary_accession_number()
     alternative_accession_id = str(virus_sample.alternative_accession_number())
@@ -158,6 +158,7 @@ def create_or_get_sequence(session, virus_sample, virus_id: int, experiment: Exp
     strand = virus_sample.strand()
     length = virus_sample.length()
     gc_percentage = virus_sample.gc_percent()
+    n_percentage = virus_sample.n_percent()
     # foreign keys
     experiment_type_id = experiment.experiment_type_id
     sequencing_project_id = sequencing_project.sequencing_project_id
@@ -169,6 +170,7 @@ def create_or_get_sequence(session, virus_sample, virus_id: int, experiment: Exp
                                               Sequence.strain_name == strain_name,
                                               Sequence.is_reference == is_reference,
                                               Sequence.is_complete == is_complete,
+                                              Sequence.n_percentage == n_percentage,
                                               Sequence.nucleotide_sequence == nucleotide_sequence,
                                               Sequence.strand == strand,
                                               Sequence.length == length,
@@ -183,6 +185,7 @@ def create_or_get_sequence(session, virus_sample, virus_id: int, experiment: Exp
                             strain_name=strain_name,
                             is_reference=is_reference,
                             is_complete=is_complete,
+                            n_percentage=n_percentage,
                             nucleotide_sequence=nucleotide_sequence,
                             strand=strand,
                             length=length,
@@ -229,11 +232,11 @@ def create_annotation_and_aa_variants(session, sample: VirusSample, sequence: Se
             session.flush()
 
 
-def create_nucleotide_variants_and_impacts(session, sample: VirusSample, sequence: Sequence, aligner):
+def create_nucleotide_variants_and_impacts(session, sample: VirusSample, sequence_id: int, aligner):
     if aligner is None:
         raise AttributeError("Can't create nucleotide variants because the aligner is None")
     for (sequence_original, sequence_alternative, start_original, start_alternative, variant_length, variant_type, variant_impacts) in sample.nucleotide_variants_and_effects(aligner):
-        nuc_variant_db_row = session.query(NucleotideVariant).filter(NucleotideVariant.sequence_id == sequence.sequence_id,
+        nuc_variant_db_row = session.query(NucleotideVariant).filter(NucleotideVariant.sequence_id == sequence_id,
                                                                      NucleotideVariant.sequence_original == sequence_original,
                                                                      NucleotideVariant.sequence_alternative == sequence_alternative,
                                                                      NucleotideVariant.start_original == start_original,
@@ -242,7 +245,7 @@ def create_nucleotide_variants_and_impacts(session, sample: VirusSample, sequenc
                                                                      NucleotideVariant.variant_type == variant_type).one_or_none()
         if not nuc_variant_db_row:
             # insert nucleotide variant
-            nuc_variant_db_row = NucleotideVariant(sequence_id=sequence.sequence_id,
+            nuc_variant_db_row = NucleotideVariant(sequence_id=sequence_id,
                                                    sequence_original=sequence_original,
                                                    sequence_alternative=sequence_alternative,
                                                    start_original=start_original,
