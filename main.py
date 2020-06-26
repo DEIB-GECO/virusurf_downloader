@@ -1,17 +1,19 @@
 import sys
 
-from sqlalchemy.exc import SQLAlchemyError
-from typing import Callable, Optional, List, Tuple
-import locations
+import os
 from loguru import logger
+from typing import Callable, Optional, List
+
+import locations
 import database_tom
 import vcm as vcm
-from virus_sample import VirusSample, download_or_get_virus_sample_as_xml, DoNotImportSample, delete_virus_sample_xml
-from multiprocessing import Queue, JoinableQueue, cpu_count, Process
-import os
+from data_sources.virus_sample import VirusSample
+from data_sources.virus import VirusSource
+from data_sources.gisaid_sars_cov_2.virus import GISAIDSarsCov2
+from data_sources.ncbi_sars_cov_2.virus import NCBISarsCov2
+from multiprocessing import JoinableQueue, cpu_count, Process
 from sqlalchemy.orm.session import Session
 from Bio import Entrez
-import IlCodiCE
 from tqdm import tqdm
 Entrez.email = "Your.Name.Here@example.org"
 
@@ -59,9 +61,9 @@ locations.create_local_folders()
 database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_db_from_scratch=True)
 
 #   ###################################     VIRUSES TO IMPORT    ###############
-virus_taxon_ids = {
-    'sars_cov2': 2697049
-}
+viruses: List[VirusSource] = [
+    NCBISarsCov2(),
+]
 
 
 class Sequential:
@@ -71,10 +73,7 @@ class Sequential:
         self.aligner: Optional[Callable] = None
         self.reference_sample: Optional[VirusSample] = None
 
-    def import_virus_sample(self, session: Session, virus_seq_accession_id):
-        virus_sample_file_path = download_or_get_virus_sample_as_xml(virus_seq_accession_id)
-        sample = VirusSample(virus_sample_file_path, virus_seq_accession_id)
-
+    def import_virus_sample(self, session: Session, sample: VirusSample):
         experiment = vcm.create_or_get_experiment(session, sample)
         host_sample = vcm.create_or_get_host_sample(session, sample)
         sequencing_project = vcm.create_or_get_sequencing_project(session, sample)
@@ -83,14 +82,14 @@ class Sequential:
         vcm.create_annotation_and_aa_variants(session, sample, sequence, self.reference_sample)
 
         if self.aligner is None and sample.is_reference():
-            self.aligner = IlCodiCE.create_aligner_to_reference(reference=sequence.nucleotide_sequence,
-                                                                annotation_file='sars_cov_2_annotations.tsv',
-                                                                is_gisaid=False)
+            self.aligner = sample.nucleotide_var_aligner()
             self.reference_sample = sample
             logger.info('reference sequence imported')
         else:
             vcm.create_nucleotide_variants_and_impacts(session, sample, sequence.sequence_id, self.aligner)
 
+    def tear_down(self):
+        pass
 
 class Parallel:
 
@@ -105,11 +104,8 @@ class Parallel:
         self.workers: List[Parallel.Consumer] = []
         self.shared_session: Optional[Session] = None
 
-    def import_virus_sample(self, session: Session, virus_seq_accession_id):
+    def import_virus_sample(self, session: Session, sample):
         # do this synchronously
-        virus_sample_file_path = download_or_get_virus_sample_as_xml(virus_seq_accession_id)
-        sample = VirusSample(virus_sample_file_path, virus_seq_accession_id)
-
         experiment = vcm.create_or_get_experiment(session, sample)
         host_sample = vcm.create_or_get_host_sample(session, sample)
         sequencing_project = vcm.create_or_get_sequencing_project(session, sample)
@@ -121,20 +117,16 @@ class Parallel:
             self.reference_sample = sample
             self.shared_session = database_tom.get_session()
             # prepare workers
-            for i in range(Parallel.number_of_processes()):
-                aligner = IlCodiCE.create_aligner_to_reference(reference=sequence.nucleotide_sequence,
-                                                               annotation_file='sars_cov_2_annotations.tsv',
-                                                               is_gisaid=False)
-                worker = Parallel.Consumer(self._queue, aligner, self.shared_session)
+            for _ in range(Parallel.number_of_processes()):
+                worker = Parallel.Consumer(self._queue, sample.nucleotide_var_aligner(), self.shared_session)
                 self.workers.append(worker)
                 worker.start()
             logger.info('reference sequence imported')
         else:
-            # do this asynchronously
-            sample.cache_nucleotide_sequence_and_release_source_xml_reference()  # release xml reference to prevent errors with multiprocessing
-            logger.info(f'queue size {self._queue.qsize()}')
+            # schedule nucleotide variants to be called asynchronously
+            sample.on_before_multiprocessing()
             self._queue.put([sample, sequence.sequence_id])
-            logger.info(f'nuc variants for sample {virus_seq_accession_id} scheduled')
+            logger.info(f'nucleotide variant calling for sequence {sample.internal_id()} scheduled')
 
     class Consumer(Process):
         def __init__(self, jobs: JoinableQueue, aligner: Callable, shared_session: Session):
@@ -146,19 +138,20 @@ class Parallel:
 
         def run(self):
             while True:
-                element = self.jobs.get(block=True, timeout=None)
-                if element is None:
-                    # shutdown this worker
-                    print('shutting down a consumer')
+                job = self.jobs.get(block=True, timeout=None)
+                if job is None:
+                    logger.info('shutting down a consumer')
                     self.jobs.task_done()
                     break
                 else:
+                    sample, sequence_id = job
                     try:
-                        vcm.create_nucleotide_variants_and_impacts(self.shared_session, element[0], element[1], self.aligner)
+                        vcm.create_nucleotide_variants_and_impacts(self.shared_session, sample, sequence_id, self.aligner)
                         self.shared_session.commit()
-                        logger.info(f'nucleotide variants for sample {element[0].alternative_accession_number()}')
-                    except SQLAlchemyError as e:
-                        self.shared_session.rollback()
+                        logger.info(f'nucleotides of sequence {sample.internal_id()} imported')
+                    except:
+                        logger.exception(f'unknown exception while calling nucleotides on sample {sample.internal_id()}')
+                        database_tom.rollback(self.shared_session)
                     self.jobs.task_done()
 
     @staticmethod
@@ -183,7 +176,7 @@ class Parallel:
 
     def tear_down(self):
         # terminate workers
-        for w in self.workers:
+        for _ in self.workers:
             self._queue.put(None, block=True, timeout=None)
         logger.info('waiting all workers to finish')
         self._queue.join()
@@ -193,44 +186,29 @@ class Parallel:
 
 def run():
 
-    def import_virus_taxonomy_data(session: Session, virus_taxonomy_xml):
-        virus_db_record = vcm.create_or_get_virus(session, virus_taxonomy_xml)
-        return virus_db_record.virus_id
+    def import_virus(session: Session, virus: VirusSource):
+        return vcm.create_or_get_virus(session, virus).virus_id
 
-    def try_import_virus_sample(seq_acc_id):
+    def try_import_virus_sample(sample: VirusSample):
         nonlocal successful_imports
         try:
-            database_tom.try_py_function(import_method.import_virus_sample, seq_acc_id)
+            database_tom.try_py_function(import_method.import_virus_sample, sample)
             successful_imports += 1
-        except DoNotImportSample:
-            delete_virus_sample_xml(seq_acc_id)
-            logger.info(f'virus sample with accession id {seq_acc_id} has not been imported and was removed from disk')
         except:
-            logger.exception(f'exception occurred while working on virus sample {seq_acc_id}.xml')
+            logger.exception(f'exception occurred while working on virus sample {sample}')
 
-    for virus in virus_taxon_ids:
+    for virus in viruses:
         # IMPORT VIRUS TAXON DATA
-        logger.info(f'importing virus {virus}')
-        virus_taxonomy_as_xml = vcm.download_virus_taxonomy_as_xml(virus_taxon_ids[virus])
-        virus_id = database_tom.try_py_function(import_virus_taxonomy_data, virus_taxonomy_as_xml)
-
-        # FIND VIRUS SEQUENCES
-        logger.info(f'getting accession ids for virus sequences')
-        refseq_accession_id, non_refseq_accession_ids = vcm.get_virus_sample_accession_ids(virus_taxon_ids[virus])
-        # logger.warning('Sequence accession ids are hardcoded in main.py.')
-        # refseq_accession_id = 1798174254      # hardcoded value for tests
-        # non_refseq_accession_ids = [1852393386]#, 1852393360, 1852393373,  1852393398, 1859035944, 1859035892, 1800242649, 1800242657, 1858732896, 1799706760, 1800242651, 1800242659, 1858732909, 1799706762, 1800242653, 1800242661, 1858732922, 1800242639, 1800242655, 1850952215, 1859094271]
-        non_refseq_accession_ids = non_refseq_accession_ids[::-1]
-        sequence_accession_ids = [refseq_accession_id] + non_refseq_accession_ids
+        virus_id = database_tom.try_py_function(import_virus, virus)
 
         # # IMPORT VIRUS SEQUENCES
         logger.info(f'importing virus sequences and related tables')
         global import_method
         import_method = import_method(virus_id)
-
         successful_imports = 0
-        for virus_seq_acc_id in tqdm(sequence_accession_ids):
-            try_import_virus_sample(virus_seq_acc_id)
+
+        for s in virus.virus_samples():
+            try_import_virus_sample(s)
 
         logger.info('main process completed')
         import_method.tear_down()

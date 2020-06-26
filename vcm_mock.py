@@ -1,6 +1,3 @@
-import re
-from collections import OrderedDict
-from datetime import datetime
 from typing import List
 # noinspection PyPackageRequirements
 from Bio import Entrez
@@ -9,7 +6,7 @@ from tqdm import tqdm
 
 from database import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation
 from locations import *
-from virus_sample import VirusSample
+from data_sources.ncbi_sars_cov_2.sample import NCBISarsCov2Sample
 from xml_helper import *
 import string
 import random
@@ -44,7 +41,7 @@ def create_or_get_virus(session, tax_tree):
     return virus
 
 
-def create_or_get_experiment(session, sample: VirusSample):
+def create_or_get_experiment(session, sample: NCBISarsCov2Sample):
     sequencing_technology = 'a_seq_technology',
     assembly_method = 'an_assembly_method',
     coverage = 'some_coverage'
@@ -65,7 +62,7 @@ def create_or_get_experiment(session, sample: VirusSample):
     return experiment
 
 
-def create_or_get_sequencing_project(session, sample: VirusSample):
+def create_or_get_sequencing_project(session, sample: NCBISarsCov2Sample):
     sequencing_lab = 'a_laboratory'
     submission_date = 'a_date'
     bioproject_id = 'a_bioproject_id'
@@ -90,7 +87,7 @@ def create_or_get_sequencing_project(session, sample: VirusSample):
     return sequencing_project
 
 
-def create_or_get_host_sample(session, sample: VirusSample):
+def create_or_get_host_sample(session, sample: NCBISarsCov2Sample):
 
     host_taxon_id = 222
     host_taxon_name = 'a_name'
@@ -191,7 +188,7 @@ def create_or_get_sequence(session, virus_sample, virus_id: int, experiment: Exp
     return sequence
 
 
-def create_or_get_annotation(session, sample: VirusSample, sequence: Sequence):
+def create_or_get_annotation(session, sample: NCBISarsCov2Sample, sequence: Sequence):
     # sample data
     feature_type = 'a_type'
     start = 1

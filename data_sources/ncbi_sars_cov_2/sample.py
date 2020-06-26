@@ -1,47 +1,26 @@
 import re
 from collections import Counter
 from decimal import Decimal
+from lxml.etree import ElementTree
 
-import lxml
-from typing import Tuple, Callable, Generator, List, Iterable
-from Bio import Entrez, pairwise2
+from typing import Tuple, Callable, Generator, List, Iterable, Optional
+from Bio import pairwise2
 from loguru import logger
 from lxml import etree
+
+import IlCodiCE
 from locations import *
-from xml_helper import *
-from database_tom import RollbackTransactionWithoutError, RollbackTransactionAndRaise
+from data_sources.virus_sample import VirusSample
+from xml_helper import text_at_node, print_element_tree
+from database_tom import RollbackTransactionWithoutError
 from datetime import datetime
 from dateutil.parser import parse
-
-
-def download_or_get_virus_sample_as_xml(sample_accession_id: int) -> str:
-    """
-    :param sample_accession_id: sequence accession id ( == numeric part of a GI id, e.g. '1798174254' of 'gi|1798174254')
-    :return: the local file path of the download INSDSeq XML file.
-    """
-    local_file_path = f"{local_folder}/{sample_accession_id}.xml"
-    if not os.path.exists(local_file_path):
-        with Entrez.efetch(db="nuccore", id=sample_accession_id, rettype="gbc", retmode="xml") as handle, open(local_file_path, 'w') as f:
-            for line in handle:
-                f.write(line)
-    return local_file_path
-
-
-def delete_virus_sample_xml(sample_accession_id: int):
-    """
-    :param sample_accession_id: sequence accession id ( == numeric part of a GI id, e.g. '1798174254' of 'gi|1798174254')
-    """
-    local_file_path = f"{local_folder}/{sample_accession_id}.xml"
-    try:
-        os.remove(local_file_path)
-    except OSError as e:
-        logger.error(f"Failed to remove file {local_file_path} with error: {e.strerror}")
 
 
 default_datetime = datetime(2020, 1, 1, 0, 0, 0, 0, None)
 
 
-class VirusSample:
+class NCBISarsCov2Sample(VirusSample):
     """
     Set of getters to take the relevant information from a virus sample in INSDSeq XML format.
     Example of virus sample @ https://www.ncbi.nlm.nih.gov/nuccore/MN908947
@@ -51,12 +30,10 @@ class VirusSample:
         """
         :param virus_sample_file_path: virus sample file (INDSeq XML) path
         :param internal_accession_id: sequence accession id ( == numeric part of a GI id, e.g. '1798174254' of 'gi|1798174254')
+        Raises lxml.etree.XMLSyntaxError if the source file is malformed or empty.
         """
-        try:
-            self.sample_xml: ElementTree = etree.parse(virus_sample_file_path, parser=etree.XMLParser(remove_blank_text=True))
-        except lxml.etree.XMLSyntaxError:
-            logger.warning(f'xml file of virus sample {internal_accession_id} is malformed or empty.')
-            raise DoNotImportSample(internal_accession_id)
+        super().__init__()
+        self.sample_xml: ElementTree = etree.parse(virus_sample_file_path, parser=etree.XMLParser(remove_blank_text=True))
         self.internal_accession_id = internal_accession_id
 
         # init internal variables
@@ -65,9 +42,8 @@ class VirusSample:
         self._annotations = None
         self._nuc_seq = None
 
-
-    def underlying_xml_element_tree(self):
-        return self.sample_xml
+    def internal_id(self):
+        return self.internal_accession_id
 
     def primary_accession_number(self):
         return text_at_node(self.sample_xml, './/INSDSeq_accession-version')
@@ -129,6 +105,12 @@ class VirusSample:
         n_percentage = round(n_percentage, 2)
         return n_percentage
 
+    def lineage(self):
+        return None
+
+    def clade(self):
+        return None
+
     def sequencing_technology(self):
         return _structured_comment(self.sample_xml, 'Sequencing Technology')
 
@@ -189,14 +171,10 @@ class VirusSample:
             #     popset = None
         return self._journal
 
-    def submitted(self):
-        return self._init_and_get_journal()[0]
-
     def submission_date(self):
         return datetime.strptime(self._init_and_get_journal()[1], '%d-%b-%Y')
 
-    @staticmethod
-    def originating_lab() -> Optional[str]:
+    def originating_lab(self) -> Optional[str]:
         return None
 
     def sequencing_lab(self) -> Optional[str]:
@@ -332,22 +310,24 @@ class VirusSample:
                     #  select one of them:
                     #         db_xref_merged = coalesce(db_xref_merged,'db_xref', mandatory=False, multiple=True)
                 except AssertionError:
-                    pass
-                # compute amino acid variants
+                    continue
+                # compute amino acid variants only on CDS except those of the reference
                 else:
-                    if reference_virus_sample is None or self == reference_virus_sample:
+                    if reference_virus_sample is None or self == reference_virus_sample or feature_type != 'CDS':
                         aa_variants = None
                     else:
-                        # get pairs of reference and non-reference sequences for each gene annotation in common
-                        reference_annotations_and_aa_variants = reference_virus_sample.annotations_and_amino_acid_variants(None)
+                        # ignore annotations named as orf1... and length < 20 k
+                        gene_name_lower = gene_name.lower()
+                        if gene_name_lower.startswith('orf1') and len(amino_acid_sequence) < 20000:
+                            continue    # skip this annotation
 
+                        # match this CDS with one from the reference
                         common_gene_annotations = []
-                        if gene_name and amino_acid_sequence:
-                            for _, _, _, ref_gene_name, _, _, ref_amino_acid_sequence, _ in reference_annotations_and_aa_variants:
-                                if ref_gene_name and ref_amino_acid_sequence and ref_gene_name == gene_name:
-                                    common_gene_annotations.append((ref_amino_acid_sequence, amino_acid_sequence))
+                        for _, _, _, ref_gene_name_lower, _, _, ref_aa_seq, _ in reference_virus_sample.get_cached_reference_CDS_annotations():
+                            if ref_gene_name_lower == gene_name_lower or ref_gene_name_lower.startswith('orf1') and gene_name_lower.startswith('orf1'):
+                                common_gene_annotations.append((ref_aa_seq, amino_acid_sequence))
 
-                        # call amino acid variants
+                        # call amino acid variants on the pair of amino acid sequences
                         aa_variants = [variant for (aa_ref, aa_seq) in common_gene_annotations for variant in _call_aa_variants(aa_ref, aa_seq)]
 
                     # append annotation and its amino acid variants
@@ -358,21 +338,35 @@ class VirusSample:
             for el in self._annotations:
                 yield el
 
-    def cache_nucleotide_sequence_and_release_source_xml_reference(self):
-        self.nucleotide_sequence()
-        self.sample_xml = None
+    # noinspection PyPep8Naming
+    def get_cached_reference_CDS_annotations(self):
+        if not hasattr(self, 'cached_CDS_annotations'):
+            self.cached_CDS_annotations = []
+            for start, stop, feature_type, gene_name, product, external_reference, amino_acid_sequence, aa_variants in self.annotations_and_amino_acid_variants(None):
+                if feature_type == 'CDS':
+                    self.cached_CDS_annotations.append((start, stop, feature_type, gene_name.lower(), product, external_reference, amino_acid_sequence, aa_variants))
+        return self.cached_CDS_annotations
+
+    def on_before_multiprocessing(self):
+        self.nucleotide_sequence()  # make sure nucleotide variants are cached in this sample
+        self.sample_xml = None  # release xml reference to prevent errors with multiprocessing
+
+    def nucleotide_var_aligner(self):
+        return IlCodiCE.create_aligner_to_reference(reference=self.nucleotide_sequence(),
+                                                    annotation_file='sars_cov_2_annotations.tsv',
+                                                    is_gisaid=False)
 
 
 def _structured_comment(el, key):
-    comment = text_at_node(el, './/INSDSeq_comment' , False)
+    comment = text_at_node(el, './/INSDSeq_comment', False)
     if comment:
         sub = re.findall("##Assembly-Data-START## ;(.*); ##Assembly-Data-END##", comment)
-        assert len(sub) <=1, f"multiple structured_comment {len(sub)}"
+        assert len(sub) <= 1, f"multiple structured_comment {len(sub)}"
         if sub:
             sub = sub[0]
             subs = sub.split(";")
             subs = [x for x in subs if key in x]
-            assert len(subs) <=1, f"multiple structured_comment for key: {key} {len(subs)}"
+            assert len(subs) <= 1, f"multiple structured_comment for key: {key} {len(subs)}"
             if subs:
                 return subs[0].split("::")[1].strip()
             else:
@@ -408,7 +402,7 @@ def _call_aa_variants(aa_ref, aa_seq) -> List[Tuple]:
     ref_aligned_aa = alignment_aa[0][0]
     seq_aligned_aa = alignment_aa[0][1]
 
-    ref_positions_aa = [0 for i in range(len(seq_aligned_aa))]
+    ref_positions_aa = [0 for _ in range(len(seq_aligned_aa))]
     pos = 0
     for i in range(len(ref_aligned_aa)):
         if ref_aligned_aa[i] != '-':
@@ -424,29 +418,23 @@ def _call_aa_variants(aa_ref, aa_seq) -> List[Tuple]:
             alternative = t[2]
             mut_len = max(len(original), len(alternative))
             mut_type = "DEL"
-            mut_set.add((mutpos, original, alternative, mut_len, mut_type))
+            mut_set.add((original, alternative, mutpos, mut_len, mut_type))
         elif t[1] != t[2]:
             mutpos = t[0]
             original = [r for (p, r, s) in aligned_aa if p == mutpos if r != "-"][0]
             alternative = "".join([s for (p, r, s) in aligned_aa if p == mutpos])
             mut_len = max(len(original), len(alternative))
             mut_type = "SUB"
-            mut_set.add((mutpos, original, alternative, mut_len, mut_type))
+            mut_set.add((original, alternative, mutpos, mut_len, mut_type))
         elif t[1] == "-":
             mutpos = t[0]
             original = t[1]
             alternative = t[2]
             mut_len = max(len(original), len(alternative))
             mut_type = "SUB"
-            mut_set.add((mutpos, original, alternative, mut_len, mut_type))
+            mut_set.add((original, alternative, mutpos, mut_len, mut_type))
     aa_variants = []
     for mut in mut_set:
         aa_variants.append(mut)
 
     return aa_variants
-
-
-class DoNotImportSample(RollbackTransactionAndRaise):
-    def __init__(self, internal_accession_id):
-        self.internal_sample_accession_id = internal_accession_id
-        super().__init__(f'Request to abort the import of sample with accession id {self.internal_sample_accession_id}')

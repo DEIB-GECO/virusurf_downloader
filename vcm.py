@@ -1,55 +1,34 @@
 from collections import OrderedDict
-from typing import List, Tuple
+from typing import List
 # noinspection PyPackageRequirements
 from Bio import Entrez
 from lxml import etree
+
+from data_sources.virus import VirusSource
 from database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
     VariantImpact, AminoacidVariant
 from locations import *
 from tqdm import tqdm
-from virus_sample import VirusSample
+from data_sources.virus_sample import VirusSample
 from xml_helper import *
 
 # Set of methods that create the corresponding rows in the Virus Conceptual Model database tables
 
 
 #   #############################    VCM    ############################
-def create_or_get_virus(session, tax_tree):
-    taxon_id = int(text_at_node(tax_tree, './Taxon/TaxId'))
-    scientific_name = text_at_node(tax_tree, './Taxon/ScientificName')
-
-    family = text_at_node(tax_tree, './/LineageEx/Taxon[./Rank/text() = "family"]/ScientificName')
-    subfamily = text_at_node(tax_tree, './/LineageEx/Taxon[./Rank/text() = "subfamily"]/ScientificName')
-    genus = text_at_node(tax_tree, './/LineageEx/Taxon[./Rank/text() = "genus"]/ScientificName')
-    species = text_at_node(tax_tree, './/LineageEx/Taxon[./Rank/text() = "species"]/ScientificName')
-    #     species_taxon_id = text_at_node(tax_tree, './/LineageEx/Taxon[./Rank/text() = "species"]/TaxId')
-
-    genbank_acronym = text_at_node(tax_tree, './/GenbankAcronym')
-    equivalent_names = tax_tree.xpath('.//EquivalentName')
-    equivalent_names = [x.text for x in equivalent_names]
-    if genbank_acronym:
-        equivalent_names.insert(0, genbank_acronym)
-    equivalent_names = list(OrderedDict.fromkeys(equivalent_names))
-    equivalent_names = ", ".join(equivalent_names)
-
-    molecule_type = 'RNA'
-    is_single_stranded = True
-    is_positive_stranded = True
-
-    virus = session.query(Virus).filter(Virus.taxon_id == taxon_id).one_or_none()
-
+def create_or_get_virus(session, a_virus: VirusSource) -> Virus:
+    virus = session.query(Virus).filter(Virus.taxon_id == a_virus.taxon_id()).one_or_none()
     if not virus:
-        #         print("not exists")
-        virus = Virus(taxon_id=taxon_id,
-                      taxon_name=scientific_name,
-                      family=family,
-                      sub_family=subfamily,
-                      genus=genus,
-                      species=species,
-                      equivalent_list=equivalent_names,
-                      molecule_type=molecule_type,
-                      is_single_stranded=is_single_stranded,
-                      is_positive_stranded=is_positive_stranded
+        virus = Virus(taxon_id=a_virus.taxon_id(),
+                      taxon_name=a_virus.taxon_name(),
+                      family=a_virus.family(),
+                      sub_family=a_virus.sub_family(),
+                      genus=a_virus.genus(),
+                      species=a_virus.species(),
+                      equivalent_list=a_virus.equivalent_names(),
+                      molecule_type=a_virus.molecule_type(),
+                      is_single_stranded=a_virus.is_single_stranded(),
+                      is_positive_stranded=a_virus.is_positive_stranded()
                       )
         session.add(virus)
         session.flush()
@@ -75,9 +54,6 @@ def create_or_get_experiment(session, sample: VirusSample):
 
 
 def create_or_get_sequencing_project(session, sample: VirusSample):
-
-    submitted = sample.submitted()
-    assert submitted == "Submitted ", "Journal value submitted"
     submission_date = sample.submission_date()
     sequencing_lab = sample.sequencing_lab()
     bioproject_id = sample.bioproject_id()
@@ -159,6 +135,8 @@ def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, ex
     length = virus_sample.length()
     gc_percentage = virus_sample.gc_percent()
     n_percentage = virus_sample.n_percent()
+    lineage = virus_sample.lineage()
+    clade = virus_sample.clade()
     # foreign keys
     experiment_type_id = experiment.experiment_type_id
     sequencing_project_id = sequencing_project.sequencing_project_id
@@ -175,6 +153,8 @@ def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, ex
                                               Sequence.strand == strand,
                                               Sequence.length == length,
                                               Sequence.gc_percentage == gc_percentage,
+                                              Sequence.lineage == lineage,
+                                              Sequence.clade == clade,
                                               Sequence.experiment_type_id == experiment_type_id,
                                               Sequence.sequencing_project_id == sequencing_project_id,
                                               Sequence.virus_id == virus_id,
@@ -190,6 +170,8 @@ def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, ex
                             strand=strand,
                             length=length,
                             gc_percentage=gc_percentage,
+                            lineage=lineage,
+                            clade=clade,
                             experiment_type_id=experiment_type_id,
                             sequencing_project_id=sequencing_project_id,
                             virus_id=virus_id,
@@ -221,7 +203,7 @@ def create_annotation_and_aa_variants(session, sample: VirusSample, sequence: Se
             session.add(annotation)
             session.flush()
             if aa_variants:
-                for mutpos, original, alternative, mut_len, mut_type in aa_variants:
+                for original, alternative, mutpos, mut_len, mut_type in aa_variants:
                     aa_variant = AminoacidVariant(annotation_id=annotation.annotation_id,
                                                   sequence_aa_original=original,
                                                   sequence_aa_alternative=alternative,
@@ -233,8 +215,6 @@ def create_annotation_and_aa_variants(session, sample: VirusSample, sequence: Se
 
 
 def create_nucleotide_variants_and_impacts(session, sample: VirusSample, sequence_id: int, aligner):
-    if aligner is None:
-        raise AttributeError("Can't create nucleotide variants because the aligner is None")
     for (sequence_original, sequence_alternative, start_original, start_alternative, variant_length, variant_type, variant_impacts) in sample.nucleotide_variants_and_effects(aligner):
         nuc_variant_db_row = session.query(NucleotideVariant).filter(NucleotideVariant.sequence_id == sequence_id,
                                                                      NucleotideVariant.sequence_original == sequence_original,
@@ -261,67 +241,3 @@ def create_nucleotide_variants_and_impacts(session, sample: VirusSample, sequenc
                                               putative_impact=putative_impact,
                                               impact_gene_name=impact_gene_name)
                 session.add(impact_db_row)
-
-
-#   ##############################      HELPER METHODS  #################à#
-def download_virus_taxonomy_as_xml(taxon_id):
-    # write taxonomy tree
-    local_file_path = f"{local_folder_taxonomy}/{taxon_id}.xml"
-    if not os.path.exists(local_file_path):
-        with Entrez.efetch(db="taxonomy", id=taxon_id, rettype=None, retmode="xml") as handle, \
-                open(local_file_path, 'w') as f:
-            for line in handle:
-                f.write(line)
-    tax_tree = etree.parse(local_file_path, parser=etree.XMLParser(remove_blank_text=True))
-    return tax_tree
-
-
-def get_virus_sample_accession_ids(virus_specie_taxon_id: int) -> (int, List[int]):
-    """
-    For a virus specie, it returns the accession ids of the reference sample (refseq) and a list of ids for the non-reference
-    samples.
-    """
-    # get reference sample accession id
-    handle = Entrez.esearch(db="nuccore", term=f"(txid{virus_specie_taxon_id}[Organism]) AND srcdb_refseq[Properties]")
-    response = Entrez.read(handle)
-    handle.close()
-    # Example response
-    # {
-    #     "Count": "1",                       <-- number of total records matching the query
-    #     "RetMax": "1",
-    #     "RetStart": "0",
-    #     "IdList": ["1798174254"],            <-- accession id of refseq
-    #     "TranslationSet": [],
-    #     "TranslationStack": [
-    #         {"Term": "txid2697049[Organism]", "Field": "Organism", "Count": "5511", "Explode": "Y"},
-    #         {"Term": "srcdb_refseq[Properties]", "Field": "Properties", "Count": "66995641", "Explode": "N"},
-    #         "AND"
-    #     ],
-    #     "QueryTranslation": "txid2697049[Organism] AND srcdb_refseq[Properties]"
-    # }
-    assert int(response['Count']) == 1, \
-        "no reference sample found or multiple RefSeqs" + "please check: https://www.ncbi.nlm.nih.gov/books/NBK25499/#chapter4.ESearch"
-    refseq_accession_id = response['IdList'][0]
-
-    # get non-refseq accession ids
-    #   total number of sequences
-    with Entrez.esearch(db="nuccore",
-                        term=f"(txid{virus_specie_taxon_id}[Organism]) NOT srcdb_refseq[Properties]",
-                        rettype='count') as handle:
-        response = Entrez.read(handle)
-        total_records = int(response['Count'])
-    #   do pagination
-    non_refseq_accessions_ids = list()
-    RECORDS_PER_PAGE = 1000
-    page_number = 0
-    with tqdm(total=total_records) as progress_bar:
-        while total_records > page_number*RECORDS_PER_PAGE:
-            with Entrez.esearch(db="nuccore", term=f"(txid{virus_specie_taxon_id}[Organism]) NOT srcdb_refseq[Properties]",
-                                retmax=RECORDS_PER_PAGE, retstart=page_number*RECORDS_PER_PAGE) as handle:
-                response = Entrez.read(handle)
-            for x in response['IdList']:
-                non_refseq_accessions_ids.append(int(x))
-            page_number += 1
-            progress_bar.update(RECORDS_PER_PAGE if page_number*RECORDS_PER_PAGE < total_records else total_records-((page_number-1)*RECORDS_PER_PAGE))
-    assert len(non_refseq_accessions_ids) == total_records, 'Some of the non-refseq accession ids were not correctly downloaded'
-    return refseq_accession_id, non_refseq_accessions_ids
