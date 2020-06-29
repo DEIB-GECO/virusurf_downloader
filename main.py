@@ -11,6 +11,7 @@ from data_sources.virus_sample import VirusSample
 from data_sources.virus import VirusSource
 from data_sources.gisaid_sars_cov_2.virus import GISAIDSarsCov2
 from data_sources.ncbi_sars_cov_2.virus import NCBISarsCov2
+from data_sources.coguk_sars_cov_2.virus import COGUKSarsCov2
 from multiprocessing import JoinableQueue, cpu_count, Process
 from sqlalchemy.orm.session import Session
 from Bio import Entrez
@@ -62,7 +63,7 @@ database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_d
 
 #   ###################################     VIRUSES TO IMPORT    ###############
 viruses: List[VirusSource] = [
-    NCBISarsCov2(),
+
 ]
 
 
@@ -215,5 +216,6 @@ def run():
         logger.info(f'successful imports: {successful_imports} (not reliable when parallel processing)')
 
 
-import_method = Parallel
-run()
+# import_method = Sequential
+# run()
+import data_sources.coguk_sars_cov_2.procedure

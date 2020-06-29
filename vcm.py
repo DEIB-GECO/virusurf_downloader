@@ -126,7 +126,7 @@ def create_or_get_host_sample(session, sample: VirusSample):
 def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, experiment: ExperimentType, host_sample: HostSample, sequencing_project: SequencingProject):
     # data from sample
     accession_id = virus_sample.primary_accession_number()
-    alternative_accession_id = str(virus_sample.alternative_accession_number())
+    alternative_accession_id = virus_sample.alternative_accession_number()
     strain_name = virus_sample.strain()
     is_reference = virus_sample.is_reference()
     is_complete = virus_sample.is_complete()

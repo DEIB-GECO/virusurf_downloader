@@ -20,7 +20,7 @@ class GISAIDSarsCov2Sample(VirusSample):
             return None
 
     def alternative_accession_number(self):
-        return self.primary_accession_number()
+        return None
 
     def strain(self):
         try:
