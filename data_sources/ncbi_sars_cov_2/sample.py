@@ -49,7 +49,7 @@ class NCBISarsCov2Sample(VirusSample):
         return text_at_node(self.sample_xml, './/INSDSeq_accession-version')
 
     def alternative_accession_number(self):
-        return self.internal_accession_id
+        return str(self.internal_accession_id) if self.internal_accession_id else None
 
     def strain(self):
         strain = text_at_node(self.sample_xml, './/INSDQualifier[./INSDQualifier_name/text() = "strain"]/INSDQualifier_value', False)
@@ -324,7 +324,8 @@ class NCBISarsCov2Sample(VirusSample):
                         # match this CDS with one from the reference
                         common_gene_annotations = []
                         for _, _, _, ref_gene_name_lower, _, _, ref_aa_seq, _ in reference_virus_sample.get_cached_reference_CDS_annotations():
-                            if ref_gene_name_lower == gene_name_lower or ref_gene_name_lower.startswith('orf1') and gene_name_lower.startswith('orf1'):
+                            if ref_gene_name_lower == gene_name_lower or \
+                                    ref_gene_name_lower.startswith('orf1') and gene_name_lower.startswith('orf1'):
                                 common_gene_annotations.append((ref_aa_seq, amino_acid_sequence))
 
                         # call amino acid variants on the pair of amino acid sequences

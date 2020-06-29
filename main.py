@@ -21,13 +21,14 @@ Entrez.email = "Your.Name.Here@example.org"
 
 #   #################################       PROGRAM ARGUMENTS   ##########################
 wrong_arguments_message = 'The module main.py expects the following arguments:' \
-                          'db_name, db_user', 'db_password', 'db_port.'
+                          'db_name, db_user, db_password, db_port, source_to_import (genbank-sars-cov2, cog-uk, gisaid)'
 # noinspection PyBroadException
 try:
     db_name = sys.argv[1]
     db_user = sys.argv[2]
     db_password = sys.argv[3]
     db_port = sys.argv[4]
+    source = sys.argv[5].lower()
 except Exception:
     logger.error(wrong_arguments_message)
     sys.exit(1)
@@ -196,7 +197,7 @@ def run():
             database_tom.try_py_function(import_method.import_virus_sample, sample)
             successful_imports += 1
         except:
-            logger.exception(f'exception occurred while working on virus sample {sample}')
+            logger.exception(f'exception occurred while working on virus sample {sample.internal_id()}')
 
     for virus in viruses:
         # IMPORT VIRUS TAXON DATA
@@ -216,6 +217,17 @@ def run():
         logger.info(f'successful imports: {successful_imports} (not reliable when parallel processing)')
 
 
-# import_method = Sequential
-# run()
-import data_sources.coguk_sars_cov_2.procedure
+
+if not source:
+    import_method = Sequential
+    run()
+elif source in ['coguk', 'cog-uk']:
+    import data_sources.coguk_sars_cov_2.procedure
+elif source in ['ncbi-sars-cov2', 'genbank-sars-cov2', 'genbank-sarscov2', 'genbank-sars-cov-2']:
+    import_method = Parallel
+    viruses = [NCBISarsCov2()]
+    run()
+elif source == 'gisaid':
+    import_method = Sequential
+    viruses = [GISAIDSarsCov2()]
+    run()
