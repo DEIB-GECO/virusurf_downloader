@@ -32,7 +32,20 @@ class NCBISarsCov1Sample(NCBISarsCov2Sample):
         return super().is_reference()
 
     def is_complete(self):
-        return super().is_complete()
+        definition = text_at_node(self.sample_xml, ".//INSDSeq_definition")
+        definition_0 = definition.split(";")[0]
+        definition_0_last = definition_0.split(",")[-1]
+        definition_0_last = definition_0_last.strip()
+        if definition_0_last in ['complete genome', ]:
+            return True
+        elif definition_0_last in ['partial cds', 'complete cds', 'partial genome']:
+            return False
+        else:
+            length = self.length()
+            if length and length < 28374:      # 95 % of the length of the reference sequence
+                return False
+            else:
+                return None
 
     def nucleotide_sequence(self):
         return super().nucleotide_sequence()

@@ -74,8 +74,11 @@ class NCBISarsCov2Sample(VirusSample):
         elif definition_0_last in ['partial cds', 'complete cds', 'partial genome']:
             return False
         else:
-            logger.warning(f"In {self.internal_accession_id}, unkown complete string: {definition_0_last}")
-            return None
+            length = self.length()
+            if length and length < 28407:      # 95 % of the length of the reference sequence
+                return False
+            else:
+                return None
 
     def nucleotide_sequence(self):
         if not self._nuc_seq:
