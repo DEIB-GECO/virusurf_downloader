@@ -28,7 +28,7 @@ class Sequential:
         sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment, host_sample,
                                               sequencing_project)
 
-        vcm.create_nucleotide_variants_and_impacts(session, sample, sequence.sequence_id, virus.nucleotide_variant_aligner())
+        # vcm.create_nucleotide_variants_and_impacts(session, sample, sequence.sequence_id, virus.nucleotide_variant_aligner())
 
     def tear_down(self):
         pass
@@ -140,7 +140,7 @@ virus_id = database_tom.try_py_function(import_virus, virus)
 
 # # IMPORT VIRUS SEQUENCES
 logger.info(f'importing virus sequences and related tables')
-import_method = Parallel()
+import_method = Sequential()
 successful_imports = 0
 
 for s in virus.virus_samples():

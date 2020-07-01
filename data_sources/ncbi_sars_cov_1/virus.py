@@ -54,7 +54,7 @@ class NCBISarsCov1(NCBISarsCov2):
         refseq_accession_id, non_refseq_accession_ids = get_virus_sample_accession_ids(self.taxon_id())
         # refseq_accession_id = 30271926
         # non_refseq_accession_ids = [1773397070, 1773397068, 1773397066, 1773397050, 1773397048, 1773397046, 1773397044, 1773397042, 1773397024, 1773397022, 1773397020, 1773397018, 1773397002, 1773397000, 1773396998, 1773396996, 1773396994, 1773396992]
-        non_refseq_accession_ids = non_refseq_accession_ids[:20]
+        # non_refseq_accession_ids = non_refseq_accession_ids[:20]
         sequence_accession_ids = [refseq_accession_id] + non_refseq_accession_ids
 
         sample_local_download_dir = get_local_folder_for(source_name=self.name, _type=FileType.SequenceOrSampleData)

@@ -70,7 +70,11 @@ class COGUKSarsCov2Sample(VirusSample):
         return False
 
     def is_complete(self):
-        return None
+        length = self.length()
+        if length and length < 28407:  # 95 % of the length of the reference sequence
+            return False
+        else:
+            return None
 
     def nucleotide_sequence(self):
         return self.sample_dict[self.NUC_SEQUENCE].lower()
@@ -79,7 +83,7 @@ class COGUKSarsCov2Sample(VirusSample):
         return 'positive'
 
     def length(self):
-        return None
+        return len(self.nucleotide_sequence())
 
     def gc_percent(self):
         c = Counter(self.nucleotide_sequence().lower())
