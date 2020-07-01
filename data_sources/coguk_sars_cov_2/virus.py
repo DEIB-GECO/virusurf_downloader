@@ -11,7 +11,6 @@ from loguru import logger
 from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
 from data_sources.ncbi_sars_cov_2.sample import NCBISarsCov2Sample
 from data_sources.ncbi_sars_cov_2.virus import NCBISarsCov2
-from data_sources.ncbi_sars_cov_2.virus import download_or_get_virus_sample_as_xml, get_virus_sample_accession_ids
 from locations import local_folder
 
 

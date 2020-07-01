@@ -1,4 +1,7 @@
 import os
+from collections import Counter
+from decimal import Decimal
+
 from loguru import logger
 from typing import Generator, Tuple, Callable, Optional, List, Iterable
 
@@ -15,6 +18,14 @@ class COGUKSarsCov2Sample(VirusSample):
     REGION = 'region'
     COLLECTION_DATE = 'collection_date'
     LINEAGE = 'lineage'
+
+    geo_mappings = {
+        'UK': 'United Kingdom',
+        'UK-ENG': 'England',
+        'UK-WLS': 'Wales',
+        'UK-SCT': 'Scotland',
+        'UK-NIR': 'Northern Ireland'
+    }
 
     def __init__(self, sample_dict):
         super().__init__()
@@ -61,19 +72,27 @@ class COGUKSarsCov2Sample(VirusSample):
         return None
 
     def nucleotide_sequence(self):
-        return self.sample_dict[self.NUC_SEQUENCE]
+        return self.sample_dict[self.NUC_SEQUENCE].lower()
 
     def strand(self):
-        return None
+        return 'positive'
 
     def length(self):
         return None
 
     def gc_percent(self):
-        return None
+        c = Counter(self.nucleotide_sequence().lower())
+        gc_percentage = (c['g'] + c['c']) / (c['g'] + c['c'] + c['a'] + c['t'] + c['u']) * 100
+        gc_percentage = Decimal(gc_percentage)
+        gc_percentage = round(gc_percentage, 2)
+        return gc_percentage
 
     def n_percent(self):
-        return None
+        c = Counter(self.nucleotide_sequence().lower())
+        n_percentage = (c['n']) / self.length() * 100
+        n_percentage = Decimal(n_percentage)
+        n_percentage = round(n_percentage, 2)
+        return n_percentage
 
     def lineage(self):
         return self.sample_dict.get(self.LINEAGE)
@@ -97,7 +116,11 @@ class COGUKSarsCov2Sample(VirusSample):
         return None
 
     def country__region__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-        return self.sample_dict.get(self.COUNTRY), self.sample_dict.get(self.REGION), None
+        orig_country = self.sample_dict.get(self.COUNTRY)
+        country = self.geo_mappings.get(orig_country) or orig_country
+        orig_region = self.sample_dict.get(self.REGION)
+        region = self.geo_mappings.get(orig_region) or orig_region
+        return orig_country, orig_region, 'Europe'
 
     def submission_date(self):
         return None
@@ -109,7 +132,7 @@ class COGUKSarsCov2Sample(VirusSample):
         return None
 
     def taxon_name(self) -> Optional[str]:
-        return 'Human'
+        return 'Homo sapiens'
 
     def taxon_id(self) -> Optional[int]:
         return 9606
