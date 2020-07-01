@@ -6,10 +6,11 @@ from loguru import logger
 from typing import Generator, Tuple, Callable, Optional, List, Iterable
 
 from data_sources.virus_sample import VirusSample
-from locations import local_folder_nuc_variant_and_effects
+from locations import get_local_folder_for, FileType
 
 
 class COGUKSarsCov2Sample(VirusSample):
+    virus_name = 'COG-UK_sars_cov_2'
     # DICT KEYS
     STRAIN_NAME = 'strain_name'
     NUC_SEQUENCE = 'nuc_sequence'
@@ -120,7 +121,7 @@ class COGUKSarsCov2Sample(VirusSample):
         country = self.geo_mappings.get(orig_country) or orig_country
         orig_region = self.sample_dict.get(self.REGION)
         region = self.geo_mappings.get(orig_region) or orig_region
-        return orig_country, orig_region, 'Europe'
+        return country, region, 'Europe'
 
     def submission_date(self):
         return None
@@ -150,7 +151,7 @@ class COGUKSarsCov2Sample(VirusSample):
         return None
 
     def _call_or_read_nuc_variants_and_effects(self, aligner: Callable) -> Generator[Iterable, None, None]:
-        cache_file_path = f'{local_folder_nuc_variant_and_effects}{os.path.sep}{self.internal_id()}'
+        cache_file_path = f'{get_local_folder_for(source_name=self.virus_name, _type=FileType.NucleotideVariants)}{self.internal_id()}'
         try:
             with open(cache_file_path, mode='r') as f:
                 logger.trace(f'reading nucleotide variants for sample {self.internal_id()} from disk')

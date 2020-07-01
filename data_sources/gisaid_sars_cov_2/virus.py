@@ -9,14 +9,17 @@ from data_sources.virus import VirusSource
 
 
 # noinspection PyMethodMayBeStatic
+from locations import get_local_folder_for, FileType
+
+
 class GISAIDSarsCov2(VirusSource):
 
-    internal_name = 'GISAID_sars_cov_2'
-    data_path = './downloads/gisaid_test/export.json'
+    name = 'GISAID_sars_cov_2'
+    data_path = f'{get_local_folder_for(source_name=name, _type=FileType.SequenceOrSampleData)}export.json'
 
     def __init__(self):
         super().__init__()
-        logger.info(f'importing virus {GISAIDSarsCov2.internal_name}')
+        logger.info(f'importing virus {GISAIDSarsCov2.name}')
 
     def taxon_id(self):
         return 2697049
@@ -49,7 +52,7 @@ class GISAIDSarsCov2(VirusSource):
         return True
 
     def virus_samples(self):
-        with open(GISAIDSarsCov2.data_path, mode='r') as input_file:
+        with open(self.data_path, mode='r') as input_file:
             for line in tqdm(input_file):
                 try:
                     yield GISAIDSarsCov2Sample(json.loads(line))

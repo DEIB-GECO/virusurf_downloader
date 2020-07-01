@@ -1,12 +1,10 @@
 import sys
-
 import os
 from loguru import logger
 from typing import Callable, Optional, List
-
-import locations
 import database_tom
 import vcm as vcm
+from data_sources.ncbi_sars_cov_1.virus import NCBISarsCov1
 from data_sources.virus_sample import VirusSample
 from data_sources.virus import VirusSource
 from data_sources.gisaid_sars_cov_2.virus import GISAIDSarsCov2
@@ -21,7 +19,8 @@ Entrez.email = "Your.Name.Here@example.org"
 
 #   #################################       PROGRAM ARGUMENTS   ##########################
 wrong_arguments_message = 'The module main.py expects the following arguments:' \
-                          'db_name, db_user, db_password, db_port, source_to_import (genbank-sars-cov2, cog-uk, gisaid)'
+                          'db_name, db_user, db_password, db_port, source_to_import\n' \
+                          '(genbank-sars-cov2, cog-uk, gisaid, genbank-sars-cov1)'
 # noinspection PyBroadException
 try:
     db_name = sys.argv[1]
@@ -54,9 +53,6 @@ logger.add("./logs/log_{time}.log",
            colorize=False,
            backtrace=True,
            diagnose=True)
-
-#   ###################################     SETUP FOLDERS   ###############################
-locations.create_local_folders()
 
 #   ###################################     FILL DB WITH VIRUS SEQUENCES    ###############
 # init database
@@ -230,4 +226,8 @@ elif source in ['ncbi-sars-cov2', 'genbank-sars-cov2', 'genbank-sarscov2', 'genb
 elif source == 'gisaid':
     import_method = Sequential
     viruses = [GISAIDSarsCov2()]
+    run()
+elif source in ['ncbi-sars-cov1', 'genbank-sars-cov1', 'genbank-sarscov1', 'genbank-sars-cov']:
+    import_method = Parallel
+    viruses = [NCBISarsCov1()]
     run()

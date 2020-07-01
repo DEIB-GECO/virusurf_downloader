@@ -11,19 +11,20 @@ from loguru import logger
 from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
 from data_sources.ncbi_sars_cov_2.sample import NCBISarsCov2Sample
 from data_sources.ncbi_sars_cov_2.virus import NCBISarsCov2
-from locations import local_folder
+from locations import get_local_folder_for, FileType
 
 
 class COGUKSarsCov2(NCBISarsCov2):
 
-    name = 'COGUK_sars_cov_2'
+    name = 'COG-UK_sars_cov_2'
     sequence_file_url = 'https://cog-uk.s3.climb.ac.uk/2020-05-08/cog_2020-05-08_sequences.fasta'
     metadata_file_url = 'https://cog-uk.s3.climb.ac.uk/2020-05-08/cog_2020-05-08_metadata.csv'
 
     def __init__(self):
-        logger.info(f'importing virus {COGUKSarsCov2.name} using {super().name} for taxonomy data')
+        logger.info(f'importing virus {self.name} using {super().name} for taxonomy data')
         super().__init__()
-        self.sequence_file_path, self.metadata_file_path = download_or_get_sample_data()
+        download_dir = get_local_folder_for(source_name=self.name, _type=FileType.SequenceOrSampleData)
+        self.sequence_file_path, self.metadata_file_path = download_or_get_sample_data(download_dir)
 
     def taxon_id(self):
         return super().taxon_id()
@@ -119,7 +120,7 @@ class COGUKSarsCov2(NCBISarsCov2):
                 "no reference sample found or multiple RefSeqs" + "please check: https://www.ncbi.nlm.nih.gov/books/NBK25499/#chapter4.ESearch"
             reference_seq_id = response['IdList'][0]
 
-            reference_seq_file_path = f"{local_folder}{os.path.sep}coguk{os.path.sep}reference_sample.xml"
+            reference_seq_file_path = f"{get_local_folder_for(source_name=self.name, _type=FileType.SequenceOrSampleData)}reference_sample.xml"
             if not os.path.exists(reference_seq_file_path):
                 with Entrez.efetch(db="nuccore", id=reference_seq_id, rettype="gbc", retmode="xml") as handle, open(
                         reference_seq_file_path, 'w') as f:
@@ -130,16 +131,13 @@ class COGUKSarsCov2(NCBISarsCov2):
         return self.reference_sample.nucleotide_var_aligner()
 
 
-def download_or_get_sample_data() -> (str, str):
+def download_or_get_sample_data(containing_directory: str) -> (str, str):
     """
     :return: the local file path of the downloaded sequence and metadata files.
     """
-    directory = f"{local_folder}{os.sep}coguk{os.sep}"
-    sequence_local_file_path = directory + COGUKSarsCov2.sequence_file_url.rsplit('/', maxsplit=1)[1]
-    metadata_local_file_path = directory + COGUKSarsCov2.metadata_file_url.rsplit('/', maxsplit=1)[1]
+    sequence_local_file_path = containing_directory + COGUKSarsCov2.sequence_file_url.rsplit('/', maxsplit=1)[1]
+    metadata_local_file_path = containing_directory + COGUKSarsCov2.metadata_file_url.rsplit('/', maxsplit=1)[1]
     if not os.path.exists(sequence_local_file_path) or not os.path.exists(metadata_local_file_path):
-        if not os.path.exists(directory):
-            os.makedirs(directory)
         logger.info(f'downloading sample sequences for COG-UK data from {COGUKSarsCov2.sequence_file_url} ...')
         wget.download(COGUKSarsCov2.sequence_file_url, sequence_local_file_path)
         logger.info(f'downloading sample metadata for COG-UK data from {COGUKSarsCov2.metadata_file_url} ...')

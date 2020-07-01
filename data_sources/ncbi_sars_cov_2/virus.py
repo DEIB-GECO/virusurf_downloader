@@ -9,7 +9,7 @@ from tqdm import tqdm
 from typing import List
 
 from data_sources.ncbi_sars_cov_2.sample import NCBISarsCov2Sample
-from locations import local_folder_taxonomy, local_folder
+from locations import get_local_folder_for, FileType
 
 from xml_helper import text_at_node
 from data_sources.virus import VirusSource
@@ -22,8 +22,10 @@ class NCBISarsCov2(VirusSource):
 
     def __init__(self):
         super().__init__()
-        logger.info(f'importing virus {NCBISarsCov2.name}')
-        self.tax_tree = download_virus_taxonomy_as_xml(self.taxon_id())
+        logger.info(f'importing virus {self.name}')
+        self.tax_tree = download_virus_taxonomy_as_xml(
+            get_local_folder_for(source_name=self.name, _type=FileType.TaxonomyData),
+            self.taxon_id())
 
     def taxon_id(self):
         # taxon_id = int(text_at_node(self.tax_tree, './Taxon/TaxId'))
@@ -43,7 +45,7 @@ class NCBISarsCov2(VirusSource):
 
     def species(self):
         # species_taxon_id = text_at_node(self.tax_tree, './/LineageEx/Taxon[./Rank/text() = "species"]/TaxId')
-        return text_at_node(self.tax_tree, './/LineageEx/Taxon[./Rank/text() = "species"]/ScientificName', mandatory=False) or 'Severe acute respiratory syndrome-related coronavirus'
+        return text_at_node(self.tax_tree, './/LineageEx/Taxon[./Rank/text() = "species"]/ScientificName', mandatory=False)
 
     def equivalent_names(self):
         genbank_acronym = text_at_node(self.tax_tree, './/GenbankAcronym', mandatory=False)
@@ -74,18 +76,20 @@ class NCBISarsCov2(VirusSource):
         # non_refseq_accession_ids = non_refseq_accession_ids[::-1]     # invert seq
         sequence_accession_ids = [refseq_accession_id] + non_refseq_accession_ids
 
+        sample_local_download_dir = get_local_folder_for(source_name=self.name, _type=FileType.SequenceOrSampleData)
+
         for virus_seq_acc_id in tqdm(sequence_accession_ids):
             try:
-                virus_sample_file_path = download_or_get_virus_sample_as_xml(virus_seq_acc_id)
+                virus_sample_file_path = download_or_get_virus_sample_as_xml(sample_local_download_dir, virus_seq_acc_id)
                 yield NCBISarsCov2Sample(virus_sample_file_path, virus_seq_acc_id)
             except XMLSyntaxError:
                 logger.error(f'virus sample file with accession id {virus_seq_acc_id} was malformed or empty and it was deleted.')
-                delete_virus_sample_xml(virus_seq_acc_id)
+                delete_virus_sample_xml(sample_local_download_dir, virus_seq_acc_id)
 
 
-def download_virus_taxonomy_as_xml(taxon_id) -> etree.ElementTree:
+def download_virus_taxonomy_as_xml(containing_directory: str, taxon_id) -> etree.ElementTree:
     # write taxonomy tree
-    local_file_path = f"{local_folder_taxonomy}/{taxon_id}.xml"
+    local_file_path = f"{containing_directory}{os.path.sep}{taxon_id}.xml"
     if not os.path.exists(local_file_path):
         with Entrez.efetch(db="taxonomy", id=taxon_id, rettype=None, retmode="xml") as handle, \
                 open(local_file_path, 'w') as f:
@@ -146,24 +150,25 @@ def get_virus_sample_accession_ids(virus_specie_taxon_id: int) -> (int, List[int
     return refseq_accession_id, non_refseq_accessions_ids
 
 
-def download_or_get_virus_sample_as_xml(sample_accession_id: int) -> str:
+def download_or_get_virus_sample_as_xml(containing_directory: str, sample_accession_id: int) -> str:
     """
+    :param containing_directory: directory where the file will be downloaded and cached
     :param sample_accession_id: sequence accession id ( == numeric part of a GI id, e.g. '1798174254' of 'gi|1798174254')
     :return: the local file path of the download INSDSeq XML file.
     """
-    local_file_path = f"{local_folder}/{sample_accession_id}.xml"
-    if not os.path.exists(local_file_path):
-        with Entrez.efetch(db="nuccore", id=sample_accession_id, rettype="gbc", retmode="xml") as handle, open(local_file_path, 'w') as f:
-            for line in handle:
-                f.write(line)
+    local_file_path = f"{containing_directory}{os.path.sep}{sample_accession_id}.xml"
+    with Entrez.efetch(db="nuccore", id=sample_accession_id, rettype="gbc", retmode="xml") as handle, open(local_file_path, 'w') as f:
+        for line in handle:
+            f.write(line)
     return local_file_path
 
 
-def delete_virus_sample_xml(sample_accession_id: int):
+def delete_virus_sample_xml(containing_directory: str, sample_accession_id: int):
     """
+    :param containing_directory: directory where the file resides
     :param sample_accession_id: sequence accession id ( == numeric part of a GI id, e.g. '1798174254' of 'gi|1798174254')
     """
-    local_file_path = f"{local_folder}/{sample_accession_id}.xml"
+    local_file_path = f"{containing_directory}{os.path.sep}{sample_accession_id}.xml"
     try:
         os.remove(local_file_path)
     except OSError as e:

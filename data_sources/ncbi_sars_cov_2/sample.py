@@ -9,6 +9,7 @@ from loguru import logger
 from lxml import etree
 
 import IlCodiCE
+from geo_groups import geo_groups
 from locations import *
 from data_sources.virus_sample import VirusSample
 from xml_helper import text_at_node, print_element_tree
@@ -21,6 +22,8 @@ default_datetime = datetime(2020, 1, 1, 0, 0, 0, 0, None)
 
 
 class NCBISarsCov2Sample(VirusSample):
+    virus_name = 'NCBI_sars_cov_2'
+
     """
     Set of getters to take the relevant information from a virus sample in INSDSeq XML format.
     Example of virus sample @ https://www.ncbi.nlm.nih.gov/nuccore/MN908947
@@ -71,7 +74,7 @@ class NCBISarsCov2Sample(VirusSample):
         elif definition_0_last in ['partial cds', 'complete cds', 'partial genome']:
             return False
         else:
-            logger.error(f"In {self.internal_accession_id}, unkown complete string: {definition_0_last}")
+            logger.warning(f"In {self.internal_accession_id}, unkown complete string: {definition_0_last}")
             return None
 
     def nucleotide_sequence(self):
@@ -139,7 +142,6 @@ class NCBISarsCov2Sample(VirusSample):
     def country__region__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
         country = None
         region = None
-        geo_group = None
         node = text_at_node(self.sample_xml,
                             '..//INSDQualifier[./INSDQualifier_name/text() = "country"]/INSDQualifier_value',
                             mandatory=False)
@@ -147,6 +149,7 @@ class NCBISarsCov2Sample(VirusSample):
             node = node.split(":")
             country = node[0]
             region = node[1] if len(node) > 1 else None
+        geo_group = geo_groups.get(country.lower()) if country else None
         return country, region, geo_group
 
     def _init_and_get_journal(self):
@@ -157,7 +160,7 @@ class NCBISarsCov2Sample(VirusSample):
             journal_string = text_at_node(reference, "./INSDReference_journal")
             assert journal_string.startswith(
                 "Submitted "), 'Cannot find submitted in the Journal of direct submission reference'
-            self._journal = re.split("[()]", journal_string, maxsplit=2)
+            self._journal = re.split("[()]", journal_string, maxsplit=2)[1:]
             assert len(self._journal) == 3, f"Journal value problem '{journal_string}' {self._journal}"
 
             #   # journal details
@@ -172,13 +175,19 @@ class NCBISarsCov2Sample(VirusSample):
         return self._journal
 
     def submission_date(self):
-        return datetime.strptime(self._init_and_get_journal()[1], '%d-%b-%Y')
+        try:
+            return datetime.strptime(self._init_and_get_journal()[0], '%d-%b-%Y')
+        except TypeError:
+            return None
 
     def originating_lab(self) -> Optional[str]:
         return None
 
     def sequencing_lab(self) -> Optional[str]:
-        return self._init_and_get_journal()[2]
+        try:
+            return self._init_and_get_journal()[1]
+        except TypeError:
+            return None
 
     def _init_and_get_host_values(self):
         if not self._host_value_list:
@@ -231,7 +240,7 @@ class NCBISarsCov2Sample(VirusSample):
         return text_at_node(self.sample_xml, './/INSDXref[./INSDXref_dbname/text() = "BioProject"]/INSDXref_id', mandatory=False)
 
     def _call_or_read_nuc_variants_and_effects(self, aligner: Callable) -> Generator[Iterable, None, None]:
-        cache_file_path = f'{local_folder_nuc_variant_and_effects}{os.path.sep}{self.internal_accession_id}'
+        cache_file_path = f'{get_local_folder_for(source_name=self.virus_name, _type=FileType.NucleotideVariants)}{os.path.sep}{self.internal_accession_id}'
         try:
             with open(cache_file_path, mode='r') as f:
                 logger.trace(f'reading nucleotide variants for sample {self.internal_accession_id} from disk')
@@ -306,14 +315,14 @@ class NCBISarsCov2Sample(VirusSample):
                     if protein_id:
                         protein_id = "ProteinID:" + protein_id
                     external_reference = [x for x in [protein_id, db_xref] if x is not None]
-                    external_reference = ','.join(external_reference)
+                    external_reference = ','.join(external_reference) if external_reference else None
                     #  select one of them:
                     #         db_xref_merged = coalesce(db_xref_merged,'db_xref', mandatory=False, multiple=True)
                 except AssertionError:
                     continue
                 # compute amino acid variants only on CDS except those of the reference
                 else:
-                    if reference_virus_sample is None or self == reference_virus_sample or feature_type != 'CDS':
+                    if reference_virus_sample is None or self == reference_virus_sample or not gene_name or not amino_acid_sequence:
                         aa_variants = None
                     else:
                         # ignore annotations named as orf1... and length < 20 k
@@ -344,7 +353,7 @@ class NCBISarsCov2Sample(VirusSample):
         if not hasattr(self, 'cached_CDS_annotations'):
             self.cached_CDS_annotations = []
             for start, stop, feature_type, gene_name, product, external_reference, amino_acid_sequence, aa_variants in self.annotations_and_amino_acid_variants(None):
-                if feature_type == 'CDS':
+                if gene_name and amino_acid_sequence:
                     self.cached_CDS_annotations.append((start, stop, feature_type, gene_name.lower(), product, external_reference, amino_acid_sequence, aa_variants))
         return self.cached_CDS_annotations
 
