@@ -99,17 +99,25 @@ class NCBISarsCov2Sample(VirusSample):
 
     def gc_percent(self):
         c = Counter(self.nucleotide_sequence().lower())
-        gc_percentage = (c['g'] + c['c']) / (c['g'] + c['c'] + c['a'] + c['t'] + c['u']) * 100
-        gc_percentage = Decimal(gc_percentage)
-        gc_percentage = round(gc_percentage, 2)
-        return gc_percentage
+        count_known_nucleotides = (c['g'] + c['c'] + c['a'] + c['t'] + c['u'])
+        if count_known_nucleotides != 0:
+            gc_percentage = (c['g'] + c['c']) / count_known_nucleotides * 100
+            gc_percentage = Decimal(gc_percentage)
+            gc_percentage = round(gc_percentage, 2)
+            return gc_percentage
+        else:
+            return 0
 
     def n_percent(self):
-        c = Counter(self.nucleotide_sequence().lower())
-        n_percentage = (c['n']) / self.length() * 100
-        n_percentage = Decimal(n_percentage)
-        n_percentage = round(n_percentage, 2)
-        return n_percentage
+        length = self.length()
+        if length != 0:
+            c = Counter(self.nucleotide_sequence().lower())
+            n_percentage = (c['n']) / length * 100
+            n_percentage = Decimal(n_percentage)
+            n_percentage = round(n_percentage, 2)
+            return n_percentage
+        else:
+            return 0
 
     def lineage(self):
         return None
