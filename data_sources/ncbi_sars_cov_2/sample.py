@@ -172,7 +172,7 @@ class NCBISarsCov2Sample(VirusSample):
             assert journal_string.startswith(
                 "Submitted "), 'Cannot find submitted in the Journal of direct submission reference'
             self._journal = re.split("[()]", journal_string, maxsplit=2)[1:]
-            assert len(self._journal) == 3, f"Journal value problem '{journal_string}' {self._journal}"
+            assert len(self._journal) == 2, f"Journal value problem '{journal_string}' {self._journal}"
 
             #   # journal details
             #     authors = reference.xpath('.//INSDAuthor')
@@ -338,7 +338,7 @@ class NCBISarsCov2Sample(VirusSample):
                     else:
                         # ignore annotations named as orf1... and length < 20 k
                         gene_name_lower = gene_name.lower()
-                        if gene_name_lower.startswith('orf1') and len(amino_acid_sequence) < 20000:
+                        if gene_name_lower.startswith('orf1') and stop-start < 20000:
                             continue    # skip this annotation
 
                         # match this CDS with one from the reference
