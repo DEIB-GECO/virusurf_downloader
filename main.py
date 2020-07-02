@@ -20,7 +20,7 @@ Entrez.email = "Your.Name.Here@example.org"
 #   #################################       PROGRAM ARGUMENTS   ##########################
 wrong_arguments_message = 'The module main.py expects the following arguments:' \
                           'db_name, db_user, db_password, db_port, source_to_import\n' \
-                          '(genbank-sars-cov2, cog-uk, gisaid, genbank-sars-cov1)'
+                          '(genbank-sars-cov2, cog-uk, gisaid, genbank-sars-cov1, just_make_indexes)'
 # noinspection PyBroadException
 try:
     db_name = sys.argv[1]
@@ -213,10 +213,11 @@ def run():
         logger.info(f'successful imports: {successful_imports} (not reliable when parallel processing)')
 
 
-
 if not source:
     import_method = Sequential
     run()
+elif 'index' in source:
+    database_tom.create_indexes()
 elif source in ['coguk', 'cog-uk']:
     import data_sources.coguk_sars_cov_2.procedure
 elif source in ['ncbi-sars-cov2', 'genbank-sars-cov2', 'genbank-sarscov2', 'genbank-sars-cov-2']:
