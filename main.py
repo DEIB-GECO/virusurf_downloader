@@ -53,10 +53,11 @@ logger.add("./logs/log_{time}.log",
            colorize=False,
            backtrace=True,
            diagnose=True)
+logger.info(f"main.py {' '.join(sys.argv[1:])}")
 
 #   ###################################     FILL DB WITH VIRUS SEQUENCES    ###############
 # init database
-database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_db_from_scratch=True)
+database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_db_from_scratch=False)
 
 #   ###################################     VIRUSES TO IMPORT    ###############
 viruses: List[VirusSource] = [
@@ -213,14 +214,11 @@ def run():
         logger.info(f'successful imports: {successful_imports} (not reliable when parallel processing)')
 
 
-if not source:
-    import_method = Sequential
-    run()
-elif 'index' in source:
+if 'index' in source:
     database_tom.create_indexes()
 elif source in ['coguk', 'cog-uk']:
     import data_sources.coguk_sars_cov_2.procedure
-elif source in ['ncbi-sars-cov2', 'genbank-sars-cov2', 'genbank-sarscov2', 'genbank-sars-cov-2']:
+elif source in ['ncbi-sars-cov2', 'genbank-sars-cov1', 'genbank-sarscov2', 'genbank-sars-cov-2']:
     import_method = Parallel
     viruses = [NCBISarsCov2()]
     run()
@@ -232,3 +230,5 @@ elif source in ['ncbi-sars-cov1', 'genbank-sars-cov1', 'genbank-sarscov1', 'genb
     import_method = Parallel
     viruses = [NCBISarsCov1()]
     run()
+else:
+    logger.error(f'the argument {source} is not recognised. Use genbank-sars-cov1 or genbank-sars-cov1 or gisaid or coguk')

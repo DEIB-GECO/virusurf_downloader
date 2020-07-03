@@ -442,7 +442,10 @@ def _call_aa_variants(aa_ref, aa_seq) -> List[Tuple]:
             mut_set.add((original, alternative, mutpos, mut_len, mut_type))
         elif t[1] != t[2]:
             mutpos = t[0]
-            original = [r for (p, r, s) in aligned_aa if p == mutpos if r != "-"][0]
+            try:
+                original = [r for (p, r, s) in aligned_aa if p == mutpos if r != "-"][0]
+            except IndexError:
+                continue
             alternative = "".join([s for (p, r, s) in aligned_aa if p == mutpos])
             mut_len = max(len(original), len(alternative))
             mut_type = "SUB"

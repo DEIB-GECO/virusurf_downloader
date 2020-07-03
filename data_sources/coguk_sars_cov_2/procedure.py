@@ -35,8 +35,8 @@ class Sequential:
 
 class Parallel:
 
-    MAX_PROCESSES = 5
-    MAX_QUEUE = 6
+    MAX_PROCESSES = 78
+    MAX_QUEUE = MAX_PROCESSES+50
 
     def __init__(self):
         # empty job queue
@@ -44,7 +44,7 @@ class Parallel:
         self.workers: List[Parallel.Consumer] = []
         self.shared_session: Optional[Session] = None
 
-    def import_virus_sample(self, session: Session, sample):
+    def import_virus_sample(self, session: Session, sample: VirusSample):
         # do this synchronously
         experiment = vcm.create_or_get_experiment(session, sample)
         host_sample = vcm.create_or_get_host_sample(session, sample)
@@ -63,7 +63,7 @@ class Parallel:
         # schedule nucleotide variants to be called asynchronously
         sample.on_before_multiprocessing()
         self._queue.put([sample, sequence.sequence_id])
-        logger.info(f'nucleotide variant calling for sequence {sample.internal_id()} scheduled')
+        logger.info(f'nucleotide variant calling for sequence {sample.internal_id()} scheduled. Queue size: {self._queue.qsize()}')
 
     class Consumer(Process):
         def __init__(self, jobs: JoinableQueue, aligner: Callable, shared_session: Session):
@@ -140,7 +140,7 @@ virus_id = database_tom.try_py_function(import_virus, virus)
 
 # # IMPORT VIRUS SEQUENCES
 logger.info(f'importing virus sequences and related tables')
-import_method = Sequential()
+import_method = Parallel()
 successful_imports = 0
 
 for s in virus.virus_samples():
