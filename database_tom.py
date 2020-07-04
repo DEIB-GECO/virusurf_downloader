@@ -209,7 +209,7 @@ class Annotation(_base):
     product = Column(String)
     external_reference = Column(String)
     aminoacid_sequence = Column(String)
-    annototation_nucleotide_sequence = Column(String)
+    annotation_nucleotide_sequence = Column(String)
 
 
 class NucleotideVariant(_base):
