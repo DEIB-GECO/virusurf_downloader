@@ -1,9 +1,5 @@
 import re
-from datetime import datetime
 from typing import Generator, Tuple, Callable, Iterable, Optional
-
-from Bio import Entrez
-from loguru import logger
 
 from data_sources.ncbi_sars_cov_2.sample import NCBISarsCov2Sample
 from xml_helper import text_at_node
@@ -117,21 +113,7 @@ class NCBISarsCov1Sample(NCBISarsCov2Sample):
         return super().taxon_name()
 
     def taxon_id(self) -> Optional[int]:
-        taxon_name = self.taxon_name()
-        taxon_id = NCBISarsCov1Sample.cached_taxon_id.get(taxon_name)
-        if taxon_id is None and taxon_name is not None:
-            try:
-                with Entrez.esearch(db="taxonomy", term=f'"{taxon_name}"[Scientific Name', rettype=None, retmode="xml") as handle:
-                    response = Entrez.read(handle)
-                    if response['Count'] == '1':
-                        taxon_id = int(response['IdList'][0])
-                        NCBISarsCov1Sample.cached_taxon_id[taxon_name] = taxon_id
-                    else:
-                        logger.warning(f'can\'t find the taxon id for taxon name {taxon_name}')
-                        NCBISarsCov1Sample.cached_taxon_id[taxon_name] = None
-            except:
-                logger.warning(f'can\'t find the taxon id for taxon name {taxon_name}')
-        return taxon_id
+        return super().taxon_id()
 
     def gender(self) -> Optional[str]:
         return super().gender()

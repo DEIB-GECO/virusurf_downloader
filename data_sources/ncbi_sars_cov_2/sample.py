@@ -4,7 +4,7 @@ from decimal import Decimal
 from lxml.etree import ElementTree
 
 from typing import Tuple, Callable, Generator, List, Iterable, Optional
-from Bio import pairwise2
+from Bio import pairwise2, Entrez
 from loguru import logger
 from lxml import etree
 
@@ -12,7 +12,7 @@ import IlCodiCE
 from geo_groups import geo_groups
 from locations import *
 from data_sources.virus_sample import VirusSample
-from xml_helper import text_at_node, print_element_tree
+from xml_helper import text_at_node
 from database_tom import RollbackTransactionWithoutError
 from datetime import datetime
 from dateutil.parser import parse
@@ -23,6 +23,7 @@ default_datetime = datetime(2020, 1, 1, 0, 0, 0, 0, None)
 
 class NCBISarsCov2Sample(VirusSample):
     virus_name = 'NCBI_sars_cov_2'
+    cached_taxon_id = {}
 
     """
     Set of getters to take the relevant information from a virus sample in INSDSeq XML format.
@@ -216,7 +217,28 @@ class NCBISarsCov2Sample(VirusSample):
         return host[0] if host else None
 
     def taxon_id(self) -> Optional[int]:
-        return 9606 if self.taxon_name() == 'Homo sapiens' else None
+        taxon_name = self.taxon_name()
+        if not taxon_name:
+            return None
+        else:
+            taxon_id = NCBISarsCov2Sample.cached_taxon_id.get(taxon_name)
+            if taxon_id == -1:  # -1 means the cached taxon_id for this taxon name was searched before
+                return None
+            elif taxon_id is None:
+                try:
+                    with Entrez.esearch(db="taxonomy", term=f'"{taxon_name}"[Scientific Name]', rettype=None,
+                                        retmode="xml") as handle:
+                        response = Entrez.read(handle)
+                        if response['Count'] == '1':
+                            taxon_id = int(response['IdList'][0])
+                            NCBISarsCov2Sample.cached_taxon_id[taxon_name] = taxon_id
+                        else:
+                            logger.warning(f'can\'t find the taxon id for taxon name {taxon_name}')
+                            NCBISarsCov2Sample.cached_taxon_id[taxon_name] = -1  # save -1 in cache to distinguish from non cached taxon_ids
+                            taxon_id = None
+                except:
+                    logger.exception(f'Exception occurred while fetching the taxon id of {taxon_name} in sample {self.internal_accession_id()}')
+            return taxon_id
 
     def gender(self) -> Optional[str]:
         host = self._init_and_get_host_values()
