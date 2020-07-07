@@ -24,6 +24,7 @@ default_datetime = datetime(2020, 1, 1, 0, 0, 0, 0, None)
 class NCBISarsCov2Sample(VirusSample):
     virus_name = 'NCBI_sars_cov_2'
     cached_taxon_id = {}
+    re_anna_RuL3z = re.compile(r'(\d+)([,|.]?)(\d*).*')
 
     """
     Set of getters to take the relevant information from a virus sample in INSDSeq XML format.
@@ -133,7 +134,21 @@ class NCBISarsCov2Sample(VirusSample):
         return _structured_comment(self.sample_xml, 'Assembly Method')
 
     def coverage(self):
-        return _structured_comment(self.sample_xml, 'Coverage')
+        _input = _structured_comment(self.sample_xml, 'Coverage')
+        if not _input:
+            return None
+        info = self.re_anna_RuL3z.match(_input)
+        if not info:
+            raise ValueError(f'coverage string {_input} doesn\'t match the regex.')
+        else:
+            o1 = info.group(1)  # integer part
+            o3 = info.group(3)  # decimal (optional)
+            # apply Anna's rules
+            output = int(o1)
+            if o3 and len(o3) < 3:
+                decimals = round(int(o3) / 10)
+                output += decimals
+            return output
 
     def collection_date(self):
         collection_date = text_at_node(self.sample_xml,
