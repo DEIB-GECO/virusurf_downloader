@@ -144,10 +144,10 @@ class COGUKSarsCov2Sample(VirusSample):
     def sequencing_lab(self) -> Optional[str]:
         return None
 
-    def taxon_name(self) -> Optional[str]:
+    def host_taxon_name(self) -> Optional[str]:
         return 'Homo sapiens'
 
-    def taxon_id(self) -> Optional[int]:
+    def host_taxon_id(self) -> Optional[int]:
         return 9606
 
     def gender(self) -> Optional[str]:

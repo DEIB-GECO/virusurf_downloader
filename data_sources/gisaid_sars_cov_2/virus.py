@@ -15,7 +15,7 @@ from locations import get_local_folder_for, FileType
 class GISAIDSarsCov2(VirusSource):
 
     name = 'GISAID_sars_cov_2'
-    data_path = f'{get_local_folder_for(source_name=name, _type=FileType.SequenceOrSampleData)}export.json'
+    data_path = f'/home/canakoglu/GISAID/export.json'
 
     def __init__(self):
         super().__init__()
@@ -53,7 +53,9 @@ class GISAIDSarsCov2(VirusSource):
 
     def virus_samples(self):
         with open(self.data_path, mode='r') as input_file:
-            for line in tqdm(input_file):
+            num_lines = sum(1 for line in input_file)
+            input_file.seek(0, 0)   # reset pointer
+            for line in tqdm(input_file, total=num_lines):
                 try:
                     yield GISAIDSarsCov2Sample(json.loads(line))
                 except JSONDecodeError:

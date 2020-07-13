@@ -64,7 +64,8 @@ class NCBISarsCov2Sample(VirusSample):
         return strain
 
     def is_reference(self):
-        return text_at_node(self.sample_xml, './/INSDKeyword', mandatory=False) == 'RefSeq'
+        keyword_nodes = self.sample_xml.xpath('.//INSDSeq_keywords/INSDKeyword')
+        return 'RefSeq' in [text_at_node(node, '.', mandatory=False) for node in keyword_nodes]
 
     def is_complete(self):
         definition = text_at_node(self.sample_xml, ".//INSDSeq_definition")
@@ -133,7 +134,7 @@ class NCBISarsCov2Sample(VirusSample):
     def assembly_method(self):
         return _structured_comment(self.sample_xml, 'Assembly Method')
 
-    def coverage(self):
+    def coverage(self) -> str:
         _input = _structured_comment(self.sample_xml, 'Coverage')
         if not _input:
             return None
@@ -148,7 +149,7 @@ class NCBISarsCov2Sample(VirusSample):
             if o3 and len(o3) < 3:
                 decimals = round(int(o3) / 10)
                 output += decimals
-            return output
+            return str(output)
 
     def collection_date(self):
         collection_date = text_at_node(self.sample_xml,
@@ -227,12 +228,12 @@ class NCBISarsCov2Sample(VirusSample):
                     self._host_value_list[i] = self._host_value_list[i].lower()
         return self._host_value_list
 
-    def taxon_name(self) -> Optional[str]:
+    def host_taxon_name(self) -> Optional[str]:
         host = self._init_and_get_host_values()
         return host[0] if host else None
 
-    def taxon_id(self) -> Optional[int]:
-        taxon_name = self.taxon_name()
+    def host_taxon_id(self) -> Optional[int]:
+        taxon_name = self.host_taxon_name()
         if not taxon_name:
             return None
         else:
@@ -241,7 +242,7 @@ class NCBISarsCov2Sample(VirusSample):
                 return None
             elif taxon_id is None:
                 try:
-                    with Entrez.esearch(db="taxonomy", term=f'"{taxon_name}"[Scientific Name]', rettype=None,
+                    with Entrez.esearch(db="taxonomy", term=taxon_name, rettype=None,
                                         retmode="xml") as handle:
                         response = Entrez.read(handle)
                         if response['Count'] == '1':
@@ -252,7 +253,7 @@ class NCBISarsCov2Sample(VirusSample):
                             NCBISarsCov2Sample.cached_taxon_id[taxon_name] = -1  # save -1 in cache to distinguish from non cached taxon_ids
                             taxon_id = None
                 except:
-                    logger.exception(f'Exception occurred while fetching the taxon id of {taxon_name} in sample {self.internal_accession_id()}')
+                    logger.exception(f'Exception occurred while fetching the taxon id of {taxon_name} in sample {self.internal_id()}')
             return taxon_id
 
     def gender(self) -> Optional[str]:

@@ -35,12 +35,13 @@ class Sequential:
 
 class Parallel:
 
-    MAX_PROCESSES = 78
-    MAX_QUEUE = MAX_PROCESSES+50
+    MAX_PROCESSES = 10
 
     def __init__(self):
         # empty job queue
-        self._queue = JoinableQueue(Parallel.MAX_QUEUE)
+        queue_size = self.number_of_processes()+10
+        self._queue = JoinableQueue(queue_size)
+        logger.info(f'queue set to accapt at most {queue_size} jobs before pausing the producer')
         self.workers: List[Parallel.Consumer] = []
         self.shared_session: Optional[Session] = None
 
@@ -63,7 +64,7 @@ class Parallel:
         # schedule nucleotide variants to be called asynchronously
         sample.on_before_multiprocessing()
         self._queue.put([sample, sequence.sequence_id])
-        logger.info(f'nucleotide variant calling for sequence {sample.internal_id()} scheduled. Queue size: {self._queue.qsize()}')
+        logger.info(f'nucleotide variant calling for sequence {sample.internal_id()} scheduled')
 
     class Consumer(Process):
         def __init__(self, jobs: JoinableQueue, aligner: Callable, shared_session: Session):

@@ -1,6 +1,6 @@
 from typing import Optional
 
-from lxml.etree import ElementTree
+from lxml.etree import ElementTree, tostring
 
 
 def text_at_node(root_node: ElementTree, xpath_string, mandatory=True) -> Optional[str]:
@@ -13,6 +13,6 @@ def text_at_node(root_node: ElementTree, xpath_string, mandatory=True) -> Option
         return None
 
 
-def print_element_tree(etree: ElementTree):
-    print(etree.tostring(etree, encoding="unicode", pretty_print=True))
+def print_element_tree(node: ElementTree):
+    print(tostring(node, encoding="unicode", pretty_print=True))
 

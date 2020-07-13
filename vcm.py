@@ -16,7 +16,7 @@ from xml_helper import *
 
 
 #   #############################    VCM    ############################
-def create_or_get_virus(session, a_virus: VirusSource) -> Virus:
+def create_or_get_virus(session, a_virus) -> Virus:
     virus = session.query(Virus).filter(Virus.taxon_id == a_virus.taxon_id()).one_or_none()
     if not virus:
         virus = Virus(taxon_id=a_virus.taxon_id(),
@@ -77,8 +77,8 @@ def create_or_get_sequencing_project(session, sample: VirusSample):
 
 def create_or_get_host_sample(session, sample: VirusSample):
 
-    host_taxon_name = sample.taxon_name()
-    host_taxon_id = sample.taxon_id()
+    host_taxon_name = sample.host_taxon_name()
+    host_taxon_id = sample.host_taxon_id()
     gender = sample.gender()
     age = sample.age()
 
@@ -241,3 +241,15 @@ def create_nucleotide_variants_and_impacts(session, sample: VirusSample, sequenc
                                               putative_impact=putative_impact,
                                               impact_gene_name=impact_gene_name)
                 session.add(impact_db_row)
+
+
+def get_virus(session, a_virus) -> Optional[Virus]:
+    return session.query(Virus).filter(Virus.taxon_id == a_virus.taxon_id()).one_or_none()
+
+
+def get_reference_sequence_of_virus(session, a_virus: Virus) -> Optional[Sequence]:
+    return session.query(Sequence).filter(
+        Sequence.virus_id == a_virus.virus_id,
+        # noqa  # ignore warning (something == True) for this case
+        Sequence.is_reference == True
+    ).one_or_none()

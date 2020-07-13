@@ -109,11 +109,11 @@ class NCBISarsCov1Sample(NCBISarsCov2Sample):
     def sequencing_lab(self) -> Optional[str]:
         return super().sequencing_lab()
 
-    def taxon_name(self) -> Optional[str]:
-        return super().taxon_name()
+    def host_taxon_name(self) -> Optional[str]:
+        return super().host_taxon_name()
 
-    def taxon_id(self) -> Optional[int]:
-        return super().taxon_id()
+    def host_taxon_id(self) -> Optional[int]:
+        return super().host_taxon_id()
 
     def gender(self) -> Optional[str]:
         return super().gender()

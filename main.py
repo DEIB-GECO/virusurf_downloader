@@ -14,13 +14,21 @@ from multiprocessing import JoinableQueue, cpu_count, Process
 from sqlalchemy.orm.session import Session
 from Bio import Entrez
 from tqdm import tqdm
+from ncbi_importer import prepared_parameters, import_samples_into_vcm_except_annotations_nuc_vars
 Entrez.email = "Your.Name.Here@example.org"
 
 
 #   #################################       PROGRAM ARGUMENTS   ##########################
 wrong_arguments_message = 'The module main.py expects the following arguments:' \
                           'db_name, db_user, db_password, db_port, source_to_import\n' \
-                          '(genbank-sars-cov2, cog-uk, gisaid, genbank-sars-cov1, just_make_indexes)'
+                          'source_to_import accept values:\n' \
+                          'genbank-sars-cov2\n' \
+                          'cog-uk\n' \
+                          'gisaid\n' \
+                          'genbank-sars-cov1\n'
+for p in prepared_parameters.keys():
+    wrong_arguments_message += f'{p}\n'
+wrong_arguments_message += 'just_make_indexes\n'
 # noinspection PyBroadException
 try:
     db_name = sys.argv[1]
@@ -36,7 +44,7 @@ except Exception:
 logger.remove()  # removes default logger to stderr with level DEBUG
 # on console print from level INFO on
 logger.add(sink=lambda msg: tqdm.write(msg, end=''),
-           level='INFO',
+           level='TRACE',   #TODO change before committing
            format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
                   "<level>{level: <8}</level> | "
                   "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
@@ -44,7 +52,7 @@ logger.add(sink=lambda msg: tqdm.write(msg, end=''),
            backtrace=True,
            diagnose=True)
 # log to file any message of any security level
-logger.add("./logs/log_{time}.log",
+logger.add("./logs/log_"+source+"_{time}.log",
            level='TRACE',
            rotation='100 MB',
            format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
@@ -92,14 +100,15 @@ class Sequential:
 
 class Parallel:
 
-    MAX_PROCESSES = 5
-    MAX_QUEUE = 6
+    MAX_PROCESSES = 3
 
     def __init__(self, virus_id: int):
         self.virus_id = virus_id
         self.reference_sample: Optional[VirusSample] = None
         # empty job queue
-        self._queue = JoinableQueue(Parallel.MAX_QUEUE)
+        queue_size = self.number_of_processes()+10
+        self._queue = JoinableQueue(maxsize=queue_size)
+        logger.info(f'Queue size set to accept at most {queue_size} before pausing the producer.')
         self.workers: List[Parallel.Consumer] = []
         self.shared_session: Optional[Session] = None
 
@@ -213,22 +222,27 @@ def run():
         import_method.tear_down()
         logger.info(f'successful imports: {successful_imports} (not reliable when parallel processing)')
 
-
-if 'index' in source:
-    database_tom.create_indexes()
-elif source in ['coguk', 'cog-uk']:
-    import data_sources.coguk_sars_cov_2.procedure
-elif source in ['ncbi-sars-cov2', 'genbank-sars-cov2', 'genbank-sarscov2', 'genbank-sars-cov-2']:
-    import_method = Parallel
-    viruses = [NCBISarsCov2()]
-    run()
-elif source == 'gisaid':
-    import_method = Sequential
-    viruses = [GISAIDSarsCov2()]
-    run()
-elif source in ['ncbi-sars-cov1', 'genbank-sars-cov1', 'genbank-sarscov1', 'genbank-sars-cov']:
-    import_method = Parallel
-    viruses = [NCBISarsCov1()]
-    run()
-else:
-    logger.error(f'the argument {source} is not recognised. Use genbank-sars-cov1 or genbank-sars-cov1 or gisaid or coguk')
+try:
+    if 'index' in source:
+        database_tom.create_indexes()
+    elif source in ['coguk', 'cog-uk']:
+        import data_sources.coguk_sars_cov_2.procedure
+    elif source in ['ncbi-sars-cov2', 'genbank-sars-cov2', 'genbank-sarscov2', 'genbank-sars-cov-2']:
+        import_method = Parallel
+        viruses = [NCBISarsCov2()]
+        run()
+    elif source == 'gisaid':
+        import_method = Sequential
+        viruses = [GISAIDSarsCov2()]
+        run()
+    elif source in ['ncbi-sars-cov1', 'genbank-sars-cov1', 'genbank-sarscov1', 'genbank-sars-cov']:
+        import_method = Parallel
+        viruses = [NCBISarsCov1()]
+        run()
+    elif source in prepared_parameters.keys():
+        import_samples_into_vcm_except_annotations_nuc_vars(*prepared_parameters[source])
+    else:
+        logger.error(f'the argument {source} is not recognised. Use genbank-sars-cov1 or genbank-sars-cov1 or gisaid or coguk')
+except:
+    logger.exception('FATAL ERROR') # this is just to make sure the exception is written to the log file before crashing
+    sys.exit(-1)

@@ -74,9 +74,11 @@ class COGUKSarsCov2(NCBISarsCov2):
 
         # generate a VirusSample for each line from region data file
         logger.info('reading sample sequence file...')
+        limit = 40
         with open(self.sequence_file_path, mode='r') as seq_file:
             progress = tqdm(total=len(meta.keys()))
-            while True:
+            while True and limit > 0:
+                limit -= 1
                 progress.update()
                 sample_key = seq_file.readline()
                 sample_sequence = seq_file.readline()

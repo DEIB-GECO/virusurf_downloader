@@ -77,10 +77,10 @@ class VirusSample:
     def sequencing_lab(self) -> Optional[str]:
         raise NotImplementedError
 
-    def taxon_name(self) -> Optional[str]:
+    def host_taxon_name(self) -> Optional[str]:
         raise NotImplementedError
 
-    def taxon_id(self) -> Optional[int]:
+    def host_taxon_id(self) -> Optional[int]:
         raise NotImplementedError
 
     def gender(self) -> Optional[str]:
