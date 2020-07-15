@@ -6,20 +6,28 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from datetime import datetime
 from decimal import Decimal
 from typing import Callable, List, Optional, Tuple
+
 import lxml
+from Bio import Entrez
 from dateutil.parser import parse
 from tqdm import tqdm
+
 import database_tom
 import vcm
+import xml_helper
 from geo_groups import geo_groups
 from xml_helper import text_at_node
+
+Entrez.email = "Your.Name.Here@example.org"
 from loguru import logger
 from lxml import etree
-from locations import get_local_folder_for, FileType
-from Bio import Entrez
-Entrez.email = "Your.Name.Here@example.org"
 
-nucleotide_reference_sequence: Optional[str] = None
+from locations import get_local_folder_for, FileType
+
+
+reference_sequences = {}    # a dict organism_name/alias -> (reference sample, organism taxon)
+organism_aliases = {}       # map principal_organism_name -> aliases
+virus_ids = {}              # map of organism_name/alias -> virus_id
 DOWNLOAD_ATTEMPTS = 3
 DOWNLOAD_FAILED_PAUSE_SECONDS = 30
 
@@ -62,18 +70,6 @@ class AnyNCBITaxon:
         equivalent_names = list(OrderedDict.fromkeys(equivalent_names))
         equivalent_names = ", ".join(equivalent_names)
         return equivalent_names
-
-    @staticmethod
-    def molecule_type():
-        return 'RNA'
-
-    @staticmethod
-    def is_single_stranded():
-        return True
-
-    @staticmethod
-    def is_positive_stranded():
-        return True
 
 
 class AnyNCBIVNucSample:
@@ -146,8 +142,15 @@ class AnyNCBIVNucSample:
         return strain
 
     def is_reference(self):
-        keyword_nodes = self.sample_xml.xpath('.//INSDSeq_keywords/INSDKeyword')
-        return 'RefSeq' in [text_at_node(node, '.', mandatory=False) for node in keyword_nodes]
+        return text_at_node(self.sample_xml, './/INSDKeyword', mandatory=False) == 'RefSeq'
+
+    def get_reference_sequence(self):
+        try:
+            return reference_sequences[self.organism()]
+        except KeyError as e:
+            logger.error(f'Error in sample {self.internal_id()}: organism {self.organism()} does not have a matching reference sequence.'
+                         f'reference sequences are available for organisms {list(reference_sequences.keys())}')
+            raise e
 
     def is_complete(self):
         definition = text_at_node(self.sample_xml, ".//INSDSeq_definition")
@@ -160,7 +163,8 @@ class AnyNCBIVNucSample:
             return False
         else:
             length = self.length()
-            reference_length = len(nucleotide_reference_sequence)
+            reference_sample, _ = self.get_reference_sequence()
+            reference_length = reference_sample.length()
             if length is not None and reference_length is not None and length < 0.95*reference_length:
                 return False
             else:
@@ -307,7 +311,7 @@ class AnyNCBIVNucSample:
                 #     publication_date = None
                 #     pubmed_id = text_at_node(reference, "./INSDReference_pubmed" , mandatory=False)
                 #     popset = None
-            except AssertionError:
+            except AssertionError as e:
                 # try to get patent information
                 definition = text_at_node(self.sample_xml, './/INSDSeq_definition', mandatory=False)
                 if definition and 'patent' in definition.lower():
@@ -358,7 +362,7 @@ class AnyNCBIVNucSample:
                 return None
             elif taxon_id is None:
                 try:
-                    with Entrez.esearch(db="taxonomy", term=taxon_name, rettype=None,
+                    with Entrez.esearch(db="taxonomy", term=f'"{taxon_name}"[Scientific Name]', rettype=None,
                                         retmode="xml") as handle:
                         response = Entrez.read(handle)
                         if response['Count'] == '1':
@@ -429,52 +433,66 @@ class AnyNCBIVNucSample:
 
 
 # noinspection PyPep8Naming
-def _all_samples_from_organism(samples_query: str, log_with_name: str, SampleWrapperClass=AnyNCBIVNucSample):
-    logger.trace(f'importing samples of organism "{log_with_name}"')
+def reference_samples_from_organism(ncbi_taxon_id: int, log_with_name: str, TaxonomyWrapperClass=AnyNCBITaxon, SampleWrapperClass=AnyNCBIVNucSample):
+    logger.info(f'importing reference samples and taxonomy of organism "{log_with_name}"')
 
-    logger.trace(f'getting accession ids of samples...')
-    accession_ids = _get_samples_accession_ids(samples_query)
+    logger.trace(f'getting accession ids of refseq samples...')
+    refseq_accession_ids = _get_refseq_samples_accession_ids(ncbi_taxon_id)
 
-    logger.trace(f'download and processing of sequences...')
+    logger.trace(f'download and processing of reference sequences...')
     download_sample_dir_path = get_local_folder_for(source_name=log_with_name, _type=FileType.SequenceOrSampleData)
-    for sample_id in tqdm(accession_ids):
+    download_taxonomy_dir_path = get_local_folder_for(source_name=log_with_name, _type=FileType.TaxonomyData)
+    for sample_id in tqdm(refseq_accession_ids):
+        sample_path = _download_or_get_virus_sample_as_xml(download_sample_dir_path, sample_id)
+        ref_sample = SampleWrapperClass(sample_path, sample_id)
+
+        principal_organism_taxon_name = ref_sample.organism()
+        logger.trace(f'downloading taxonomy data of organism {principal_organism_taxon_name}...')
+        organism_taxon_id, related_organism_taxa_ids = _find_taxon_ids(principal_organism_taxon_name)
+        taxonomy_file = _download_virus_taxonomy_as_xml(download_taxonomy_dir_path, organism_taxon_id)
+        principal_organism = TaxonomyWrapperClass(taxonomy_file)
+
+        # building a cache of reference sequences and organisms for all the samples
+        reference_sequences[principal_organism_taxon_name] = (ref_sample, principal_organism)
+        organism_aliases[principal_organism_taxon_name] = [principal_organism_taxon_name]
+        for txid in related_organism_taxa_ids:
+            related_org_taxonomy_file = _download_virus_taxonomy_as_xml(download_taxonomy_dir_path, txid)
+            related_org = TaxonomyWrapperClass(related_org_taxonomy_file)
+            reference_sequences[related_org.taxon_name()] = (ref_sample, principal_organism)
+            organism_aliases[principal_organism_taxon_name].append(related_org.taxon_name())
+
+        ref_sample.set_taxonomy_info(principal_organism)
+        yield ref_sample
+
+
+# noinspection PyPep8Naming
+def other_samples_from_organism(ncbi_taxon_id: int, log_with_name: str, SampleWrapperClass=AnyNCBIVNucSample):
+    logger.info(f'importing non-reference samples of organism "{log_with_name}"')
+
+    logger.trace(f'getting accession ids of non-refseq samples...')
+    non_refseq_accession_ids = _get_other_samples_accession_ids(ncbi_taxon_id)
+    # non_refseq_accession_ids = non_refseq_accession_ids[:10]  # TODO remove
+
+    logger.trace(f'download and processing of non-reference sequences...')
+    download_sample_dir_path = get_local_folder_for(source_name=log_with_name, _type=FileType.SequenceOrSampleData)
+    for sample_id in tqdm(non_refseq_accession_ids):
         sample_path = _download_or_get_virus_sample_as_xml(download_sample_dir_path, sample_id)
         other_sample = SampleWrapperClass(sample_path, sample_id)
         yield other_sample
 
 
-# noinspection PyPep8Naming
-def _reference_sample_from_organism(samples_query: str, log_with_name: str, SampleWrapperClass=AnyNCBIVNucSample):
-    logger.trace(f'importing reference sample of organism "{log_with_name}"')
-
-    logger.trace(f'getting accession ids of refseq...')
-    accession_ids = _get_samples_accession_ids(samples_query+' AND srcdb_refseq[Properties]')
-    assert len(accession_ids) > 0, f'No reference sequence exists in the sample group identified by the query\n' \
-                                   f'<<<' \
-                                   f'{samples_query}' \
-                                   f'>>>'
-    assert len(accession_ids) == 1, f'More than one reference sequence found in the sample group identified by the query\n' \
-                                    f'<<<\n' \
-                                    f'{samples_query}\n' \
-                                    f'>>>\n' \
-                                    f'Reference sequence accession ids: {accession_ids}'
-
-    logger.trace(f'download and processing of the reference sample...')
-    download_sample_dir_path = get_local_folder_for(source_name=log_with_name, _type=FileType.SequenceOrSampleData)
-    sample_path = _download_or_get_virus_sample_as_xml(download_sample_dir_path, accession_ids[0])
-    ref_sample = SampleWrapperClass(sample_path, accession_ids[0])
-    return ref_sample
+def _find_taxon_ids(organism_name: str):
+    def do():
+        # find the taxon id for this taxon organism
+        with Entrez.esearch(db="taxonomy", term=f'"{organism_name}"[subtree]') as handle:
+            response = Entrez.read(handle)
+        principal_taxon_id = response['IdList'][-1]  # if multiple organism, take the last one (usually is the parent of all the organisms)
+        sub_specie_taxa_ids = response['IdList'][:-1]   # related subtypes of the principal organism (can be an empty list)
+        return principal_taxon_id, sub_specie_taxa_ids
+    return _try_or_wait(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
 
 
 def _download_virus_taxonomy_as_xml(containing_directory: str, taxon_id: int) -> str:
-    def count_organisms():
-        with Entrez.esearch(db="taxonomy", term=f'{11070}[uid]', rettype='count', retmode="xml") as handle_1:
-            response = Entrez.read(handle_1)
-        return int(response['Count'])
-    how_many_organisms = _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, count_organisms)
-    assert how_many_organisms == 1, f'The passed taxon id should match exactly one organism in the NCBI Taxonomy DB but\n' \
-                                    f'{taxon_id} does not match any.'
-
     def do():
         # download and write the taxonomy tree for the taxon id
         destination_file_path = f"{containing_directory}{os.path.sep}{taxon_id}.xml"
@@ -484,7 +502,7 @@ def _download_virus_taxonomy_as_xml(containing_directory: str, taxon_id: int) ->
                 for line in handle:
                     f.write(line)
         return destination_file_path
-    return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
+    return _try_or_wait(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
 
 
 def _download_or_get_virus_sample_as_xml(containing_directory: str, sample_accession_id: int) -> str:
@@ -499,42 +517,74 @@ def _download_or_get_virus_sample_as_xml(containing_directory: str, sample_acces
             for line in handle:
                 f.write(line)
         return local_file_path
-    return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
+    return _try_or_wait(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
 
 
-def _get_samples_accession_ids(all_samples_query: str) -> List[int]:
+def _get_refseq_samples_accession_ids(taxon_id: int):
+    def do():
+        # total number of sequences
+        with Entrez.esearch(db="nuccore",
+                            term=f"(txid{taxon_id}[Organism:exp]) AND srcdb_refseq[Properties]",
+                            rettype='count') as handle:
+            response = Entrez.read(handle)
+        total_records = int(response['Count'])
+        # get accession ids
+        with tqdm(total=total_records) as progress_bar:
+            with Entrez.esearch(db="nuccore", term=f"(txid{taxon_id}[Organism:exp]) AND srcdb_refseq[Properties]") as handle:
+                response = Entrez.read(handle)
+                # # EXAMPLE RESPONSE
+                # {
+                #     "Count": "1",                       <-- number of total records matching the query
+                #     "RetMax": "1",
+                #     "RetStart": "0",
+                #     "IdList": ["1798174254"],            <-- accession id of refseq
+                #     "TranslationSet": [],
+                #     "TranslationStack": [
+                #         {"Term": "txid2697049[Organism]", "Field": "Organism", "Count": "5511", "Explode": "Y"},
+                #         {"Term": "srcdb_refseq[Properties]", "Field": "Properties", "Count": "66995641", "Explode": "N"},
+                #         "AND"
+                #     ],
+                #     "QueryTranslation": "txid2697049[Organism] AND srcdb_refseq[Properties]"
+                # }
+            refseq_acc_ids = [int(_id) for _id in response['IdList']]
+            progress_bar.update(len(refseq_acc_ids))
+            assert total_records == len(refseq_acc_ids), "no reference sample found. Please check: https://www.ncbi.nlm.nih.gov/books/NBK25499/#chapter4.ESearch"
+            return refseq_acc_ids
+    return _try_or_wait(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
+
+
+def _get_other_samples_accession_ids(taxon_id: int) -> (List[int], List[int]):
     def do():
         # DO PAGINATION
         # total number of sequences
         with Entrez.esearch(db="nuccore",
-                            term=f"{all_samples_query}",
+                            term=f"(txid{taxon_id}[Organism:exp]) NOT srcdb_refseq[Properties]",
                             rettype='count') as handle:
             response = Entrez.read(handle)
             total_records = int(response['Count'])
         # get pages
-        accessions_ids = list()
-        # noinspection PyPep8Naming
+        non_refseq_accessions_ids = list()
         RECORDS_PER_PAGE = 1000
         page_number = 0
         with tqdm(total=total_records) as progress_bar:
             while total_records > page_number * RECORDS_PER_PAGE:
                 with Entrez.esearch(db="nuccore",
-                                    term=f"{all_samples_query}",
+                                    term=f"(txid{taxon_id}[Organism:exp]) NOT srcdb_refseq[Properties]",
                                     retmax=RECORDS_PER_PAGE, retstart=page_number * RECORDS_PER_PAGE) as handle:
                     response = Entrez.read(handle)
                 for x in response['IdList']:
-                    accessions_ids.append(int(x))
+                    non_refseq_accessions_ids.append(int(x))
                 page_number += 1
                 progress_bar.update(
                     RECORDS_PER_PAGE if page_number * RECORDS_PER_PAGE < total_records else total_records - (
                                 (page_number - 1) * RECORDS_PER_PAGE))
-        if len(accessions_ids) != total_records:
-            raise IOError('Some of the accession ids were not correctly downloaded')
-        return accessions_ids
-    return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
+        if len(non_refseq_accessions_ids) != total_records:
+            raise IOError('Some of the non-refseq accession ids were not correctly downloaded')
+        return non_refseq_accessions_ids
+    return _try_or_wait(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
 
 
-def _try_n_times(n_times: int, or_wait_secs: int, function: Callable, *args, **kwargs):
+def _try_or_wait(n_times: int, or_wait_secs: int, function: Callable, *args, **kwargs):
     with ThreadPoolExecutor(max_workers=1) as executor:
         try:
             return executor.submit(function, *args, **kwargs).result()
@@ -545,98 +595,46 @@ def _try_n_times(n_times: int, or_wait_secs: int, function: Callable, *args, **k
                              f'New attempt in {or_wait_secs} secs.'
                              f'Reason of error: {str(type(e))} {e.args}')
                 executor.submit(time.sleep, or_wait_secs).result()
-                return _try_n_times(n_times, or_wait_secs, function, *args, **kwargs)
+                return _try_or_wait(n_times, or_wait_secs, function, *args, **kwargs)
             else:
                 raise e
 
 
-# noinspection PyPep8Naming
-def import_samples_into_vcm_except_annotations_nuc_vars(
-        samples_query,
-        bind_to_organism_taxon_id: int,
-        log_with_name: str,
-        SampleWrapperClass=AnyNCBIVNucSample,
-        OrganismWrapperClass=AnyNCBITaxon):
+#   #   MAIN PIPELINE
+def import_into_vcm_all_except_annotations_nuc_vars(session: database_tom.Session, sample: AnyNCBIVNucSample):
+    virus_id = virus_ids[sample.organism()]  # the virus_id is the one associated with the reference sequence of the principal organism
+    experiment = vcm.create_or_get_experiment(session, sample)
+    host_sample = vcm.create_or_get_host_sample(session, sample)
+    sequencing_project = vcm.create_or_get_sequencing_project(session, sample)
+    sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment, host_sample, sequencing_project)
 
-    def check_user_query():
-        # total number of sequences
-        with Entrez.esearch(db="nuccore",
-                            term=f"{samples_query}",
-                            rettype='count') as handle:
-            response = Entrez.read(handle)
-        total_records = int(response['Count'])
-        assert total_records > 0, f'The query provided does not select any sample from NCBI Nucleotide DB. ' \
-                                  f'Retry with a different query \n' \
-                                  f'<<<\n' \
-                                  f'{samples_query}\n' \
-                                  f'>>>'
-        logger.info(f'The query provided selects {total_records} form NCBI Nucleotide DB.')
 
-    def main_pipeline_part_1():
-        taxonomy_download_dir = get_local_folder_for(log_with_name, FileType.TaxonomyData)
-        taxon_file_path = _download_virus_taxonomy_as_xml(taxonomy_download_dir, bind_to_organism_taxon_id)
-        organism = OrganismWrapperClass(taxon_file_path)
+def import_references_into_vcm(session: database_tom.Session, sample: AnyNCBIVNucSample):
+    virus_id = vcm.create_or_get_virus(session, sample).virus_id
 
-        def get_virus_id_and_nuc_reference_sequence(session: database_tom.Session):
-            virus = vcm.get_virus(session, organism)
-            if virus:
-                logger.trace(f'organism txid {bind_to_organism_taxon_id} already in VIRUS table.')
-                refseq_row: database_tom.Sequence = vcm.get_reference_sequence_of_virus(session, organism)
-                if refseq_row:
-                    return virus.virus_id, refseq_row.nucleotide_sequence
-                else:
-                    raise ValueError(f'Organism {bind_to_organism_taxon_id} is already in the DB VIRUS table, but it '
-                                     f'misses a reference sequence.')
-            else:
-                logger.trace(f'inserting new organism {bind_to_organism_taxon_id} into VIRUS table')
-                virus = vcm.create_or_get_virus(session, organism)
-                logger.trace('caching the nucleotide sequence of the reference')
-                downloaded_ref_sample = _reference_sample_from_organism(samples_query, log_with_name, SampleWrapperClass)
-                return virus.virus_id, downloaded_ref_sample.nucleotide_sequence()
+    # associate the organism of the reference sequence and related organisms to this virus_id
+    this_org_aliases: [str] = organism_aliases[sample.organism()]
+    logger.debug(f'organism associated to {sample.organism()} are {this_org_aliases}')
+    global virus_ids
+    for organism in this_org_aliases:
+        virus_ids[organism] = virus_id
+    logger.debug(f'virus_ids: {virus_ids}')
 
-        return database_tom.try_py_function(
-            get_virus_id_and_nuc_reference_sequence
-        )
+    import_into_vcm_all_except_annotations_nuc_vars(session, sample)
 
-    def main_pipeline_part_2(session: database_tom.Session, sample: AnyNCBIVNucSample):
-        try:
-            experiment = vcm.create_or_get_experiment(session, sample)
-            host_sample = vcm.create_or_get_host_sample(session, sample)
-            sequencing_project = vcm.create_or_get_sequencing_project(session, sample)
-            sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment, host_sample, sequencing_project)
-        except Exception as e:
-            if str(e).startswith('.//INSDQualifier[./INSDQualifier_name/text() = "isolate"]/INSDQualifier_value'):
-                logger.error(str(e))
-            elif str(e).startswith('coverage string'):
-                logger.error(str(e))
-            elif str(e).startswith('Unknown string format:'):
-                logger.error(str(e))
-            else:
-                logger.exception(f'exception occurred while working on virus sample {sample}')
-            raise database_tom.RollbackTransactionWithoutError()
 
-    check_user_query()
+for refseq in reference_samples_from_organism(12637, 'Dengue virus'):
+    logger.debug(organism_aliases)
+    database_tom.try_py_function(
+        import_references_into_vcm, refseq)
 
-    global nucleotide_reference_sequence
-    virus_id, nucleotide_reference_sequence = main_pipeline_part_1()   # id of the virus in the VCM.Virus table, to which imported sequences will be bound
-
-    logger.info(f'importing the samples identified by the query provided as bound to organism txid{bind_to_organism_taxon_id}')
-    for sample in _all_samples_from_organism(samples_query, log_with_name, SampleWrapperClass):
+for other_seq in other_samples_from_organism(12637, 'Dengue virus'):
+    try:
         database_tom.try_py_function(
-            main_pipeline_part_2, sample
+            import_into_vcm_all_except_annotations_nuc_vars, other_seq
         )
+    except:
+        logger.exception(f'exception occurred while working on virus sample {other_seq}')
 
-prepared_parameters = {
-    'dengue_virus_1' : ('txid11053[Organism:exp]', 11053, 'Dengue Virus 1'),
-    'dengue_virus_2' : ('txid11060[Organism:exp]', 11060, 'Dengue Virus 2'),
-    'dengue_virus_3' : ('txid11069[Organism:exp]', 11069, 'Dengue Virus 3'),
-    'dengue_virus_4' : ('txid11070[Organism:exp]', 11070, 'Dengue Virus 4'),
-    'mers' : ('txid1335626[Organism:noexp]', 1335626, 'MERS-CoV'),
-    'betacoronavirus_england_1' : ('txid1263720[Organism:noexp]', 1263720, 'Betacoronavirus England 1'),
-    'zaire_ebolavirus' : ('txid186538[Organism:exp]', 186538, 'Zaire ebolavirus'),
-    'sudan_ebolavirus' : ('txid186540[Organism:exp]', 186540, 'Sudan ebolavirus'),
-    'reston_ebolavirus' : ('txid186539[Organism:exp]', 186539, 'Reston ebolavirus'),
-    'bundibugyo_ebolavirus' : ('txid565995[Organism:noexp]', 565995, 'Bundibugyo ebolavirus'),
-    'bombali_ebolavirus' : ('txid2010960[Organism:noexp]', 2010960, 'Bombali ebolavirus'),
-    'tai_forest_ebolavirus' : ('txid186541[Organism:exp]', 186541, 'Tai Forest ebolavirus')
-}
+
+

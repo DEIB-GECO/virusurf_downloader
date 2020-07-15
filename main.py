@@ -9,12 +9,12 @@ from data_sources.virus_sample import VirusSample
 from data_sources.virus import VirusSource
 from data_sources.gisaid_sars_cov_2.virus import GISAIDSarsCov2
 from data_sources.ncbi_sars_cov_2.virus import NCBISarsCov2
-from data_sources.coguk_sars_cov_2.virus import COGUKSarsCov2
+from data_sources.ncbi_any_virus.ncbi_importer import prepared_parameters, import_samples_into_vcm_except_annotations_nuc_vars
 from multiprocessing import JoinableQueue, cpu_count, Process
 from sqlalchemy.orm.session import Session
 from Bio import Entrez
 from tqdm import tqdm
-from ncbi_importer import prepared_parameters, import_samples_into_vcm_except_annotations_nuc_vars
+
 Entrez.email = "Your.Name.Here@example.org"
 
 
@@ -242,7 +242,7 @@ try:
     elif source in prepared_parameters.keys():
         import_samples_into_vcm_except_annotations_nuc_vars(*prepared_parameters[source])
     else:
-        logger.error(f'the argument {source} is not recognised. Use genbank-sars-cov1 or genbank-sars-cov1 or gisaid or coguk')
+        logger.error(f'the argument {source} is not recognised.\n'+wrong_arguments_message)
 except:
-    logger.exception('FATAL ERROR') # this is just to make sure the exception is written to the log file before crashing
+    logger.exception('FATAL ERROR')  # this is just to make sure the exception is written to the log file before crashing
     sys.exit(-1)

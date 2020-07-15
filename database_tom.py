@@ -82,15 +82,22 @@ def try_py_function(func, *args, **kwargs):
         session.commit()
         return result
     except SQLAlchemyError as e:
+        logger.trace('rollback of current transaction')
         rollback(session)
         raise e
     except RollbackTransactionAndRaise as e:
+        logger.trace('rollback of current transaction')
         rollback(session)
         raise e
     except RollbackTransactionWithoutError as e:
+        logger.trace('rollback of current transaction')
         rollback(session)
-        if e.args is not None and e.args[0] is not None:
-            logger.info(e.args[0])
+        if str(e) is not None:
+            logger.error(str(e))
+    except Exception as e:
+        logger.info('Rollback of current transaction.')
+        rollback(session)
+        raise e
     finally:
         session.close()
 
