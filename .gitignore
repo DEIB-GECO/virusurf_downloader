@@ -1,5 +1,6 @@
 /tmp_snpeff/*.vcf
-
+/downloads/
+/generated/
 /snpEff_genes.txt
 /snpEff_summary.html
 

@@ -1,3 +1,5 @@
+from typing import Callable, Tuple
+
 import numpy as np
 from Bio import pairwise2
 from Bio import Seq
@@ -37,7 +39,7 @@ def add_variant(sequence_id, pos_ref, pos_seq,  length, original,  mutated, vari
                       ",".join(map(str, [variant_type,pos_seq,length, original, mutated])) ]))
 
 
-def create_aligner_to_reference(reference, annotation_file, is_gisaid = False):
+def create_aligner_to_reference(reference, annotation_file, is_gisaid = False) -> Callable[[str, int], Tuple]:
     
     table = CodonTable.ambiguous_dna_by_id[1]
     reference_annotations = []
@@ -62,7 +64,7 @@ def create_aligner_to_reference(reference, annotation_file, is_gisaid = False):
         #name, pos, original, alt, type
         aa_variants = []
         
-        alignments = pairwise2.align.globalms(reference, sequence, 2, -1, -1, -.5)
+        alignments = pairwise2.align.globalms(reference, sequence, 2, -1, -1, -.5, one_alignment_only=True)
         ref_aligned = alignments[0][0]
         seq_aligned = alignments[0][1]
         
@@ -305,10 +307,10 @@ def parse_annotated_variants(annotated_variants):
     for variant in annotated_variants:
         _, start_original, _, _, _, _, others, snpeff_ann = variant.split("\t")
         
-        annotations = []
+        impacts = []
         for ann in snpeff_ann.split(","):
             s = ann.split("|")
-            annotations.append([s[1], s[2], s[3]])
+            impacts.append([s[1], s[2], s[3]])
         
 
         variant_type, start_alternative, variant_length, sequence_original, sequence_alternative = others.split(',')
@@ -319,6 +321,6 @@ def parse_annotated_variants(annotated_variants):
                        'start_alternative': start_alternative,
                        'variant_length': variant_length,
                        'variant_type': variant_type,
-                       'annotations' : annotations
+                       'annotations' : impacts
                        })
     return result
