@@ -214,6 +214,42 @@ def create_annotation_and_aa_variants(session, sample: VirusSample, sequence: Se
             session.flush()
 
 
+def create_annotation_and_amino_acid_variants(session, sequence_id, *args):
+    # print(args)
+    gene_name, product, protein_id, feature_type, start, stop, nuc_seq, amino_acid_seq, aa_variants = args
+    annotation = session.query(Annotation).filter(Annotation.start == start,
+                                                  Annotation.stop == stop,
+                                                  Annotation.feature_type == feature_type,
+                                                  Annotation.gene_name == gene_name,
+                                                  Annotation.product == product,
+                                                  Annotation.external_reference == protein_id,
+                                                  Annotation.sequence_id == sequence_id,
+                                                  Annotation.annotation_nucleotide_sequence == nuc_seq,
+                                                  Annotation.aminoacid_sequence == amino_acid_seq).one_or_none()
+    if not annotation:
+        annotation = Annotation(start=start,
+                                stop=stop,
+                                gene_name=gene_name,
+                                feature_type=feature_type,
+                                product=product,
+                                sequence_id=sequence_id,
+                                external_reference=protein_id,
+                                annotation_nucleotide_sequence=nuc_seq,
+                                aminoacid_sequence=amino_acid_seq)
+        session.add(annotation)
+        session.flush()
+        if aa_variants:
+            for gen_name, protein, protein_id, start_pos, sequence_aa_original, sequence_aa_alternative, variant_aa_type in aa_variants:
+                aa_variant = AminoacidVariant(annotation_id=annotation.annotation_id,
+                                              sequence_aa_original=sequence_aa_original,
+                                              sequence_aa_alternative=sequence_aa_alternative,
+                                              start_aa_original=start_pos,
+                                              variant_aa_length=max(len(sequence_aa_original), len(sequence_aa_alternative)),
+                                              variant_aa_type=variant_aa_type)
+                session.add(aa_variant)
+        session.flush()
+
+
 def create_nucleotide_variants_and_impacts(session, sample: VirusSample, sequence_id: int, aligner):
     for (sequence_original, sequence_alternative, start_original, start_alternative, variant_length, variant_type, variant_impacts) in sample.nucleotide_variants_and_effects(aligner):
         nuc_variant_db_row = session.query(NucleotideVariant).filter(NucleotideVariant.sequence_id == sequence_id,
@@ -243,6 +279,42 @@ def create_nucleotide_variants_and_impacts(session, sample: VirusSample, sequenc
                 session.add(impact_db_row)
 
 
+def create_nuc_variants_and_impacts(session, sequence_id, args):
+    seq_original = args['sequence_original']
+    seq_alternative = args['sequence_alternative']
+    start_original = args['start_original']
+    start_alternative = args['start_alternative']
+    variant_length = args['variant_length']
+    variant_type = args['variant_type']
+    impacts = args['annotations']
+    nuc_variant_db_row = session.query(NucleotideVariant).filter(NucleotideVariant.sequence_id == sequence_id,
+                                                                 NucleotideVariant.sequence_original == seq_original,
+                                                                 NucleotideVariant.sequence_alternative == seq_alternative,
+                                                                 NucleotideVariant.start_original == start_original,
+                                                                 NucleotideVariant.start_alternative == start_alternative,
+                                                                 NucleotideVariant.variant_length == variant_length,
+                                                                 NucleotideVariant.variant_type == variant_type).one_or_none()
+    if not nuc_variant_db_row:
+        # insert nucleotide variant
+        nuc_variant_db_row = NucleotideVariant(sequence_id=sequence_id,
+                                               sequence_original=seq_original,
+                                               sequence_alternative=seq_alternative,
+                                               start_original=start_original,
+                                               start_alternative=start_alternative,
+                                               variant_length=variant_length,
+                                               variant_type=variant_type)
+        session.add(nuc_variant_db_row)
+        session.flush()
+        # insert related impact
+        for effect, putative_impact, impact_gene_name in impacts:
+            impact_db_row = VariantImpact(nucleotide_variant_id=nuc_variant_db_row.nucleotide_variant_id,
+                                          effect=effect,
+                                          putative_impact=putative_impact,
+                                          impact_gene_name=impact_gene_name)
+            session.add(impact_db_row)
+        session.flush()
+
+
 def get_virus(session, a_virus) -> Optional[Virus]:
     return session.query(Virus).filter(Virus.taxon_id == a_virus.taxon_id()).one_or_none()
 
@@ -250,6 +322,6 @@ def get_virus(session, a_virus) -> Optional[Virus]:
 def get_reference_sequence_of_virus(session, a_virus: Virus) -> Optional[Sequence]:
     return session.query(Sequence).filter(
         Sequence.virus_id == a_virus.virus_id,
-        # noqa  # ignore warning (something == True) for this case
+        # noqa              # == ignore warning on " == True" for this case
         Sequence.is_reference == True
     ).one_or_none()

@@ -3,6 +3,7 @@ import re
 import time
 from collections import Counter, OrderedDict
 from concurrent.futures.thread import ThreadPoolExecutor
+from queuable_jobs import Job, Boss, Worker
 from datetime import datetime
 from decimal import Decimal
 from typing import Callable, List, Optional, Tuple
@@ -19,8 +20,10 @@ from lxml import etree
 from locations import get_local_folder_for, FileType
 from Bio import Entrez
 Entrez.email = "Your.Name.Here@example.org"
+from pipeline_nuc_variants__annotations__aa import sequence_aligner
 
 nucleotide_reference_sequence: Optional[str] = None
+pipeline_3_shared_db_session: Optional[database_tom.Session] = None
 DOWNLOAD_ATTEMPTS = 3
 DOWNLOAD_FAILED_PAUSE_SECONDS = 30
 
@@ -121,14 +124,6 @@ class AnyNCBIVNucSample:
 
     def __str__(self):
         return f'{self.internal_id()}.xml'
-
-    def set_taxonomy_info(self, taxonomy_info: AnyNCBITaxon):
-        self.taxonomy_info = taxonomy_info
-
-    def __getattr__(self, name):
-        """This is invoked after a lookup of {name} into this class. This provides a callback for a fallback action other
-        than raising AttributeError"""
-        return getattr(self.taxonomy_info, name)
 
     def internal_id(self):
         """
@@ -490,6 +485,10 @@ class AnyNCBIVNucSample:
         else:
             return None
 
+    def on_before_multiprocessing(self):
+        self.nucleotide_sequence()  # make sure nucleotide variants are cached in this sample
+        self.sample_xml = None  # release xml reference to prevent errors with multiprocessing
+
 
 # noinspection PyPep8Naming
 def _all_samples_from_organism(samples_query: str, log_with_name: str, SampleWrapperClass=AnyNCBIVNucSample):
@@ -613,6 +612,61 @@ def _try_n_times(n_times: int, or_wait_secs: int, function: Callable, *args, **k
                 raise e
 
 
+def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSample, db_sequence_id):
+    try:
+        annotations, nuc_variants = sequence_aligner(
+            db_sequence_id,
+            nucleotide_reference_sequence,
+            sample.nucleotide_sequence(),
+            sample.alternative_accession_number(),
+            "annotations/sars_cov_2.tsv")
+        for ann in annotations:
+            vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
+        for nuc in nuc_variants:
+            vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
+    except Exception:
+        logger.exception(f'exception occurred while working on annotations and nuc_variants of virus sample {sample}. Rollback transaction.')
+        raise database_tom.RollbackTransactionWithoutError()
+
+
+class ImportAnnotationsAndNucVariants(Job):
+    def __init__(self, sequence_id, sample: AnyNCBIVNucSample):
+        super(ImportAnnotationsAndNucVariants, self).__init__()
+        self.sequence_id = sequence_id
+        self.sample = sample
+        sample.on_before_multiprocessing()
+
+    def execute(self):
+        try:
+            main_pipeline_part_3(self.session, self.sample, self.sequence_id)
+            self.session.commit()
+            logger.info(f'pipeline_part_3 of sequence with id {self.sequence_id} imported')
+        except database_tom.RollbackTransactionWithoutError:
+            database_tom.rollback(self.session)
+        except:
+            logger.exception(f'unknown exception while running pipeline_part_3 of sequence with id {self.sequence_id}')
+            database_tom.rollback(self.session)
+
+    def use_session(self, session):
+        self.session = session
+
+
+class TheWorker(Worker):
+    def __init__(self, jobs):
+        super(TheWorker, self).__init__(jobs)
+        self.worker_session = database_tom.get_session()
+
+    def get_a_job(self) -> Optional[Job]:
+        job: ImportAnnotationsAndNucVariants = super().get_a_job()
+        if job:
+            job.use_session(self.worker_session)
+        return job
+
+    def release_resources(self):
+        super().release_resources()
+        self.worker_session.close()
+
+
 # noinspection PyPep8Naming
 def import_samples_into_vcm_except_annotations_nuc_vars(
         samples_query,
@@ -620,6 +674,8 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
         log_with_name: str,
         SampleWrapperClass=AnyNCBIVNucSample,
         OrganismWrapperClass=AnyNCBITaxon):
+
+    the_boss = Boss(10, 10, TheWorker)
 
     def check_user_query():
         # total number of sequences
@@ -641,18 +697,17 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
         organism = OrganismWrapperClass(taxon_file_path)
 
         def get_virus_id_and_nuc_reference_sequence(session: database_tom.Session):
+            # get virus ID
             virus = vcm.get_virus(session, organism)
-            if virus:
-                logger.trace(f'organism txid {bind_to_organism_taxon_id} already in VIRUS table.')
-                refseq_row: database_tom.Sequence = vcm.get_reference_sequence_of_virus(session, virus)
-                if refseq_row:
-                    return virus.virus_id, refseq_row.nucleotide_sequence
-                else:
-                    raise ValueError(f'Organism {bind_to_organism_taxon_id} is already in the DB VIRUS table, but it '
-                                     f'misses a reference sequence.')
-            else:
+            if not virus:
                 logger.trace(f'inserting new organism {bind_to_organism_taxon_id} into VIRUS table')
                 virus = vcm.create_or_get_virus(session, organism)
+            # get nuc_reference_sequence
+            logger.trace(f'organism txid {bind_to_organism_taxon_id} already in VIRUS table.')
+            refseq_row: database_tom.Sequence = vcm.get_reference_sequence_of_virus(session, virus)
+            if refseq_row:
+                return virus.virus_id, refseq_row.nucleotide_sequence
+            else:
                 logger.trace('caching the nucleotide sequence of the reference')
                 downloaded_ref_sample = _reference_sample_from_organism(samples_query, log_with_name, SampleWrapperClass)
                 return virus.virus_id, downloaded_ref_sample.nucleotide_sequence()
@@ -667,6 +722,7 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
             host_sample = vcm.create_or_get_host_sample(session, sample)
             sequencing_project = vcm.create_or_get_sequencing_project(session, sample)
             sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment, host_sample, sequencing_project)
+            return sequence.sequence_id
         except Exception as e:
             if str(e).startswith('duplicate key value violates unique constraint "sequence_accession_id_key"'):
                 logger.error(f'exception occurred while working on virus sample {sample}: {str(e)}')
@@ -680,10 +736,27 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
     virus_id, nucleotide_reference_sequence = main_pipeline_part_1()   # id of the virus in the VCM.Virus table, to which imported sequences will be bound
 
     logger.info(f'importing the samples identified by the query provided as bound to organism txid{bind_to_organism_taxon_id}')
-    for sample in _all_samples_from_organism(samples_query, log_with_name, SampleWrapperClass):
-        database_tom.try_py_function(
-            main_pipeline_part_2, sample
-        )
+    database_tom.dispose_db_engine()
+    the_boss.wake_up_workers()
+    database_tom.re_config_db_engine(False)
+    # counter = 10
+    try:
+        for sample in _all_samples_from_organism(samples_query, log_with_name, SampleWrapperClass):
+            # if counter > 0:
+            #     counter -= 1
+                sequence_id = database_tom.try_py_function(
+                    main_pipeline_part_2, sample
+                )
+                if sequence_id:
+                    the_boss.assign_job(ImportAnnotationsAndNucVariants(sequence_id, sample))
+                # database_tom.try_py_function(
+                #     main_pipeline_part_3, sample, sequence_id
+                # )
+            # else:
+            #     break
+    finally:
+        the_boss.stop_workers()
+
 
 
 prepared_parameters = {
@@ -698,5 +771,6 @@ prepared_parameters = {
     'reston_ebolavirus' : ('txid186539[Organism:exp]', 186539, 'Reston ebolavirus'),
     'bundibugyo_ebolavirus' : ('txid565995[Organism:noexp]', 565995, 'Bundibugyo ebolavirus'),
     'bombali_ebolavirus' : ('txid2010960[Organism:noexp]', 2010960, 'Bombali ebolavirus'),
-    'tai_forest_ebolavirus' : ('txid186541[Organism:exp]', 186541, 'Tai Forest ebolavirus')
+    'tai_forest_ebolavirus' : ('txid186541[Organism:exp]', 186541, 'Tai Forest ebolavirus'),
+    'new_ncbi_sars_cov_2': ('txid2697049[Organism]', 2697049, 'New NCBI SARS-Cov-2')
 }

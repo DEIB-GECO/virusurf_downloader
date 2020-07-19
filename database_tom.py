@@ -15,13 +15,16 @@ from sqlalchemy_utils import create_view
 _db_engine: Engine
 _base = declarative_base()
 _session_factory: sessionmaker
+_last_config_parameters = ()
+
 
 
 def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch: bool = False):
     """
     Call this method once to initialize the database session factory and prepare it to execute queries.
     """
-    global _db_engine, _session_factory
+    global _db_engine, _session_factory, _last_config_parameters
+    _last_config_parameters = (db_name, db_user, db_psw, db_port, recreate_db_from_scratch)
     logger.info('configuring db... make sure a connection is available')
     _db_engine = sqlalchemy.create_engine(f'postgresql://{db_user}:{db_psw}@localhost:{db_port}/{db_name}')
 
@@ -59,6 +62,14 @@ def get_session() -> Session:
     return _session_factory()
 
 
+def dispose_db_engine():
+    _db_engine.dispose()
+
+
+def re_config_db_engine(recreate_db_from_scratch=False):
+    config_db_engine(*_last_config_parameters[0:4], recreate_db_from_scratch)
+
+
 def try_py_function(func, *args, **kwargs):
     """
     Use this function to perform any action on the database.
@@ -94,6 +105,9 @@ def try_py_function(func, *args, **kwargs):
         rollback(session)
         if str(e) is not None:
             logger.error(str(e))
+    except RaiseNoRollback as e:
+        session.commit()
+        raise e.true_exception
     except Exception as e:
         logger.info('Rollback of current transaction.')
         rollback(session)
@@ -115,6 +129,11 @@ class RollbackTransactionWithoutError(Exception):
 
 class RollbackTransactionAndRaise(Exception):
     pass
+
+
+class RaiseNoRollback(Exception):
+    def __init__(self, true_exception=Exception):
+        self.true_exception = true_exception
 
 
 class ExperimentType(_base):

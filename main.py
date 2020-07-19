@@ -65,7 +65,7 @@ logger.info(f"main.py {' '.join(sys.argv[1:])}")
 
 #   ###################################     FILL DB WITH VIRUS SEQUENCES    ###############
 # init database
-database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_db_from_scratch=False)
+database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_db_from_scratch=True)
 
 #   ###################################     VIRUSES TO IMPORT    ###############
 viruses: List[VirusSource] = [
