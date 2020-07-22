@@ -14,6 +14,7 @@ from multiprocessing import JoinableQueue, cpu_count, Process
 from sqlalchemy.orm.session import Session
 from Bio import Entrez
 from tqdm import tqdm
+import warnings
 
 Entrez.email = "Your.Name.Here@example.org"
 
@@ -50,7 +51,8 @@ logger.add(sink=lambda msg: tqdm.write(msg, end=''),
                   "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
            colorize=True,
            backtrace=True,
-           diagnose=True)
+           diagnose=True,
+           enqueue=True)
 # log to file any message of any security level
 logger.add("./logs/log_"+source+"_{time}.log",
            level='TRACE',
@@ -60,7 +62,13 @@ logger.add("./logs/log_"+source+"_{time}.log",
                   "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
            colorize=False,
            backtrace=True,
-           diagnose=True)
+           diagnose=True,
+           enqueue=True)
+# redirect warnings
+def customwarn(message, category, filename, lineno, file=None, line=None):
+    logger.warning(warnings.formatwarning(message, category, filename, lineno))
+warnings.showwarning = customwarn
+
 logger.info(f"main.py {' '.join(sys.argv[1:])}")
 
 #   ###################################     FILL DB WITH VIRUS SEQUENCES    ###############
@@ -246,3 +254,5 @@ try:
 except:
     logger.exception('FATAL ERROR')  # this is just to make sure the exception is written to the log file before crashing
     sys.exit(-1)
+finally:
+    logger.complete()
