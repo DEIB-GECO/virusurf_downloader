@@ -74,11 +74,9 @@ class COGUKSarsCov2(NCBISarsCov2):
 
         # generate a VirusSample for each line from region data file
         logger.info('reading sample sequence file...')
-        limit = 40
         with open(self.sequence_file_path, mode='r') as seq_file:
             progress = tqdm(total=len(meta.keys()))
-            while True and limit > 0:
-                limit -= 1
+            while True:
                 progress.update()
                 sample_key = seq_file.readline()
                 sample_sequence = seq_file.readline()
@@ -96,7 +94,7 @@ class COGUKSarsCov2(NCBISarsCov2):
                         logger.error(f'Found a sequence without a paired metadata string. Foreign key was {sample_key}')
                     yield COGUKSarsCov2Sample(sample)
 
-    def nucleotide_variant_aligner(self) -> Callable:
+    def reference_sequence(self) -> str:
         if not hasattr(self, 'reference_sample'):
             # import a reference sequence from a different dataset that we'll use to call nucleotide variants
             # get reference sample accession id
@@ -130,7 +128,7 @@ class COGUKSarsCov2(NCBISarsCov2):
                         f.write(line)
 
             self.reference_sample = NCBISarsCov2Sample(reference_seq_file_path, reference_seq_id)
-        return self.reference_sample.nucleotide_var_aligner()
+        return self.reference_sample.nucleotide_sequence()
 
 
 def download_or_get_sample_data(containing_directory: str) -> (str, str):

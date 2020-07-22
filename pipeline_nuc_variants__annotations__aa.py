@@ -29,7 +29,7 @@ def parse_annotated_variants(annotated_variants):
     return result
 
 
-def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_positions, seq_positions):
+def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_positions, seq_positions, sequence_id):
     table = CodonTable.ambiguous_dna_by_id[1]
 
     list_annotations = []
@@ -84,11 +84,14 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
                 ref_aligned_aa = alignment_aa[0][0]
                 seq_aligned_aa = alignment_aa[0][1]
             except IndexError:
-                logger.error(f'solito Index out of range in function "call_annotation_variant". Annotation {annotation} will be skipped. Function args were\n.'
-                             f'ref aligned: {ref_aligned}\n'
-                             f'seq aligned: {seq_aligned}\n'
-                             f'ref positions: {ref_positions}\n'
-                             f'seq positions: {seq_positions}')
+                logger.error(f'solito Index out of range in function "call_annotation_variant". This annotation will be skipped. '
+                             f'Sequence id: {sequence_id}'
+                             # f'Function args were\n.'
+                             # f'ref aligned: {ref_aligned}\n'
+                             # f'seq aligned: {seq_aligned}\n'
+                             # f'ref positions: {ref_positions}\n'
+                             # f'seq positions: {seq_positions}'
+                             )
                 continue
 
             ref_positions_aa = np.zeros(len(seq_aligned_aa), dtype=int)
@@ -302,7 +305,7 @@ def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file
     annotated_variants = call_nucleotide_variants(sequence_id, reference, sequence, ref_aligned, seq_aligned,
                                                   ref_positions, seq_positions, chr_name)
 
-    annotations = call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_positions, ref_aligned)
+    annotations = call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_positions, ref_aligned, sequence_id)
 
     return annotations, annotated_variants
 

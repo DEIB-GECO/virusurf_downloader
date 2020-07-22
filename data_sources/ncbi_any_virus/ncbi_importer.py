@@ -325,7 +325,7 @@ class AnyNCBIVNucSample:
         if node:
             node = node.split(":")
             country = node[0] or self.country_suggested_by_other_method     # can be None
-            region = node[1] if len(node) > 1 else None
+            region = node[1].strip() if len(node) > 1 else None
         else:
             country = self.country_suggested_by_other_method    # can be None
         geo_group = geo_groups.get(country.lower()) if country else None
