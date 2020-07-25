@@ -1,6 +1,7 @@
 import os
 import re
 import time
+import urllib
 from collections import Counter, OrderedDict
 from concurrent.futures.thread import ThreadPoolExecutor
 from queuable_jobs import Job, Boss, Worker
@@ -83,9 +84,11 @@ class AnyNCBITaxon:
     def is_single_stranded():
         return True
 
-    @staticmethod
-    def is_positive_stranded():
-        return True
+    def is_positive_stranded(self):
+        if 'ebolavirus' in self.taxon_name().lower():
+            return False
+        else:
+            return True
 
 
 class AnyNCBIVNucSample:
@@ -499,10 +502,17 @@ def _all_samples_from_organism(samples_query: str, log_with_name: str, SampleWra
 
     logger.trace(f'download and processing of sequences...')
     download_sample_dir_path = get_local_folder_for(source_name=log_with_name, _type=FileType.SequenceOrSampleData)
+    skipped_samples = 0
     for sample_id in tqdm(accession_ids):
-        sample_path = _download_or_get_virus_sample_as_xml(download_sample_dir_path, sample_id)
+        try:
+            sample_path = _download_or_get_virus_sample_as_xml(download_sample_dir_path, sample_id)
+        except urllib.error.URLError:
+            logger.exception(f"Network error while downloading sample {sample_id} can't be solved. This sample 'll be skipped.")
+            skipped_samples += 1
+            continue
         other_sample = SampleWrapperClass(sample_path, sample_id)
         yield other_sample
+    logger.info(f"{skipped_samples} 've been skipped due to network errors.")
 
 
 # noinspection PyPep8Naming
@@ -530,7 +540,7 @@ def _reference_sample_from_organism(samples_query: str, log_with_name: str, Samp
 
 def _download_virus_taxonomy_as_xml(containing_directory: str, taxon_id: int) -> str:
     def count_organisms():
-        with Entrez.esearch(db="taxonomy", term=f'{11070}[uid]', rettype='count', retmode="xml") as handle_1:
+        with Entrez.esearch(db="taxonomy", term=f'{taxon_id}[uid]', rettype='count', retmode="xml") as handle_1:
             response = Entrez.read(handle_1)
         return int(response['Count'])
     how_many_organisms = _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, count_organisms)
@@ -678,6 +688,10 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
     the_boss = Boss(10, 10, TheWorker)
 
     def check_user_query():
+        """
+        Makes sure the user-provided query returns at least one sequence.
+        :raise AssertionError if the user query returns 0 sequences.
+        """
         # total number of sequences
         with Entrez.esearch(db="nuccore",
                             term=f"{samples_query}",
@@ -692,6 +706,12 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
         logger.info(f'The query provided selects {total_records} form NCBI Nucleotide DB.')
 
     def main_pipeline_part_1():
+        """
+        Inserts or fetches the organism the user wants to bind the sequences to into the VIRUS table.
+        Also it fetches the reference nucleotide sequence for such organism taking it from the DB if already present,
+        or extracting it from the samples selected from the user-provided query.
+        :return:
+        """
         taxonomy_download_dir = get_local_folder_for(log_with_name, FileType.TaxonomyData)
         taxon_file_path = _download_virus_taxonomy_as_xml(taxonomy_download_dir, bind_to_organism_taxon_id)
         organism = OrganismWrapperClass(taxon_file_path)
@@ -717,6 +737,10 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
         )
 
     def main_pipeline_part_2(session: database_tom.Session, sample: AnyNCBIVNucSample):
+        """
+        Inserts metadata and returns the SEQUENCE.sequence_id
+        :return: SEQUENCE.sequence_id of every sample
+        """
         try:
             experiment = vcm.create_or_get_experiment(session, sample)
             host_sample = vcm.create_or_get_host_sample(session, sample)
@@ -748,10 +772,11 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
                     main_pipeline_part_2, sample
                 )
                 if sequence_id:
+                    # carries out main_pipeline_3 with many processes
                     the_boss.assign_job(ImportAnnotationsAndNucVariants(sequence_id, sample))
-                # database_tom.try_py_function(
-                #     main_pipeline_part_3, sample, sequence_id
-                # )
+                    # database_tom.try_py_function(
+                    #     main_pipeline_part_3, sample, sequence_id
+                    # )
             # else:
             #     break
     finally:
@@ -760,17 +785,17 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
 
 
 prepared_parameters = {
-    'dengue_virus_1' : ('txid11053[Organism:exp]', 11053, 'Dengue Virus 1'),
-    'dengue_virus_2' : ('txid11060[Organism:exp]', 11060, 'Dengue Virus 2'),
-    'dengue_virus_3' : ('txid11069[Organism:exp]', 11069, 'Dengue Virus 3'),
-    'dengue_virus_4' : ('txid11070[Organism:exp]', 11070, 'Dengue Virus 4'),
-    'mers' : ('txid1335626[Organism:noexp]', 1335626, 'MERS-CoV'),
-    'betacoronavirus_england_1' : ('txid1263720[Organism:noexp]', 1263720, 'Betacoronavirus England 1'),
-    'zaire_ebolavirus' : ('txid186538[Organism:exp]', 186538, 'Zaire ebolavirus'),
-    'sudan_ebolavirus' : ('txid186540[Organism:exp]', 186540, 'Sudan ebolavirus'),
-    'reston_ebolavirus' : ('txid186539[Organism:exp]', 186539, 'Reston ebolavirus'),
-    'bundibugyo_ebolavirus' : ('txid565995[Organism:noexp]', 565995, 'Bundibugyo ebolavirus'),
-    'bombali_ebolavirus' : ('txid2010960[Organism:noexp]', 2010960, 'Bombali ebolavirus'),
-    'tai_forest_ebolavirus' : ('txid186541[Organism:exp]', 186541, 'Tai Forest ebolavirus'),
+    'dengue_virus_1': ('txid11053[Organism:exp]', 11053, 'Dengue Virus 1'),
+    'dengue_virus_2': ('txid11060[Organism:exp]', 11060, 'Dengue Virus 2'),
+    'dengue_virus_3': ('txid11069[Organism:exp]', 11069, 'Dengue Virus 3'),
+    'dengue_virus_4': ('txid11070[Organism:exp]', 11070, 'Dengue Virus 4'),
+    'mers': ('txid1335626[Organism:noexp]', 1335626, 'MERS-CoV'),
+    'betacoronavirus_england_1': ('txid1263720[Organism:noexp]', 1263720, 'Betacoronavirus England 1'),
+    'zaire_ebolavirus': ('txid186538[Organism:exp]', 186538, 'Zaire ebolavirus'),
+    'sudan_ebolavirus': ('txid186540[Organism:exp]', 186540, 'Sudan ebolavirus'),
+    'reston_ebolavirus': ('txid186539[Organism:exp]', 186539, 'Reston ebolavirus'),
+    'bundibugyo_ebolavirus': ('txid565995[Organism:noexp]', 565995, 'Bundibugyo ebolavirus'),
+    'bombali_ebolavirus': ('txid2010960[Organism:noexp]', 2010960, 'Bombali ebolavirus'),
+    'tai_forest_ebolavirus': ('txid186541[Organism:exp]', 186541, 'Tai Forest ebolavirus'),
     'new_ncbi_sars_cov_2': ('txid2697049[Organism]', 2697049, 'New NCBI SARS-Cov-2')
 }

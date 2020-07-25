@@ -168,6 +168,9 @@ successful_imports = 0
 
 # total_s = 2
 for s in virus.virus_samples():
+    if not s.nucleotide_sequence():
+        logger.info(f'sample {s.internal_id()} skipped because nucleotide sequence is empty or null')
+        continue
     # if total_s > 0:
     #     total_s -= 1
     try_import_virus_sample(s)

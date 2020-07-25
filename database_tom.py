@@ -373,10 +373,10 @@ class ViewNucleotideVariantAnnoatation(View):
     def drop():
         View._drop_view('nucleotide_variant_annotation')
 
-    try:
-        __table__ = create_view('nucleotide_variant_annotation', stmt, _base.metadata)
-    except sqlalchemy.exc.ProgrammingError:
-        pass    # view already exists
+    # try:
+    #     __table__ = create_view('nucleotide_variant_annotation', stmt, _base.metadata)
+    # except sqlalchemy.exc.ProgrammingError:
+    #     pass    # view already exists
 
 
 class ViewNucleotideVariantLimited(View):
