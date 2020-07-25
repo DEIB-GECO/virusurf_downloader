@@ -10,6 +10,7 @@ from data_sources.virus import VirusSource
 from data_sources.gisaid_sars_cov_2.virus import GISAIDSarsCov2
 from data_sources.ncbi_sars_cov_2.virus import NCBISarsCov2
 from data_sources.ncbi_any_virus.ncbi_importer import prepared_parameters, import_samples_into_vcm_except_annotations_nuc_vars
+import data_sources.nmdc.procedure as nmdc
 from multiprocessing import JoinableQueue, cpu_count, Process
 from sqlalchemy.orm.session import Session
 from Bio import Entrez
@@ -249,6 +250,8 @@ try:
         run()
     elif source in prepared_parameters.keys():
         import_samples_into_vcm_except_annotations_nuc_vars(*prepared_parameters[source])
+    elif 'nmdc' in source:
+        nmdc.import_samples_into_vcm()
     else:
         logger.error(f'the argument {source} is not recognised.\n'+wrong_arguments_message)
 except:
