@@ -35,6 +35,8 @@ def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch
                 'rerun by setting "recreate_db_from_scratch" to False in module main.py.')
             sleep(10)
             logger.info('removal of all table records in progress...')
+            delete_indexes()
+
             # DROP VIEWS (also removes dependencies on the tables)
             for v in views:
                 v.drop()
@@ -393,27 +395,28 @@ class ViewNucleotideVariantLimited(View):
 
 views = [ViewAnnotationCDS, ViewNucleotideVariantAnnoatation, ViewNucleotideVariantLimited, ViewAnnotation]
 
+# noinspection SqlDialectInspection,SqlNoDataSourceInspection
+def delete_indexes():
+    # the following names must match the ones declared during the generation of the indexes (see code below)
+    indexes_to_drop = ['aa__ann_id', 'aa__var_type_lower', 'aa__start_original', 'aa__var_type_normal',
+                        'ann__seq_id', 'ann__start', 'ann__stop',
+                        'nuc_var__seq_id', 'nuc_var__start_alt', 'nuc_var__start_orig', 'nuc_var__length',
+                        'seq__experiment_id', 'seq__host_id', 'seq__seq_proj_id', 'seq__virus_id',
+                        'impact__var_id'
+                        ]
+    for i in indexes_to_drop:
+        try:
+            _db_engine.execute(f'DROP INDEX {i}')
+        except sqlalchemy.exc.ProgrammingError:
+            pass
 
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 def create_indexes():
-    # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-    def delete_indexes():
-        # the following names must match the ones declared during the generation of the indexes (see code below)
-        indexes_to_drop = ['aa__ann_id', 'aa__var_type_lower', 'aa__start_original', 'aa__var_type_normal',
-                           'ann__seq_id', 'ann__start', 'ann__stop',
-                           'nuc_var__seq_id', 'nuc_var__start_alt', 'nuc_var__start_orig', 'nuc_var__length',
-                           'seq__experiment_id', 'seq__host_id', 'seq__seq_proj_id', 'seq__virus_id',
-                           'impact__var_id'
-                           ]
-        for i in indexes_to_drop:
-            try:
-                _db_engine.execute(f'DROP INDEX {i}')
-            except sqlalchemy.exc.ProgrammingError:
-                pass
-
+    
     def column_name(column_obj):
         return str(column_obj).split('.', maxsplit=1)[1]
 
+    logger.info('Deleting previous version of indexes (if present)')
     delete_indexes()
     logger.info('Generating indexes...')
 
