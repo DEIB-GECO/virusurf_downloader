@@ -220,6 +220,7 @@ class Sequence(_base):
     n_percentage = Column(Float)
     lineage = Column(String)
     clade = Column(String)
+    gisaid_only = Column(Boolean)
 
 
 class Annotation(_base):
@@ -330,6 +331,27 @@ class ViewAnnotationCDS(View):
         View._drop_view('annotation_cds')
 
 
+class ViewAnnotation(View):
+    stmt = select([
+        Annotation.sequence_id,
+        Annotation.product.label('annotation_view_product'),
+        Annotation.aminoacid_sequence.label('annotation_view_aminoacid_sequence'),
+        Annotation.annotation_nucleotide_sequence.label('annotation_view_nucleotide_sequence')
+    ]).where(
+        # noqa              # == ignore warning on " != None" for this case
+        (Annotation.product != None)
+        & ((Annotation.aminoacid_sequence != None) | (Annotation.annotation_nucleotide_sequence != None))
+    )
+
+    @staticmethod
+    def create():
+        View._create_view('annotation_view', ViewAnnotation.stmt)
+
+    @staticmethod
+    def drop():
+        View._drop_view('annotation_view')
+
+
 class ViewNucleotideVariantAnnoatation(View):
     stmt = select([
         NucleotideVariant.nucleotide_variant_id,
@@ -349,10 +371,10 @@ class ViewNucleotideVariantAnnoatation(View):
     def drop():
         View._drop_view('nucleotide_variant_annotation')
 
-    # try:
-    #     __table__ = create_view('nucleotide_variant_annotation', stmt, _base.metadata)
-    # except sqlalchemy.exc.ProgrammingError:
-    #     pass    # view already exists
+    try:
+        __table__ = create_view('nucleotide_variant_annotation', stmt, _base.metadata)
+    except sqlalchemy.exc.ProgrammingError:
+        pass    # view already exists
 
 
 class ViewNucleotideVariantLimited(View):
@@ -369,37 +391,51 @@ class ViewNucleotideVariantLimited(View):
         View._drop_view('nucleotide_variant_limited')
 
 
-views = [ViewAnnotationCDS, ViewNucleotideVariantAnnoatation, ViewNucleotideVariantLimited]
+views = [ViewAnnotationCDS, ViewNucleotideVariantAnnoatation, ViewNucleotideVariantLimited, ViewAnnotation]
 
 
+# noinspection SqlNoDataSourceInspection,SqlDialectInspection
 def create_indexes():
-    logger.warning('Generation of indexes: This operation will blindly add new indexes without checking prior existence'
-                   'Stop the execution now if that\'s not the desired behaviour')
-    sleep(10)
-    logger.info('Generating indexes...')
+    # noinspection SqlDialectInspection,SqlNoDataSourceInspection
+    def delete_indexes():
+        # the following names must match the ones declared during the generation of the indexes (see code below)
+        indexes_to_drop = ['aa__ann_id', 'aa__var_type_lower', 'aa__start_original', 'aa__var_type_normal',
+                           'ann__seq_id', 'ann__start', 'ann__stop',
+                           'nuc_var__seq_id', 'nuc_var__start_alt', 'nuc_var__start_orig', 'nuc_var__length',
+                           'seq__experiment_id', 'seq__host_id', 'seq__seq_proj_id', 'seq__virus_id',
+                           'impact__var_id'
+                           ]
+        for i in indexes_to_drop:
+            try:
+                _db_engine.execute(f'DROP INDEX {i}')
+            except sqlalchemy.exc.ProgrammingError:
+                pass
 
     def column_name(column_obj):
         return str(column_obj).split('.', maxsplit=1)[1]
 
-    _db_engine.execute(f'CREATE INDEX ON {AminoacidVariant.__table__}({column_name(AminoacidVariant.annotation_id)})')
-    _db_engine.execute(f'CREATE INDEX ON {AminoacidVariant.__table__}(lower({column_name(AminoacidVariant.variant_aa_type)}))')
-    _db_engine.execute(f'CREATE INDEX ON {AminoacidVariant.__table__}({column_name(AminoacidVariant.start_aa_original)})')
-    _db_engine.execute(f'CREATE INDEX ON {AminoacidVariant.__table__}({column_name(AminoacidVariant.variant_aa_type)})')
+    delete_indexes()
+    logger.info('Generating indexes...')
 
-    _db_engine.execute(f'CREATE INDEX ON {Annotation.__table__}({column_name(Annotation.sequence_id)})')
-    _db_engine.execute(f'CREATE INDEX ON {Annotation.__table__}({column_name(Annotation.start)})')
-    _db_engine.execute(f'CREATE INDEX ON {Annotation.__table__}({column_name(Annotation.stop)})')
+    _db_engine.execute(f'CREATE INDEX aa__ann_id ON {AminoacidVariant.__table__}({column_name(AminoacidVariant.annotation_id)})')
+    _db_engine.execute(f'CREATE INDEX aa__var_type_lower ON {AminoacidVariant.__table__}(lower({column_name(AminoacidVariant.variant_aa_type)}))')
+    _db_engine.execute(f'CREATE INDEX aa__start_original ON {AminoacidVariant.__table__}({column_name(AminoacidVariant.start_aa_original)})')
+    _db_engine.execute(f'CREATE INDEX aa__var_type_normal ON {AminoacidVariant.__table__}({column_name(AminoacidVariant.variant_aa_type)})')
+
+    _db_engine.execute(f'CREATE INDEX ann__seq_id ON {Annotation.__table__}({column_name(Annotation.sequence_id)})')
+    _db_engine.execute(f'CREATE INDEX ann__start ON {Annotation.__table__}({column_name(Annotation.start)})')
+    _db_engine.execute(f'CREATE INDEX ann__stop ON {Annotation.__table__}({column_name(Annotation.stop)})')
 
     #            for now we'll keep the following index disabled
-    # _db_engine.execute(f'CREATE INDEX ON {NucleotideVariant.__table__}(lower({column_name(NucleotideVariant.sequence_alternative)}))')
-    _db_engine.execute(f'CREATE INDEX ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.sequence_id)})')    # primary key
-    _db_engine.execute(f'CREATE INDEX ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.start_alternative)})')
-    _db_engine.execute(f'CREATE INDEX ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.start_original)})')
-    _db_engine.execute(f'CREATE INDEX ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.variant_length)})')
+    # _db_engine.execute(f'CREATE INDEX nuc_var__alt ON {NucleotideVariant.__table__}(lower({column_name(NucleotideVariant.sequence_alternative)}))')
+    _db_engine.execute(f'CREATE INDEX nuc_var__seq_id ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.sequence_id)})')    # primary key
+    _db_engine.execute(f'CREATE INDEX nuc_var__start_alt ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.start_alternative)})')
+    _db_engine.execute(f'CREATE INDEX nuc_var__start_orig ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.start_original)})')
+    _db_engine.execute(f'CREATE INDEX nuc_var__length ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.variant_length)})')
 
-    _db_engine.execute(f'CREATE INDEX ON {Sequence.__table__}({column_name(Sequence.experiment_type_id)})')
-    _db_engine.execute(f'CREATE INDEX ON {Sequence.__table__}({column_name(Sequence.host_sample_id)})')
-    _db_engine.execute(f'CREATE INDEX ON {Sequence.__table__}({column_name(Sequence.sequencing_project_id)})')
-    _db_engine.execute(f'CREATE INDEX ON {Sequence.__table__}({column_name(Sequence.virus_id)})')
+    _db_engine.execute(f'CREATE INDEX seq__experiment_id ON {Sequence.__table__}({column_name(Sequence.experiment_type_id)})')
+    _db_engine.execute(f'CREATE INDEX seq__host_id ON {Sequence.__table__}({column_name(Sequence.host_sample_id)})')
+    _db_engine.execute(f'CREATE INDEX seq__seq_proj_id ON {Sequence.__table__}({column_name(Sequence.sequencing_project_id)})')
+    _db_engine.execute(f'CREATE INDEX seq__virus_id ON {Sequence.__table__}({column_name(Sequence.virus_id)})')
 
-    _db_engine.execute(f'CREATE INDEX ON {VariantImpact.__table__}({column_name(VariantImpact.nucleotide_variant_id)})')
+    _db_engine.execute(f'CREATE INDEX impact__var_id ON {VariantImpact.__table__}({column_name(VariantImpact.nucleotide_variant_id)})')
