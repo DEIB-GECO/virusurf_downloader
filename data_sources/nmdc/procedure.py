@@ -15,6 +15,7 @@ from xml_helper import text_at_node
 from locations import get_local_folder_for, FileType
 import wget
 import os
+from os.path import sep
 from data_sources.common_methods_host_sample import host_taxon_id_from_ncbi_taxon_name
 from data_sources.common_methods_virus import _download_virus_taxonomy_as_xml_from_name
 import vcm
@@ -467,8 +468,9 @@ def import_samples_into_vcm():
                 db_sequence_id,
                 refseq,
                 a_sample.nucleotide_sequence(),
-                a_sample.alternative_accession_number(),
-                "annotations/sars_cov_2.tsv")
+                'NC_045512.2',
+                f'.{sep}annotations{sep}sars_cov_2.tsv',
+                'covid')
             for ann in annotations:
                 vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
             for nuc in nuc_variants:

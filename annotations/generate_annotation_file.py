@@ -9,7 +9,7 @@ from os.path import sep
 import os
 
 arguments = {
-    'sars_cov_1': (f'.{sep}generated{sep}NCBI_sars_cov_1{sep}samples{sep}30271926.xml', f'.{sep}annotations{sep}new_sars_cov_1.tsv'),
+    'sars_cov_1': (f'.{sep}generated{sep}NCBI_sars_cov_1{sep}samples{sep}30271926.xml', f'.{sep}annotations{sep}sars_cov_1.tsv'),
     'sars_cov_2': (f'.{sep}generated{sep}New NCBI SARS-Cov-2{sep}samples{sep}sc2-refseq.xml', f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv'),
     'dengue_virus_1': (f'.{sep}generated{sep}Dengue Virus 1{sep}samples{sep}NC_001477.1.xml', f'.{sep}annotations{sep}dengue_virus_1.tsv'),
     'dengue_virus_2': (f'.{sep}generated{sep}Dengue Virus 2{sep}samples{sep}NC_001474.2.xml', f'.{sep}annotations{sep}dengue_virus_2.tsv'),
@@ -160,7 +160,9 @@ def create_snpeff_folders_for_viruses():
         f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}reston_ebolavirus',
         f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}sudan_ebolavirus',
         f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}tai_forest_ebolavirus',
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}zaire_ebolavirus'
+        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}zaire_ebolavirus',
+        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}sars_cov_1',
+        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}covid'
     ]
     for path in folders:
         if not os.path.exists(path):

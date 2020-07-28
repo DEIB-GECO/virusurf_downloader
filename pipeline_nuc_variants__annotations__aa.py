@@ -178,7 +178,7 @@ def add_variant(sequence_id, pos_ref, pos_seq, length, original, mutated, varian
 
 
 def call_nucleotide_variants(sequence_id, reference, sequence, ref_aligned, seq_aligned, ref_positions, seq_positions,
-                             chr_name):
+                             chr_name, snpeff_database_name: str):
 
     variants = []
 
@@ -279,8 +279,9 @@ def call_nucleotide_variants(sequence_id, reference, sequence, ref_aligned, seq_
         for m in variants:
             f.write(m + '\n')
 
-    os.system("java -jar ./tmp_snpeff/snpEff/snpEff.jar  covid  {} > ./tmp_snpeff/output_{}.vcf".format(variant_file,
-                                                                                                        sequence_id))
+    os.system("java -jar ./tmp_snpeff/snpEff/snpEff.jar  {}  {} > ./tmp_snpeff/output_{}.vcf".format(snpeff_database_name,
+                                                                                                     variant_file,
+                                                                                                     sequence_id))
 
     with open("./tmp_snpeff/output_{}.vcf".format(sequence_id)) as f:
         annotated_variants = [line for line in f if not line.startswith("#")]
@@ -289,7 +290,7 @@ def call_nucleotide_variants(sequence_id, reference, sequence, ref_aligned, seq_
     return parse_annotated_variants(annotated_variants)
 
 
-def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file):
+def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file, snpeff_database_name):
     aligner = Align.PairwiseAligner()
     aligner.match_score = 3.0  # the documentation states we can pass the scores in the constructor of PairwiseAligner but it doesn't work
     aligner.mismatch_score = -2.0
@@ -316,7 +317,7 @@ def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file
         seq_positions[i] = pos
 
     annotated_variants = call_nucleotide_variants(sequence_id, reference, sequence, ref_aligned, seq_aligned,
-                                                  ref_positions, seq_positions, chr_name)
+                                                  ref_positions, seq_positions, chr_name, snpeff_database_name)
 
     annotations = call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_positions, seq_positions, sequence_id)
 
