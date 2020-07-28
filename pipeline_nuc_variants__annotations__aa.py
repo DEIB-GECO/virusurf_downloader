@@ -79,58 +79,68 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
             for (start, stop) in annotation.ann_pos:
                 dna_ref = "".join([x[1] for x in zip(ref_positions, seq_aligned) if start <= x[0] and stop >= x[0]])
                 dna_ref = dna_ref.replace("-", "")
+
+            if len(dna_ref)%3 == 0 and len(dna_ref) > 0:
                 aa_seq += Seq._translate_str(dna_ref, table, cds=False).replace("*", "")
 
-            alignment_aa = pairwise2.align.globalms(annotation.aa_seq, aa_seq, 2, -1, -1, -.5)
+                alignment_aa = pairwise2.align.globalms(annotation.aa_seq, aa_seq, 2, -1, -1, -.5)
 
-            try:
-                ref_aligned_aa = alignment_aa[0][0]
-                seq_aligned_aa = alignment_aa[0][1]
-            except IndexError:
-                logger.error(f'solito Index out of range in function "call_annotation_variant". This annotation will be skipped. '
-                             f'Sequence id: {sequence_id}'
-                             f'Function args were\n.'
-                             f'ref aligned: {ref_aligned}\n'
-                             f'seq aligned: {seq_aligned}\n'
-                             f'ref positions: {ref_positions}\n'
-                             f'seq positions: {seq_positions}'
-                             )
-                continue
+                try:
+                    ref_aligned_aa = alignment_aa[0][0]
+                    seq_aligned_aa = alignment_aa[0][1]
+                except IndexError:
+                    logger.error(f'solito Index out of range in function "call_annotation_variant". This annotation will be skipped. '
+                                 f'Sequence id: {sequence_id}'
+                                 f'Function args were\n.'
+                                 f'ref aligned: {ref_aligned}\n'
+                                 f'seq aligned: {seq_aligned}\n'
+                                 f'ref positions: {ref_positions}\n'
+                                 f'seq positions: {seq_positions}'
+                                 )
+                    continue
 
-            ref_positions_aa = np.zeros(len(seq_aligned_aa), dtype=int)
-            pos = 0
-            for i in range(len(ref_aligned_aa)):
-                if ref_aligned_aa[i] != '-':
-                    pos += 1
-                ref_positions_aa[i] = pos
+                ref_positions_aa = np.zeros(len(seq_aligned_aa), dtype=int)
+                pos = 0
+                for i in range(len(ref_aligned_aa)):
+                    if ref_aligned_aa[i] != '-':
+                        pos += 1
+                    ref_positions_aa[i] = pos
 
-            aligned_aa = list(zip(ref_positions_aa, ref_aligned_aa, seq_aligned_aa))
-            # print(annotation.protein, "aligned_aa, ", [x[1] for x in aligned_aa])
-            mut_set = set()
-            for t in aligned_aa:
-                if t[2] == "-":
-                    mutpos = int(t[0])
-                    original = t[1]
-                    alternative = t[2]
-                    mut_type = "DEL"
-                    mut_set.add((gene, protein, protein_id, mutpos, original, alternative, mut_type))
-                elif (t[1] != t[2]) & (t[1] != "-"):
-                    mutpos = int(t[0])
-                    original = [r for (p, r, s) in aligned_aa if p == mutpos][0]
-                    alternative = "".join([s for (p, r, s) in aligned_aa if p == mutpos])
-                    mut_type = "SUB"
-                    mut_set.add((gene, protein, protein_id, mutpos, original, alternative, mut_type))
-                elif t[1] == "-":
-                    mutpos = int(t[0])
-                    original = t[1]
-                    alternative = t[2]
-                    mut_type = "SUB"
-                    mut_set.add((gene, protein, protein_id, mutpos, original, alternative, mut_type))
+                aligned_aa = list(zip(ref_positions_aa, ref_aligned_aa, seq_aligned_aa))
+                # print(annotation.protein, "aligned_aa, ", [x[1] for x in aligned_aa])
+                mut_set = set()
+                for t in aligned_aa:
+                    if t[2] == "-":
+                        mutpos = int(t[0])
+                        original = t[1]
+                        alternative = t[2]
+                        mut_type = "DEL"
+                        mut_set.add((gene, protein, protein_id, mutpos, original, alternative, mut_type))
+                    elif (t[1] != t[2]) & (t[1] != "-"):
+                        mutpos = int(t[0])
+                        original = [r for (p, r, s) in aligned_aa if p == mutpos][0]
+                        alternative = "".join([s for (p, r, s) in aligned_aa if p == mutpos])
+                        mut_type = "SUB"
+                        mut_set.add((gene, protein, protein_id, mutpos, original, alternative, mut_type))
+                    elif t[1] == "-":
+                        mutpos = int(t[0])
+                        original = t[1]
+                        alternative = t[2]
+                        mut_type = "SUB"
+                        mut_set.add((gene, protein, protein_id, mutpos, original, alternative, mut_type))
 
-            list_mutations = list(mut_set)
+                list_mutations = list(mut_set)
 
-        list_annotations.append(
-            (gene, protein, protein_id, atype, nuc_start, nuc_stop, nuc_seq, aa_seq, list_mutations))
+                list_annotations.append(
+                    (gene, protein, protein_id, atype, nuc_start, nuc_stop, nuc_seq, aa_seq, list_mutations))
+
+            elif len(dna_ref) == 0:
+                list_annotations.append(
+                    (gene, protein, protein_id, atype, nuc_start, nuc_stop, None, None, []))
+
+            else:
+                list_annotations.append(
+                    (gene, protein, protein_id, atype, nuc_start, nuc_stop, nuc_seq, None, []))
 
     return list_annotations
 
@@ -311,6 +321,7 @@ def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file
     annotations = call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_positions, seq_positions, sequence_id)
 
     return annotations, annotated_variants
+
 
 
 
