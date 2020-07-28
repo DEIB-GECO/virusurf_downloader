@@ -1,4 +1,5 @@
 import os
+from os.path import sep
 import re
 import time
 import urllib
@@ -23,8 +24,9 @@ from Bio import Entrez
 Entrez.email = "Your.Name.Here@example.org"
 from pipeline_nuc_variants__annotations__aa import sequence_aligner
 
-nucleotide_reference_sequence: Optional[str] = None
-pipeline_3_shared_db_session: Optional[database_tom.Session] = None
+nucleotide_reference_sequence: Optional[str] = None # initialized elsewhere
+annotation_file_path: Optional[str] = None  # initialized elsewhere
+virus_sequence_chromosome_name: Optional[str] = None  # initialized elsewhere
 DOWNLOAD_ATTEMPTS = 3
 DOWNLOAD_FAILED_PAUSE_SECONDS = 30
 
@@ -628,8 +630,8 @@ def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSampl
             db_sequence_id,
             nucleotide_reference_sequence,
             sample.nucleotide_sequence(),
-            'NC_045512.2',
-            "annotations/sars_cov_2.tsv")
+            virus_sequence_chromosome_name,
+            annotation_file_path)
         for ann in annotations:
             vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
         for nuc in nuc_variants:
@@ -667,6 +669,7 @@ class TheWorker(Worker):
         self.worker_session = database_tom.get_session()
 
     def get_a_job(self) -> Optional[Job]:
+        # noinspection PyTypeChecker
         job: ImportAnnotationsAndNucVariants = super().get_a_job()
         if job:
             job.use_session(self.worker_session)
@@ -682,9 +685,14 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
         samples_query,
         bind_to_organism_taxon_id: int,
         log_with_name: str,
+        _annotation_file_path: str,
+        virus_chromosome_name: str,
         SampleWrapperClass=AnyNCBIVNucSample,
         OrganismWrapperClass=AnyNCBITaxon):
 
+    global annotation_file_path, virus_sequence_chromosome_name
+    annotation_file_path = _annotation_file_path
+    virus_sequence_chromosome_name = virus_chromosome_name
     the_boss = Boss(10, 10, TheWorker)
 
     def check_user_query():
@@ -785,17 +793,17 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
 
 
 prepared_parameters = {
-    'dengue_virus_1': ('txid11053[Organism:exp]', 11053, 'Dengue Virus 1'),
-    'dengue_virus_2': ('txid11060[Organism:exp]', 11060, 'Dengue Virus 2'),
-    'dengue_virus_3': ('txid11069[Organism:exp]', 11069, 'Dengue Virus 3'),
-    'dengue_virus_4': ('txid11070[Organism:exp]', 11070, 'Dengue Virus 4'),
-    'mers': ('txid1335626[Organism:noexp]', 1335626, 'MERS-CoV'),
-    'betacoronavirus_england_1': ('txid1263720[Organism:noexp]', 1263720, 'Betacoronavirus England 1'),
-    'zaire_ebolavirus': ('txid186538[Organism:exp]', 186538, 'Zaire ebolavirus'),
-    'sudan_ebolavirus': ('txid186540[Organism:exp]', 186540, 'Sudan ebolavirus'),
-    'reston_ebolavirus': ('txid186539[Organism:exp]', 186539, 'Reston ebolavirus'),
-    'bundibugyo_ebolavirus': ('txid565995[Organism:noexp]', 565995, 'Bundibugyo ebolavirus'),
-    'bombali_ebolavirus': ('txid2010960[Organism:noexp]', 2010960, 'Bombali ebolavirus'),
-    'tai_forest_ebolavirus': ('txid186541[Organism:exp]', 186541, 'Tai Forest ebolavirus'),
-    'new_ncbi_sars_cov_2': ('txid2697049[Organism]', 2697049, 'New NCBI SARS-Cov-2')
+    'dengue_virus_1': ('txid11053[Organism:exp]', 11053, 'Dengue Virus 1', f'.{sep}annotations{sep}dengue_virus_1.tsv', 'NC_001477.1'),
+    'dengue_virus_2': ('txid11060[Organism:exp]', 11060, 'Dengue Virus 2', f'.{sep}annotations{sep}dengue_virus_2.tsv', 'NC_001474.2'),
+    'dengue_virus_3': ('txid11069[Organism:exp]', 11069, 'Dengue Virus 3', f'.{sep}annotations{sep}dengue_virus_3.tsv', 'NC_001475.2'),
+    'dengue_virus_4': ('txid11070[Organism:exp]', 11070, 'Dengue Virus 4', f'.{sep}annotations{sep}dengue_virus_4.tsv', 'NC_002640.1'),
+    'mers': ('txid1335626[Organism:noexp]', 1335626, 'MERS-CoV', f'.{sep}annotations{sep}mers.tsv', 'NC_019843.3'),
+    'betacoronavirus_england_1': ('txid1263720[Organism:noexp]', 1263720, 'Betacoronavirus England 1', f'.{sep}annotations{sep}betacoronavirus_england_1.tsv', 'NC_038294.1'),
+    'zaire_ebolavirus': ('txid186538[Organism:exp]', 186538, 'Zaire ebolavirus', f'.{sep}annotations{sep}zaire_ebolavirus.tsv', 'NC_002549.1'),
+    'sudan_ebolavirus': ('txid186540[Organism:exp]', 186540, 'Sudan ebolavirus', f'.{sep}annotations{sep}sudan_ebolavirus.tsv', 'NC_006432.1'),
+    'reston_ebolavirus': ('txid186539[Organism:exp]', 186539, 'Reston ebolavirus', f'.{sep}annotations{sep}reston_ebolavirus.tsv', 'NC_004161.1'),
+    'bundibugyo_ebolavirus': ('txid565995[Organism:noexp]', 565995, 'Bundibugyo ebolavirus', f'.{sep}annotations{sep}bundibugyo_ebolavirus.tsv', 'NC_014373.1'),
+    'bombali_ebolavirus': ('txid2010960[Organism:noexp]', 2010960, 'Bombali ebolavirus', f'.{sep}annotations{sep}bombali_ebolavirus.tsv', 'NC_039345.1'),
+    'tai_forest_ebolavirus': ('txid186541[Organism:exp]', 186541, 'Tai Forest ebolavirus', f'.{sep}annotations{sep}tai_forest_ebolavirus.tsv', 'NC_014372.1'),
+    'new_ncbi_sars_cov_2': ('txid2697049[Organism]', 2697049, 'New NCBI SARS-Cov-2', f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv', 'NC_045512.2')
 }
