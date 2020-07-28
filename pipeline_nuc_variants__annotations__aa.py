@@ -13,8 +13,11 @@ def parse_annotated_variants(annotated_variants):
 
         annotations = []
         for ann in snpeff_ann.split(","):
-            s = ann.split("|")
-            annotations.append([s[1], s[2], s[3]])
+            try:
+                s = ann.split("|")
+                annotations.append([s[1], s[2], s[3]])
+            except:
+                pass
 
         variant_type, start_alternative, variant_length, sequence_original, sequence_alternative = others.split(',')
 
@@ -71,7 +74,7 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
             [x[1] for x in zip(ref_positions, seq_aligned) if nuc_start <= x[0] and nuc_stop >= x[0]]).replace("-", "")
 
         list_mutations = []
-        if annotation.ann_type == 'gene' or annotation.ann_type == 'mature_protein_region':
+        if annotation.ann_type == 'mature_protein_region' or annotation.ann_type == 'CDS':
             aa_seq = ''
             for (start, stop) in annotation.ann_pos:
                 dna_ref = "".join([x[1] for x in zip(ref_positions, seq_aligned) if start <= x[0] and stop >= x[0]])
@@ -86,11 +89,11 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
             except IndexError:
                 logger.error(f'solito Index out of range in function "call_annotation_variant". This annotation will be skipped. '
                              f'Sequence id: {sequence_id}'
-                             # f'Function args were\n.'
-                             # f'ref aligned: {ref_aligned}\n'
-                             # f'seq aligned: {seq_aligned}\n'
-                             # f'ref positions: {ref_positions}\n'
-                             # f'seq positions: {seq_positions}'
+                             f'Function args were\n.'
+                             f'ref aligned: {ref_aligned}\n'
+                             f'seq aligned: {seq_aligned}\n'
+                             f'ref positions: {ref_positions}\n'
+                             f'seq positions: {seq_positions}'
                              )
                 continue
 
@@ -305,7 +308,7 @@ def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file
     annotated_variants = call_nucleotide_variants(sequence_id, reference, sequence, ref_aligned, seq_aligned,
                                                   ref_positions, seq_positions, chr_name)
 
-    annotations = call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_positions, ref_aligned, sequence_id)
+    annotations = call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_positions, seq_positions, sequence_id)
 
     return annotations, annotated_variants
 

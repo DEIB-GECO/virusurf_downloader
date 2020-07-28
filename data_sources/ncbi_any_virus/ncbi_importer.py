@@ -628,7 +628,7 @@ def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSampl
             db_sequence_id,
             nucleotide_reference_sequence,
             sample.nucleotide_sequence(),
-            sample.alternative_accession_number(),
+            'NC_045512.2',
             "annotations/sars_cov_2.tsv")
         for ann in annotations:
             vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
