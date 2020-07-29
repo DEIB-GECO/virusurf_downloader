@@ -14,6 +14,7 @@ class FileType(Enum):
     TaxonomyData = 'taxonomy'
     SequenceOrSampleData = 'samples'
     NucleotideVariants = 'nuc_variants'
+    Logs = 'logs'
 
 def get_local_folder_for(source_name: str, _type: FileType) -> str:
     """

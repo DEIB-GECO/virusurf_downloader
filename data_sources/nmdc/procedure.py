@@ -330,6 +330,9 @@ class NMDCVirusSample:
     def taxon_name(self):
         return self.metadata.get("spciesname")
 
+    def gisa_id(self):
+        return self.metadata.get('gisaid')
+
 
 def get_fasta_list():
     get_list_attempts = 3
@@ -483,30 +486,44 @@ def import_samples_into_vcm():
     logger.info('begin import of selected records')
     logger.warning('nucleotide and annotation calling disabled')    # TODO remove
     total_sequences_imported = 0
-    for file in tqdm(fasta_list):
-        try:
-            sample = NMDCVirusSample(file)
+    total_sequences_skipped = 0
+    log_of_gisaid_id_path = f"{get_local_folder_for('NMDC', FileType.Logs)}{os.path.sep}gisa_ids.txt"
+    with open(log_of_gisaid_id_path, mode='w') as log_of_gisaid_id:
+        for file in tqdm(fasta_list):
+            try:
+                sample = NMDCVirusSample(file)
 
-            organism_name = sample.taxon_name()
-            if organism_name == 'Rhinolophus malayanus':
+                organism_name = sample.taxon_name()
+                if organism_name == 'Rhinolophus malayanus':
+                    logger.info(f'Sample {file} skipped because related to organims Rhinolophus malayanus')
+                    total_sequences_skipped += 1
+                    continue
+                organism = cached_taxonomy.get('organism_name')
+                if not organism:
+                    organism_file = _download_virus_taxonomy_as_xml_from_name(taxonomy_folder, organism_name)
+                    organism = AnyNCBITaxon(organism_file)
+                    cached_taxonomy[organism_name] = organism
+            except FileNotFoundError:
+                logger.error(f'Sample {file} skipped')
+                total_sequences_skipped += 1
                 continue
-            organism = cached_taxonomy.get('organism_name')
-            if not organism:
-                organism_file = _download_virus_taxonomy_as_xml_from_name(taxonomy_folder, organism_name)
-                organism = AnyNCBITaxon(organism_file)
-                cached_taxonomy[organism_name] = organism
-        except FileNotFoundError:
-            logger.error(f'Sample {file} skipped')
-            continue
-        except AssertionError:
-            logger.exception(f'Sample {file} skipped')
-            continue
+            except AssertionError:
+                logger.exception(f'Sample {file} skipped')
+                total_sequences_skipped += 1
+                continue
 
-        virus_id = database_tom.try_py_function(virus_taxonomy_pipeline, organism)
-        if virus_id:
-            sequence_id = database_tom.try_py_function(metadata_pipeline, sample)
-            # if sequence_id:
-            #     database_tom.try_py_function(nucleotide__annotations__pipeline, sample, sequence_id)
-            total_sequences_imported += 1
+            virus_id = database_tom.try_py_function(virus_taxonomy_pipeline, organism)
+            if virus_id:
+                gisa_id = sample.gisa_id()
+                if gisa_id:
+                    log_of_gisaid_id.write(gisa_id+'\n')
 
-    logger.info(f'{total_sequences_imported} sequences imported.')
+                # sequence_id = database_tom.try_py_function(metadata_pipeline, sample)
+                # if sequence_id:
+                #     database_tom.try_py_function(nucleotide__annotations__pipeline, sample, sequence_id)
+                total_sequences_imported += 1
+
+        logger.info(f'{total_sequences_imported} sequences imported.')
+        logger.info(f'{total_sequences_skipped} sequences skipped.')
+        logger.info(f'list of sequences with GISAID references at path: '+log_of_gisaid_id_path)
+
