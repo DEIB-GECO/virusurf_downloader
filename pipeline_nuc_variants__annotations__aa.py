@@ -5,9 +5,6 @@ import os
 
 from loguru import logger
 
-total_cases = 0
-nuc_sequences_without_aa = 0
-
 def parse_annotated_variants(annotated_variants):
     result = []
     for variant in annotated_variants:
@@ -75,10 +72,8 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
         nuc_seq = "".join(
             [x[1] for x in zip(ref_positions, seq_aligned) if nuc_start <= x[0] and nuc_stop >= x[0]]).replace("-", "")
 
-        global total_cases, nuc_sequences_without_aa
-        total_cases += 1
         if nuc_seq is not None and aa_seq is None:
-            nuc_sequences_without_aa += 1
+            logger.warning('nuc_seq is not None and aa_seq is None')
 
 
         list_mutations = []

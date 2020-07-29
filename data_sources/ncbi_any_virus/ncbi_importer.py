@@ -22,7 +22,7 @@ from lxml import etree
 from locations import get_local_folder_for, FileType
 from Bio import Entrez
 Entrez.email = "Your.Name.Here@example.org"
-from pipeline_nuc_variants__annotations__aa import sequence_aligner, total_cases, nuc_sequences_without_aa
+from pipeline_nuc_variants__annotations__aa import sequence_aligner
 
 nucleotide_reference_sequence: Optional[str] = None # initialized elsewhere
 annotation_file_path: Optional[str] = None  # initialized elsewhere
@@ -795,8 +795,6 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
             #     break
     finally:
         the_boss.stop_workers()
-        logger.info(f'total calls to pipeline_nuc_variants__annotations__aa.call_annotation_variant: {total_cases}\n'
-                    f'nucleotide sequences without aa: {nuc_sequences_without_aa}')
 
 
 
@@ -813,5 +811,5 @@ prepared_parameters = {
     'bundibugyo_ebolavirus': ('txid565995[Organism:noexp]', 565995, 'Bundibugyo ebolavirus', f'.{sep}annotations{sep}bundibugyo_ebolavirus.tsv', 'NC_014373', 'bundibugyo_ebolavirus'),
     'bombali_ebolavirus': ('txid2010960[Organism:noexp]', 2010960, 'Bombali ebolavirus', f'.{sep}annotations{sep}bombali_ebolavirus.tsv', 'NC_039345', 'bombali_ebolavirus'),
     'tai_forest_ebolavirus': ('txid186541[Organism:exp]', 186541, 'Tai Forest ebolavirus', f'.{sep}annotations{sep}tai_forest_ebolavirus.tsv', 'NC_014372', 'tai_forest_ebolavirus'),
-    'new_ncbi_sars_cov_2': ('txid2697049[Organism]', 2697049, 'New NCBI SARS-Cov-2', f'.{sep}annotations{sep}new_nsbi_sars_cov_2.tsv', 'NC_045512', 'new_ncbi_sars_cov_2')
+    'new_ncbi_sars_cov_2': ('txid2697049[Organism]', 2697049, 'New NCBI SARS-Cov-2', f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv', 'NC_045512', 'new_ncbi_sars_cov_2')
 }
