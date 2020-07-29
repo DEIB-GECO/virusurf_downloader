@@ -11,3 +11,4 @@ java -jar snpEff.jar build -genbank -v sudan_ebolavirus
 java -jar snpEff.jar build -genbank -v tai_forest_ebolavirus
 java -jar snpEff.jar build -genbank -v zaire_ebolavirus
 java -jar snpEff.jar build -genbank -v sars_cov_1
+java -jar snpEff.jar build -genbank -v new_ncbi_sars_cov_2

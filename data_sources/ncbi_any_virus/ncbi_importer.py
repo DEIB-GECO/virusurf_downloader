@@ -22,7 +22,7 @@ from lxml import etree
 from locations import get_local_folder_for, FileType
 from Bio import Entrez
 Entrez.email = "Your.Name.Here@example.org"
-from pipeline_nuc_variants__annotations__aa import sequence_aligner
+from pipeline_nuc_variants__annotations__aa import sequence_aligner, total_cases, nuc_sequences_without_aa
 
 nucleotide_reference_sequence: Optional[str] = None # initialized elsewhere
 annotation_file_path: Optional[str] = None  # initialized elsewhere
@@ -795,21 +795,23 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
             #     break
     finally:
         the_boss.stop_workers()
+        logger.info(f'total calls to pipeline_nuc_variants__annotations__aa.call_annotation_variant: {total_cases}\n'
+                    f'nucleotide sequences without aa: {nuc_sequences_without_aa}')
 
 
 
 prepared_parameters = {
-    'dengue_virus_1': ('txid11053[Organism:exp]', 11053, 'Dengue Virus 1', f'.{sep}annotations{sep}dengue_virus_1.tsv', 'NC_001477.1', 'dengue_virus_1'),
-    'dengue_virus_2': ('txid11060[Organism:exp]', 11060, 'Dengue Virus 2', f'.{sep}annotations{sep}dengue_virus_2.tsv', 'NC_001474.2', 'dengue_virus_2'),
-    'dengue_virus_3': ('txid11069[Organism:exp]', 11069, 'Dengue Virus 3', f'.{sep}annotations{sep}dengue_virus_3.tsv', 'NC_001475.2', 'dengue_virus_3'),
-    'dengue_virus_4': ('txid11070[Organism:exp]', 11070, 'Dengue Virus 4', f'.{sep}annotations{sep}dengue_virus_4.tsv', 'NC_002640.1', 'dengue_virus_4'),
-    'mers': ('txid1335626[Organism:noexp]', 1335626, 'MERS-CoV', f'.{sep}annotations{sep}mers.tsv', 'NC_019843.3', 'mers'),
-    'betacoronavirus_england_1': ('txid1263720[Organism:noexp]', 1263720, 'Betacoronavirus England 1', f'.{sep}annotations{sep}betacoronavirus_england_1.tsv', 'NC_038294.1', 'betacoronavirus_england_1'),
-    'zaire_ebolavirus': ('txid186538[Organism:exp]', 186538, 'Zaire ebolavirus', f'.{sep}annotations{sep}zaire_ebolavirus.tsv', 'NC_002549.1', 'zaire_ebolavirus'),
-    'sudan_ebolavirus': ('txid186540[Organism:exp]', 186540, 'Sudan ebolavirus', f'.{sep}annotations{sep}sudan_ebolavirus.tsv', 'NC_006432.1', 'sudan_ebolavirus'),
-    'reston_ebolavirus': ('txid186539[Organism:exp]', 186539, 'Reston ebolavirus', f'.{sep}annotations{sep}reston_ebolavirus.tsv', 'NC_004161.1', 'reston_ebolavirus'),
-    'bundibugyo_ebolavirus': ('txid565995[Organism:noexp]', 565995, 'Bundibugyo ebolavirus', f'.{sep}annotations{sep}bundibugyo_ebolavirus.tsv', 'NC_014373.1', 'bundibugyo_ebolavirus'),
-    'bombali_ebolavirus': ('txid2010960[Organism:noexp]', 2010960, 'Bombali ebolavirus', f'.{sep}annotations{sep}bombali_ebolavirus.tsv', 'NC_039345.1', 'bombali_ebolavirus'),
-    'tai_forest_ebolavirus': ('txid186541[Organism:exp]', 186541, 'Tai Forest ebolavirus', f'.{sep}annotations{sep}tai_forest_ebolavirus.tsv', 'NC_014372.1', 'tai_forest_ebolavirus'),
-    'new_ncbi_sars_cov_2': ('txid2697049[Organism]', 2697049, 'New NCBI SARS-Cov-2', f'.{sep}annotations{sep}sars_cov_2.tsv', 'NC_045512.2', 'covid')
+    'dengue_virus_1': ('txid11053[Organism:exp]', 11053, 'Dengue Virus 1', f'.{sep}annotations{sep}dengue_virus_1.tsv', 'NC_001477', 'dengue_virus_1'),
+    'dengue_virus_2': ('txid11060[Organism:exp]', 11060, 'Dengue Virus 2', f'.{sep}annotations{sep}dengue_virus_2.tsv', 'NC_001474', 'dengue_virus_2'),
+    'dengue_virus_3': ('txid11069[Organism:exp]', 11069, 'Dengue Virus 3', f'.{sep}annotations{sep}dengue_virus_3.tsv', 'NC_001475', 'dengue_virus_3'),
+    'dengue_virus_4': ('txid11070[Organism:exp]', 11070, 'Dengue Virus 4', f'.{sep}annotations{sep}dengue_virus_4.tsv', 'NC_002640', 'dengue_virus_4'),
+    'mers': ('txid1335626[Organism:noexp]', 1335626, 'MERS-CoV', f'.{sep}annotations{sep}mers.tsv', 'NC_019843', 'mers'),
+    'betacoronavirus_england_1': ('txid1263720[Organism:noexp]', 1263720, 'Betacoronavirus England 1', f'.{sep}annotations{sep}betacoronavirus_england_1.tsv', 'NC_038294', 'betacoronavirus_england_1'),
+    'zaire_ebolavirus': ('txid186538[Organism:exp]', 186538, 'Zaire ebolavirus', f'.{sep}annotations{sep}zaire_ebolavirus.tsv', 'NC_002549', 'zaire_ebolavirus'),
+    'sudan_ebolavirus': ('txid186540[Organism:exp]', 186540, 'Sudan ebolavirus', f'.{sep}annotations{sep}sudan_ebolavirus.tsv', 'NC_006432', 'sudan_ebolavirus'),
+    'reston_ebolavirus': ('txid186539[Organism:exp]', 186539, 'Reston ebolavirus', f'.{sep}annotations{sep}reston_ebolavirus.tsv', 'NC_004161', 'reston_ebolavirus'),
+    'bundibugyo_ebolavirus': ('txid565995[Organism:noexp]', 565995, 'Bundibugyo ebolavirus', f'.{sep}annotations{sep}bundibugyo_ebolavirus.tsv', 'NC_014373', 'bundibugyo_ebolavirus'),
+    'bombali_ebolavirus': ('txid2010960[Organism:noexp]', 2010960, 'Bombali ebolavirus', f'.{sep}annotations{sep}bombali_ebolavirus.tsv', 'NC_039345', 'bombali_ebolavirus'),
+    'tai_forest_ebolavirus': ('txid186541[Organism:exp]', 186541, 'Tai Forest ebolavirus', f'.{sep}annotations{sep}tai_forest_ebolavirus.tsv', 'NC_014372', 'tai_forest_ebolavirus'),
+    'new_ncbi_sars_cov_2': ('txid2697049[Organism]', 2697049, 'New NCBI SARS-Cov-2', f'.{sep}annotations{sep}new_nsbi_sars_cov_2.tsv', 'NC_045512', 'new_ncbi_sars_cov_2')
 }

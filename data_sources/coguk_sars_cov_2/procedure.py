@@ -23,9 +23,9 @@ def main_pipeline_part_3(session: database_tom.Session, sample, db_sequence_id):
             db_sequence_id,
             reference_sequence,
             sample.nucleotide_sequence(),
-            'NC_045512.2',
-            f'.{sep}annotations{sep}sars_cov_2.tsv',
-            'covid')
+            'NC_045512',
+            f'.{sep}annotations{sep}new_nsbi_sars_cov_2.tsv',
+            'new_nsbi_sars_cov_2')
         for ann in annotations:
             vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
         for nuc in nuc_variants:

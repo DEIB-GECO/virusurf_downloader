@@ -468,9 +468,9 @@ def import_samples_into_vcm():
                 db_sequence_id,
                 refseq,
                 a_sample.nucleotide_sequence(),
-                'NC_045512.2',
-                f'.{sep}annotations{sep}sars_cov_2.tsv',
-                'covid')
+                'NC_045512',
+                f'.{sep}annotations{sep}new_nsbi_sars_cov_2.tsv',
+                'new_nsbi_sars_cov_2')
             for ann in annotations:
                 vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
             for nuc in nuc_variants:
