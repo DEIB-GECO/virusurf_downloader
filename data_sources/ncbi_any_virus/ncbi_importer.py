@@ -505,6 +505,7 @@ def _all_samples_from_organism(samples_query: str, log_with_name: str, SampleWra
     logger.trace(f'getting accession ids of samples...')
     accession_ids = _get_samples_accession_ids(samples_query)
     if from_sample is not None and to_sample is not None:
+        accession_ids.sort()
         accession_ids = accession_ids[from_sample:to_sample]
 
     logger.trace(f'download and processing of sequences...')
