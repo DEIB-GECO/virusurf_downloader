@@ -14,13 +14,14 @@ import dateutil.parser as dateparser
 import lxml
 from tqdm import tqdm
 import database_tom
-import vcm
+import vcm as vcm
 from geo_groups import geo_groups
 from xml_helper import text_at_node
 from loguru import logger
 from lxml import etree
 from locations import get_local_folder_for, FileType
 from Bio import Entrez
+import pickle
 Entrez.email = "Your.Name.Here@example.org"
 from pipeline_nuc_variants__annotations__aa import sequence_aligner
 
@@ -28,6 +29,7 @@ nucleotide_reference_sequence: Optional[str] = None # initialized elsewhere
 annotation_file_path: Optional[str] = None  # initialized elsewhere
 virus_sequence_chromosome_name: Optional[str] = None  # initialized elsewhere
 snpeff_db_name: Optional[str] = None  # initialized elsewhere
+log_with_name: Optional[str] = None
 DOWNLOAD_ATTEMPTS = 3
 DOWNLOAD_FAILED_PAUSE_SECONDS = 30
 
@@ -629,13 +631,21 @@ def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSampl
     try:
         # logger.debug(f'callling sequence aligner with args: {db_sequence_id}, <ref_seq>, <seq>, {virus_sequence_chromosome_name}, {annotation_file_path}, {snpeff_db_name}')
         # logger.debug('seq: '+sample.nucleotide_sequence())
-        annotations, nuc_variants = sequence_aligner(
-            db_sequence_id,
-            nucleotide_reference_sequence,
-            sample.nucleotide_sequence(),
-            virus_sequence_chromosome_name,
-            annotation_file_path,
-            snpeff_db_name)
+        file_path = get_local_folder_for(log_with_name, FileType.Annotations)+str(sample.primary_accession_number())+".pickle"
+        if not os.path.exists(file_path):
+            annotations_and_nuc_variants = sequence_aligner(
+                db_sequence_id,
+                nucleotide_reference_sequence,
+                sample.nucleotide_sequence(),
+                virus_sequence_chromosome_name,
+                annotation_file_path,
+                snpeff_db_name)
+            with open(file_path, mode='wb') as cache_file:
+                pickle.dump(annotations_and_nuc_variants, cache_file, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            with open(file_path, mode='rb') as cache_file:
+                annotations_and_nuc_variants = pickle.load(cache_file)
+        annotations, nuc_variants = annotations_and_nuc_variants
         for ann in annotations:
             vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
         for nuc in nuc_variants:
@@ -688,18 +698,19 @@ class TheWorker(Worker):
 def import_samples_into_vcm_except_annotations_nuc_vars(
         samples_query,
         bind_to_organism_taxon_id: int,
-        log_with_name: str,
+        _log_with_name: str,
         _annotation_file_path: str,
         virus_chromosome_name: str,
         _snpeff_db_name: str,
         SampleWrapperClass=AnyNCBIVNucSample,
         OrganismWrapperClass=AnyNCBITaxon):
 
-    global annotation_file_path, virus_sequence_chromosome_name, snpeff_db_name
+    global annotation_file_path, virus_sequence_chromosome_name, snpeff_db_name, log_with_name
     annotation_file_path = _annotation_file_path
     virus_sequence_chromosome_name = virus_chromosome_name
     snpeff_db_name = _snpeff_db_name
-    the_boss = Boss(1, 1, TheWorker)
+    log_with_name = _log_with_name
+    the_boss = Boss(90, 90, TheWorker)
 
     def check_user_query():
         """
@@ -777,23 +788,26 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
     database_tom.dispose_db_engine()
     the_boss.wake_up_workers()
     database_tom.re_config_db_engine(False)
-    # counter = 10
+    # counter = 30
     try:
         for sample in _all_samples_from_organism(samples_query, log_with_name, SampleWrapperClass):
-            # if counter > 0:
-            #     counter -= 1
-                sequence_id = database_tom.try_py_function(
-                    main_pipeline_part_2, sample
-                )
-                if sequence_id:
-                    # carries out main_pipeline_3 with many processes
-                    the_boss.assign_job(ImportAnnotationsAndNucVariants(sequence_id, sample))
-                    # database_tom.try_py_function(
-                    #     main_pipeline_part_3, sample, sequence_id
-                    # )
-            # else:
-            #     break
+        # if sample.length() < 29000: # TODO remove this
+        #     continue
+        # if counter > 0:             # TODO remove this
+        #     counter -= 1
+            sequence_id = database_tom.try_py_function(
+                main_pipeline_part_2, sample
+            )
+            if sequence_id:
+                # carries out main_pipeline_3 with many processes
+                the_boss.assign_job(ImportAnnotationsAndNucVariants(sequence_id, sample))
+                # database_tom.try_py_function(
+                #     main_pipeline_part_3, sample, sequence_id
+                # )
+        # else:
+        #     break
     finally:
+        # pass
         the_boss.stop_workers()
 
 
