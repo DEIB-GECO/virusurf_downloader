@@ -499,11 +499,13 @@ class AnyNCBIVNucSample:
 
 
 # noinspection PyPep8Naming
-def _all_samples_from_organism(samples_query: str, log_with_name: str, SampleWrapperClass=AnyNCBIVNucSample):
+def _all_samples_from_organism(samples_query: str, log_with_name: str, SampleWrapperClass=AnyNCBIVNucSample, from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     logger.trace(f'importing samples of organism "{log_with_name}"')
 
     logger.trace(f'getting accession ids of samples...')
     accession_ids = _get_samples_accession_ids(samples_query)
+    if from_sample and to_sample:
+        accession_ids = accession_ids[from_sample:to_sample]
 
     logger.trace(f'download and processing of sequences...')
     download_sample_dir_path = get_local_folder_for(source_name=log_with_name, _type=FileType.SequenceOrSampleData)
@@ -703,7 +705,9 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
         virus_chromosome_name: str,
         _snpeff_db_name: str,
         SampleWrapperClass=AnyNCBIVNucSample,
-        OrganismWrapperClass=AnyNCBITaxon):
+        OrganismWrapperClass=AnyNCBITaxon,
+        from_sample: Optional[int] = None,
+        to_sample: Optional[int] = None):
 
     global annotation_file_path, virus_sequence_chromosome_name, snpeff_db_name, log_with_name
     annotation_file_path = _annotation_file_path
@@ -790,7 +794,7 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
     database_tom.re_config_db_engine(False)
     # counter = 30
     try:
-        for sample in _all_samples_from_organism(samples_query, log_with_name, SampleWrapperClass):
+        for sample in _all_samples_from_organism(samples_query, log_with_name, SampleWrapperClass, from_sample, to_sample):
         # if sample.length() < 29000: # TODO remove this
         #     continue
         # if counter > 0:             # TODO remove this

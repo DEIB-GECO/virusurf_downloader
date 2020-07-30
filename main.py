@@ -38,6 +38,12 @@ try:
     db_password = sys.argv[3]
     db_port = sys.argv[4]
     source = sys.argv[5].lower()
+    try:
+        _from = int(sys.argv[6])
+        to = int(sys.argv[7])
+    except Exception:
+        _from = None
+        to = None
 except Exception:
     logger.error(wrong_arguments_message)
     sys.exit(1)
@@ -249,7 +255,7 @@ try:
         viruses = [NCBISarsCov1()]
         run()
     elif source in prepared_parameters.keys():
-        import_samples_into_vcm_except_annotations_nuc_vars(*prepared_parameters[source])
+        import_samples_into_vcm_except_annotations_nuc_vars(*prepared_parameters[source], from_sample=_from, to_sample=to)
     elif 'nmdc' in source:
         nmdc.import_samples_into_vcm()
     else:
