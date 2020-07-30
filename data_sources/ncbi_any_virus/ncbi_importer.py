@@ -14,7 +14,7 @@ import dateutil.parser as dateparser
 import lxml
 from tqdm import tqdm
 import database_tom
-import vcm as vcm
+import vcm_mock as vcm
 from geo_groups import geo_groups
 from xml_helper import text_at_node
 from loguru import logger
