@@ -282,13 +282,21 @@ def call_nucleotide_variants(sequence_id, reference, sequence, ref_aligned, seq_
         for m in variants:
             f.write(m + '\n')
 
-    os.system("java -jar ./tmp_snpeff/snpEff/snpEff.jar  {}  {} > ./tmp_snpeff/output_{}.vcf".format(snpeff_database_name,
-                                                                                                     variant_file,
-                                                                                                     sequence_id))
+    if variants:
+        os.system("java -jar ./tmp_snpeff/snpEff/snpEff.jar  {}  {} > ./tmp_snpeff/output_{}.vcf".format(snpeff_database_name,
+                                                                                                         variant_file,
+                                                                                                         sequence_id))
 
-    with open("./tmp_snpeff/output_{}.vcf".format(sequence_id)) as f:
-        annotated_variants = [line for line in f if not line.startswith("#")]
-    os.remove("./tmp_snpeff/{}.vcf".format(sequence_id))
+        os.remove("./tmp_snpeff/{}.vcf".format(sequence_id))
+        try:
+            with open("./tmp_snpeff/output_{}.vcf".format(sequence_id)) as f:
+                annotated_variants = [line for line in f if not line.startswith("#")]
+            os.remove("./tmp_snpeff/output_{}.vcf".format(sequence_id))
+        except FileNotFoundError:
+            annotated_variants = list()
+            pass
+    else:
+        annotated_variants = list()
 
     return parse_annotated_variants(annotated_variants)
 

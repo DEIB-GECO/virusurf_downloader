@@ -22,7 +22,7 @@ Entrez.email = "Your.Name.Here@example.org"
 
 #   #################################       PROGRAM ARGUMENTS   ##########################
 wrong_arguments_message = 'The module main.py expects the following arguments:' \
-                          'db_name, db_user, db_password, db_port, source_to_import\n' \
+                          'db_name, recreate_db?, db_user, db_password, db_port, source_to_import\n' \
                           'source_to_import accept values:\n' \
                           'genbank-sars-cov2\n' \
                           'cog-uk\n' \
@@ -31,16 +31,19 @@ wrong_arguments_message = 'The module main.py expects the following arguments:' 
 for p in prepared_parameters.keys():
     wrong_arguments_message += f'{p}\n'
 wrong_arguments_message += 'just_make_indexes\n'
+wrong_arguments_message += 'optionally you can specify a range of samples to import as <min> <max>'
 # noinspection PyBroadException
 try:
     db_name = sys.argv[1]
-    db_user = sys.argv[2]
-    db_password = sys.argv[3]
-    db_port = sys.argv[4]
-    source = sys.argv[5].lower()
+    _db_recreate = sys.argv[2].lower()
+    db_recreate = True if _db_recreate == 'yes' or _db_recreate == 'true' else False
+    db_user = sys.argv[3]
+    db_password = sys.argv[4]
+    db_port = sys.argv[5]
+    source = sys.argv[6].lower()
     try:
-        _from = int(sys.argv[6])
-        to = int(sys.argv[7])
+        _from = int(sys.argv[7])
+        to = int(sys.argv[8])
     except Exception:
         _from = None
         to = None
@@ -80,7 +83,7 @@ logger.info(f"main.py {' '.join(sys.argv[1:])}")
 
 #   ###################################     FILL DB WITH VIRUS SEQUENCES    ###############
 # init database
-database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_db_from_scratch=True)
+database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_db_from_scratch=db_recreate)
 
 #   ###################################     VIRUSES TO IMPORT    ###############
 viruses: List[VirusSource] = [

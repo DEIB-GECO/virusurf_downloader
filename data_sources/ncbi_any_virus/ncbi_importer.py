@@ -504,7 +504,7 @@ def _all_samples_from_organism(samples_query: str, log_with_name: str, SampleWra
 
     logger.trace(f'getting accession ids of samples...')
     accession_ids = _get_samples_accession_ids(samples_query)
-    if from_sample and to_sample:
+    if from_sample is not None and to_sample is not None:
         accession_ids = accession_ids[from_sample:to_sample]
 
     logger.trace(f'download and processing of sequences...')
@@ -633,10 +633,10 @@ def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSampl
     try:
         # logger.debug(f'callling sequence aligner with args: {db_sequence_id}, <ref_seq>, <seq>, {virus_sequence_chromosome_name}, {annotation_file_path}, {snpeff_db_name}')
         # logger.debug('seq: '+sample.nucleotide_sequence())
-        file_path = get_local_folder_for(log_with_name, FileType.Annotations)+str(sample.primary_accession_number())+".pickle"
+        file_path = get_local_folder_for(log_with_name, FileType.Annotations)+str(sample.internal_id())+".pickle"
         if not os.path.exists(file_path):
             annotations_and_nuc_variants = sequence_aligner(
-                db_sequence_id,
+                sample.internal_id(),
                 nucleotide_reference_sequence,
                 sample.nucleotide_sequence(),
                 virus_sequence_chromosome_name,
