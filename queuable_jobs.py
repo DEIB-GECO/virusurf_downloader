@@ -30,12 +30,12 @@ class Worker(Process):
             else:
                 try:
                     job.execute()
+                    self.jobs.task_done()
                 except Exception:
                     logger.exception('An exception reached the Worker loop. Worker is being disposed.')
+                    self.jobs.task_done()
                     self.release_resources()
                     break
-                finally:
-                    self.jobs.task_done()
 
     def release_resources(self):
         self.jobs = None
