@@ -15,7 +15,7 @@ from locations import get_local_folder_for, FileType
 class GISAIDSarsCov2(VirusSource):
 
     name = 'GISAID_sars_cov_2'
-    data_path = f'/home/canakoglu/GISAID/export.json'
+    data_path = f'/home/alfonsi/GISAID/export.json'
 
     def __init__(self):
         super().__init__()

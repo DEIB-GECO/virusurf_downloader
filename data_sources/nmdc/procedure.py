@@ -139,9 +139,8 @@ class NMDCVirusSample:
     def primary_accession_number(self):
         return self._id
 
-    @staticmethod
-    def alternative_accession_number():
-        return None
+    def alternative_accession_number(self):
+        return self.gisa_id()
 
     def strain(self):
         return self.metadata.get('isolate')
@@ -230,9 +229,8 @@ class NMDCVirusSample:
         else:
             return None
 
-    @staticmethod
-    def assembly_method():
-        return None
+    def assembly_method(self):
+        return self.metadata.get("jointMethods")
 
     @staticmethod
     def coverage():
@@ -321,7 +319,7 @@ class NMDCVirusSample:
 
     @staticmethod
     def database_source() -> str:
-        return 'MNDC'
+        return 'NMDC'
 
     @staticmethod
     def bioproject_id():

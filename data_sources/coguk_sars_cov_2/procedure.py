@@ -1,7 +1,8 @@
 import os
+import pickle
 from os.path import sep
 from loguru import logger
-from typing import Callable, Optional, List
+from typing import Callable, Optional, List, Union
 import database_tom
 import vcm as vcm
 from data_sources.virus_sample import VirusSample
@@ -10,22 +11,36 @@ from data_sources.coguk_sars_cov_2.virus import COGUKSarsCov2
 from multiprocessing import JoinableQueue, cpu_count, Process
 from sqlalchemy.orm.session import Session
 from Bio import Entrez
+
+from locations import get_local_folder_for, FileType
 from pipeline_nuc_variants__annotations__aa import sequence_aligner
 Entrez.email = "Your.Name.Here@example.org"
 
 
 reference_sequence = None
+virus: Optional[COGUKSarsCov2] = None
+virus_id: Optional[int] = None
+import_method = None
+successful_imports: Optional[int] = None
 
 
 def main_pipeline_part_3(session: database_tom.Session, sample, db_sequence_id):
+    file_path = get_local_folder_for(virus.name, FileType.Annotations) + str(sample.internal_id()) + ".pickle"
     try:
-        annotations, nuc_variants = sequence_aligner(
-            db_sequence_id,
-            reference_sequence,
-            sample.nucleotide_sequence(),
-            'NC_045512',
-            f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv',
-            'new_ncbi_sars_cov_2')
+        if not os.path.exists(file_path):
+            annotations_and_nuc_variants = sequence_aligner(
+                db_sequence_id,
+                reference_sequence,
+                sample.nucleotide_sequence(),
+                'NC_045512',
+                f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv',
+                'new_ncbi_sars_cov_2')
+            with open(file_path, mode='wb') as cache_file:
+                pickle.dump(annotations_and_nuc_variants, cache_file, protocol=pickle.HIGHEST_PROTOCOL)
+        else:
+            with open(file_path, mode='rb') as cache_file:
+                annotations_and_nuc_variants = pickle.load(cache_file)
+        annotations, nuc_variants = annotations_and_nuc_variants
         for ann in annotations:
             vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
         for nuc in nuc_variants:
@@ -159,26 +174,28 @@ def try_import_virus_sample(sample: VirusSample):
         logger.exception(f'exception occurred while working on virus sample {sample}')
 
 
-virus = COGUKSarsCov2()
-# IMPORT VIRUS TAXON DATA
-virus_id = database_tom.try_py_function(import_virus, virus)
+def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
+    global virus, virus_id, import_method, successful_imports
+    virus = COGUKSarsCov2()
+    # IMPORT VIRUS TAXON DATA
+    virus_id = database_tom.try_py_function(import_virus, virus)
 
-# # IMPORT VIRUS SEQUENCES
-logger.info(f'importing virus sequences and related tables')
-import_method = Parallel()
-successful_imports = 0
+    # # IMPORT VIRUS SEQUENCES
+    logger.info(f'importing virus sequences and related tables')
+    import_method = Parallel()
+    successful_imports = 0
 
-# total_s = 2
-for s in virus.virus_samples():
-    if not s.nucleotide_sequence():
-        logger.info(f'sample {s.internal_id()} skipped because nucleotide sequence is empty or null')
-        continue
-    # if total_s > 0:
-    #     total_s -= 1
-    try_import_virus_sample(s)
-    # else:
-    #     break
+    # total_s = 2
+    for s in virus.virus_samples(from_sample, to_sample):
+        if not s.nucleotide_sequence():
+            logger.info(f'sample {s.internal_id()} skipped because nucleotide sequence is empty or null')
+            continue
+        # if total_s > 0:
+        #     total_s -= 1
+        try_import_virus_sample(s)
+        # else:
+        #     break
 
-logger.info('main process completed')
-import_method.tear_down()
-logger.info(f'successful imports: {successful_imports} (not reliable when parallel processing)')
+    logger.info('main process completed')
+    import_method.tear_down()
+    logger.info(f'successful imports: {successful_imports} (not reliable when parallel processing)')
