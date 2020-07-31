@@ -18,7 +18,7 @@ class COGUKSarsCov2(NCBISarsCov2):
 
     name = 'COG-UK_sars_cov_2'
     sequence_file_url = 'https://cog-uk.s3.climb.ac.uk/2020-07-28/cog_2020-07-28_sequences.fasta'
-    +    metadata_file_url = 'https://cog-uk.s3.climb.ac.uk/2020-07-28/cog_2020-07-28_metadata.csv'
+    metadata_file_url = 'https://cog-uk.s3.climb.ac.uk/2020-07-28/cog_2020-07-28_metadata.csv'
 
     def __init__(self):
         logger.info(f'importing virus {self.name} using {super().name} for taxonomy data')
