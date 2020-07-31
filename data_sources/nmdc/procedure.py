@@ -139,9 +139,8 @@ class NMDCVirusSample:
     def primary_accession_number(self):
         return self._id
 
-    @staticmethod
-    def alternative_accession_number():
-        return None
+    def alternative_accession_number(self):
+        return self.gisa_id()
 
     def strain(self):
         return self.metadata.get('isolate')
@@ -230,9 +229,8 @@ class NMDCVirusSample:
         else:
             return None
 
-    @staticmethod
-    def assembly_method():
-        return None
+    def assembly_method(self):
+        return self.metadata.get("jointMethods")
 
     @staticmethod
     def coverage():
@@ -321,7 +319,7 @@ class NMDCVirusSample:
 
     @staticmethod
     def database_source() -> str:
-        return 'MNDC'
+        return 'NMDC'
 
     @staticmethod
     def bioproject_id():
@@ -415,8 +413,8 @@ def reference_sequence(nuccore_query) -> str:
 base_url = 'http://nmdc.cn/SProject/virus/genbankfasta/'
 fasta_list = []
 # DOWNLOAD FASTA
-fasta_folder = get_local_folder_for('NMDC', FileType.SequenceOrSampleData)
-taxonomy_folder = get_local_folder_for('NMDC', FileType.TaxonomyData)
+fasta_folder: Optional[str] = None      # initialized elsewhere
+taxonomy_folder: Optional[str] = None     # initialized elsewhere
 
 # REFRENCE SEQUENCE
 refseq_sc2 = None
@@ -426,7 +424,9 @@ refseq_sc1_len = 0
 
 
 def import_samples_into_vcm():
-    global fasta_list, refseq_sc1, refseq_sc2, refseq_sc1_len, refseq_sc2_len, cached_taxonomy
+    global fasta_list, refseq_sc1, refseq_sc2, refseq_sc1_len, refseq_sc2_len, cached_taxonomy, fasta_folder, taxonomy_folder
+    fasta_folder = get_local_folder_for('NMDC', FileType.SequenceOrSampleData)
+    taxonomy_folder = get_local_folder_for('NMDC', FileType.TaxonomyData)
     fasta_list = get_fasta_list()
     logger.warning(
         f'{len(fasta_list)} files found at {base_url}. Some of them may be skipped because they have not metadata'

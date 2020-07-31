@@ -4,7 +4,7 @@ import sys
 import wget as wget
 from Bio import Entrez
 from tqdm import tqdm
-from typing import Generator, Callable
+from typing import Generator, Callable, Optional
 
 from loguru import logger
 
@@ -17,8 +17,8 @@ from locations import get_local_folder_for, FileType
 class COGUKSarsCov2(NCBISarsCov2):
 
     name = 'COG-UK_sars_cov_2'
-    sequence_file_url = 'https://cog-uk.s3.climb.ac.uk/2020-05-08/cog_2020-05-08_sequences.fasta'
-    metadata_file_url = 'https://cog-uk.s3.climb.ac.uk/2020-05-08/cog_2020-05-08_metadata.csv'
+    sequence_file_url = 'https://cog-uk.s3.climb.ac.uk/2020-07-28/cog_2020-07-28_sequences.fasta'
+    +    metadata_file_url = 'https://cog-uk.s3.climb.ac.uk/2020-07-28/cog_2020-07-28_metadata.csv'
 
     def __init__(self):
         logger.info(f'importing virus {self.name} using {super().name} for taxonomy data')
@@ -56,7 +56,7 @@ class COGUKSarsCov2(NCBISarsCov2):
     def is_positive_stranded(self):
         return super().is_positive_stranded()
 
-    def virus_samples(self) -> Generator[COGUKSarsCov2Sample, None, None]:
+    def virus_samples(self, from_sample: Optional[int] = None, to_sample: Optional[int] = None) -> Generator[COGUKSarsCov2Sample, None, None]:
         # import metadata (few KB, we can save it in memory)
         # noinspection PyAttributeOutsideInit
         logger.info('parsing metadata file...')
@@ -74,15 +74,25 @@ class COGUKSarsCov2(NCBISarsCov2):
 
         # generate a VirusSample for each line from region data file
         logger.info('reading sample sequence file...')
+        counter = 0
         with open(self.sequence_file_path, mode='r') as seq_file:
             progress = tqdm(total=len(meta.keys()))
             while True:
-                progress.update()
                 sample_key = seq_file.readline()
                 sample_sequence = seq_file.readline()
                 if not sample_sequence or not sample_key:
                     break  # EOF
                 else:
+                    if from_sample is not None and to_sample is not None:
+                        if counter < from_sample:
+                            progress.update()
+                            counter += 1
+                            continue
+                        elif counter >= to_sample:
+                            break
+                        else:
+                            counter += 1
+                    progress.update()
                     sample_key = sample_key[1:].rstrip()  # in the sequence file, the strain name is preceded by a '>', while in the metadata file not
                     sample = {
                         COGUKSarsCov2Sample.STRAIN_NAME: sample_key,

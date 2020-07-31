@@ -624,6 +624,7 @@ def _try_n_times(n_times: int, or_wait_secs: int, function: Callable, *args, **k
                 logger.error(f'Error while invoking {function.__name__} with args: {args}\nkwargs: {kwargs}. '
                              f'New attempt in {or_wait_secs} secs.'
                              f'Reason of error: {str(type(e))} {e.args}')
+                logger.warning(f'new attempt to download in 30s. Left attempts {n_times}')
                 executor.submit(time.sleep, or_wait_secs).result()
                 return _try_n_times(n_times, or_wait_secs, function, *args, **kwargs)
             else:
@@ -806,11 +807,15 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
             if sequence_id:
                 # carries out main_pipeline_3 with many processes
                 the_boss.assign_job(ImportAnnotationsAndNucVariants(sequence_id, sample))
+                logger.debug(f'queue size: {the_boss._queue.qsize()}\t\t alive processes: {len([x for x in the_boss._workers if x.is_alive()])}')
+                print(len([x for x in the_boss._workers if x.is_alive()]))
                 # database_tom.try_py_function(
                 #     main_pipeline_part_3, sample, sequence_id
                 # )
         # else:
         #     break
+    except:
+        logger.exception("AN EXCEPTION CAUSED THE LOOP TO TERMINATE. Workers will be terminated.")
     finally:
         # pass
         the_boss.stop_workers()
