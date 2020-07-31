@@ -244,7 +244,8 @@ try:
     if 'index' in source:
         database_tom.create_indexes()
     elif source in ['coguk', 'cog-uk']:
-        import data_sources.coguk_sars_cov_2.procedure
+        from data_sources.coguk_sars_cov_2.procedure import run as run_coguk
+        run_coguk(from_sample=_from, to_sample=to)
     elif source in ['ncbi-sars-cov2', 'genbank-sars-cov2', 'genbank-sarscov2', 'genbank-sars-cov-2']:
         import_method = Parallel
         viruses = [NCBISarsCov2()]
