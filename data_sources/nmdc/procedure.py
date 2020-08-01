@@ -19,7 +19,7 @@ import os
 from os.path import sep
 from data_sources.common_methods_host_sample import host_taxon_id_from_ncbi_taxon_name
 from data_sources.common_methods_virus import _download_virus_taxonomy_as_xml_from_name
-import vcm
+import vcm_mock as vcm
 import database_tom
 import dateutil.parser as dateparser
 from geo_groups import geo_groups
