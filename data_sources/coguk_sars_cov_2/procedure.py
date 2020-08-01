@@ -29,7 +29,7 @@ def main_pipeline_part_3(session: database_tom.Session, sample, db_sequence_id):
     try:
         if not os.path.exists(file_path):
             annotations_and_nuc_variants = sequence_aligner(
-                db_sequence_id,
+                sample.internal_id(),
                 reference_sequence,
                 sample.nucleotide_sequence(),
                 'NC_045512',
@@ -46,7 +46,7 @@ def main_pipeline_part_3(session: database_tom.Session, sample, db_sequence_id):
         for nuc in nuc_variants:
             vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
     except Exception:
-        logger.exception(f'exception occurred while working on annotations and nuc_variants of virus sample {sample}. Rollback transaction.')
+        logger.exception(f'exception occurred while working on annotations and nuc_variants of virus sample {sample.primary_accession_number()}. Rollback transaction.')
         raise database_tom.RollbackTransactionWithoutError()
 
 
@@ -98,7 +98,7 @@ class Parallel:
         # schedule nucleotide variants to be called asynchronously
         sample.on_before_multiprocessing()
         self._queue.put([sample, sequence.sequence_id])
-        logger.info(f'nucleotide variant calling for sequence {sample.internal_id()} scheduled')
+        logger.info(f'nuc_var for sequence {sample.internal_id()} scheduled\tQueue size: {self._queue.qsize()}\tAlive processes:{len([x for x in self.workers if x.is_alive()])}')
 
     class Consumer(Process):
         def __init__(self, jobs: JoinableQueue, refseq: str, shared_session: Session):
@@ -128,9 +128,11 @@ class Parallel:
                             logger.exception(
                                 f'unknown exception while running pipeline_part_3 of sequence with id {sequence_id}')
                             database_tom.rollback(self.shared_session)
-                        self.jobs.task_done()
+                        finally:
+                            self.jobs.task_done()
             finally:
                 self.shared_session.close()
+                self.jobs = None
 
     @staticmethod
     def number_of_processes():
@@ -171,7 +173,7 @@ def try_import_virus_sample(sample: VirusSample):
         database_tom.try_py_function(import_method.import_virus_sample, sample)
         successful_imports += 1
     except:
-        logger.exception(f'exception occurred while working on virus sample {sample}')
+        logger.exception(f'exception occurred while working on virus sample {sample.primary_accession_number()}')
 
 
 def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):

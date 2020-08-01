@@ -8,7 +8,12 @@ from loguru import logger
 def parse_annotated_variants(annotated_variants):
     result = []
     for variant in annotated_variants:
-        _, start_original, _, _, _, _, others, snpeff_ann = variant.split("\t")
+        try:
+            _, start_original, _, _, _, _, others, snpeff_ann = variant.split("\t")
+        except ValueError:
+            # happened with variant = protein_coding||c.*2479_*2480insCGCC|||||2480|,ANNNN|downstream_gene_variant|MODIFIER|ORF6|GU280_gp06|transcript|GU280_gp06|...
+            logger.warning(f'nuc_variant skipped because variant was: {variant}')
+            continue
 
         annotations = []
         for ann in snpeff_ann.split(","):
