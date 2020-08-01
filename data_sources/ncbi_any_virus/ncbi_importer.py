@@ -529,10 +529,13 @@ def _reference_sample_from_organism(samples_query: str, log_with_name: str, Samp
 
     logger.trace(f'getting accession ids of refseq...')
     accession_ids = _get_samples_accession_ids(samples_query+' AND srcdb_refseq[Properties]')
-    assert len(accession_ids) > 0, f'No reference sequence exists in the sample group identified by the query\n' \
-                                   f'<<<' \
-                                   f'{samples_query}' \
-                                   f'>>>'
+    if len(accession_ids) == 0:
+        logger.warning(f'No reference sequence exists in the sample group identified by the query\n'
+                       f'<<<'
+                       f'{samples_query}'
+                       f'>>>\n'
+                       f'Type a valid query selecting only one sample to be used as reference sample or press Ctrl+C to abort')
+        return _reference_sample_from_organism(input().strip(), log_with_name, SampleWrapperClass)
     assert len(accession_ids) == 1, f'More than one reference sequence found in the sample group identified by the query\n' \
                                     f'<<<\n' \
                                     f'{samples_query}\n' \
@@ -655,7 +658,8 @@ def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSampl
         for nuc in nuc_variants:
             vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
     except Exception:
-        logger.exception(f'exception occurred while working on annotations and nuc_variants of virus sample {sample}. Rollback transaction.')
+        logger.exception(f'exception occurred while working on annotations and nuc_variants of virus sample '
+                         f'{sample.internal_id()}. Rollback transaction.')
         raise database_tom.RollbackTransactionWithoutError()
 
 
@@ -716,7 +720,7 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
     virus_sequence_chromosome_name = virus_chromosome_name
     snpeff_db_name = _snpeff_db_name
     log_with_name = _log_with_name
-    the_boss = Boss(90, 90, TheWorker)
+    the_boss = Boss(10, 10, TheWorker)
 
     def check_user_query():
         """
@@ -750,18 +754,20 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
         def get_virus_id_and_nuc_reference_sequence(session: database_tom.Session):
             # get virus ID
             virus = vcm.get_virus(session, organism)
-            if not virus:
+            if virus:
+                _virus_id = virus.virus_id
+            else:
                 logger.trace(f'inserting new organism {bind_to_organism_taxon_id} into VIRUS table')
-                virus = vcm.create_or_get_virus(session, organism)
+                _virus_id = vcm.create_or_get_virus(session, organism)
             # get nuc_reference_sequence
             logger.trace(f'organism txid {bind_to_organism_taxon_id} already in VIRUS table.')
-            refseq_row: database_tom.Sequence = vcm.get_reference_sequence_of_virus(session, virus)
+            refseq_row: database_tom.Sequence = vcm.get_reference_sequence_of_virus(session, _virus_id)
             if refseq_row:
-                return virus.virus_id, refseq_row.nucleotide_sequence
+                return _virus_id, refseq_row.nucleotide_sequence
             else:
                 logger.trace('caching the nucleotide sequence of the reference')
                 downloaded_ref_sample = _reference_sample_from_organism(samples_query, log_with_name, SampleWrapperClass)
-                return virus.virus_id, downloaded_ref_sample.nucleotide_sequence()
+                return _virus_id, downloaded_ref_sample.nucleotide_sequence()
 
         return database_tom.try_py_function(
             get_virus_id_and_nuc_reference_sequence
@@ -773,10 +779,10 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
         :return: SEQUENCE.sequence_id of every sample
         """
         try:
-            experiment = vcm.create_or_get_experiment(session, sample)
-            host_sample = vcm.create_or_get_host_sample(session, sample)
-            sequencing_project = vcm.create_or_get_sequencing_project(session, sample)
-            sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment, host_sample, sequencing_project)
+            experiment_id = vcm.create_or_get_experiment(session, sample)
+            host_sample_id = vcm.create_or_get_host_sample(session, sample)
+            sequencing_project_id = vcm.create_or_get_sequencing_project(session, sample)
+            sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
             return sequence.sequence_id
         except Exception as e:
             if str(e).startswith('duplicate key value violates unique constraint "sequence_accession_id_key"'):

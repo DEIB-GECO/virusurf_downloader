@@ -205,13 +205,13 @@ class Sequence(_base):
 
     sequence_id = Column(Integer, primary_key=True, autoincrement=True)
     # FKs
-    experiment_type_id = Column(Integer, ForeignKey(ExperimentType.experiment_type_id), nullable=False)
-    virus_id = Column(Integer, ForeignKey(Virus.virus_id), nullable=False)
-    host_sample_id = Column(Integer, ForeignKey(HostSample.host_sample_id), nullable=False)
-    sequencing_project_id = Column(Integer, ForeignKey(SequencingProject.sequencing_project_id), nullable=False)
+    experiment_type_id = Column(Integer, nullable=False)
+    virus_id = Column(Integer, nullable=False)
+    host_sample_id = Column(Integer, nullable=False)
+    sequencing_project_id = Column(Integer, nullable=False)
 
-    accession_id = Column(String, unique=True, nullable=False)
-    alternative_accession_id = Column(String, unique=True, nullable=True)
+    accession_id = Column(String, nullable=False)
+    alternative_accession_id = Column(String, nullable=True)
     strain_name = Column(String)
     is_reference = Column(Boolean, nullable=False)
     is_complete = Column(Boolean)

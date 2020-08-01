@@ -13,7 +13,7 @@ logger.warning('You are using a mocked version of the VCM: You can use it to tes
 
 
 #   #############################    VCM    ############################
-def create_or_get_virus(session, a_virus) -> Virus:
+def create_or_get_virus(session, a_virus):
     # virus = session.query(Virus).filter(Virus.taxon_id == a_virus.taxon_id()).one_or_none()
     # if not virus:
     virus = Virus(taxon_id=a_virus.taxon_id(),
@@ -28,7 +28,7 @@ def create_or_get_virus(session, a_virus) -> Virus:
                   is_positive_stranded=a_virus.is_positive_stranded()
                   )
     virus.virus_id = 1
-    return virus
+    return virus.virus_id
 
 
 def create_or_get_experiment(session, sample: VirusSample):
@@ -45,7 +45,7 @@ def create_or_get_experiment(session, sample: VirusSample):
         assembly_method=assembly_method,
         coverage=coverage)
     experiment.experiment_type_id = 1
-    return experiment
+    return experiment.experiment_type_id
 
 
 def create_or_get_sequencing_project(session, sample: VirusSample):
@@ -66,7 +66,7 @@ def create_or_get_sequencing_project(session, sample: VirusSample):
                                            bioproject_id=bioproject_id,
                                            database_source=database_source)
     sequencing_project.sequencing_project_id = 1
-    return sequencing_project
+    return sequencing_project.sequencing_project_id
 
 
 def create_or_get_host_sample(session, sample: VirusSample):
@@ -112,10 +112,10 @@ def create_or_get_host_sample(session, sample: VirusSample):
                              gender=gender,
                              )
     host_sample.host_sample_id = 1
-    return host_sample
+    return host_sample.host_sample_id
 
 
-def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, experiment: ExperimentType, host_sample: HostSample, sequencing_project: SequencingProject):
+def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, experiment_id, host_sample_id, sequencing_project_id):
     # data from sample
     accession_id = virus_sample.primary_accession_number()
     alternative_accession_id = virus_sample.alternative_accession_number()
@@ -129,11 +129,6 @@ def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, ex
     n_percentage = virus_sample.n_percent()
     lineage = virus_sample.lineage()
     clade = virus_sample.clade()
-    # foreign keys
-    experiment_type_id = experiment.experiment_type_id
-    sequencing_project_id = sequencing_project.sequencing_project_id
-    virus_id = virus_id
-    host_sample_id = host_sample.host_sample_id
 
     # sequence = session.query(Sequence).filter(Sequence.accession_id == accession_id,
     #                                           Sequence.alternative_accession_id == alternative_accession_id,
@@ -147,7 +142,7 @@ def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, ex
     #                                           Sequence.gc_percentage == gc_percentage,
     #                                           Sequence.lineage == lineage,
     #                                           Sequence.clade == clade,
-    #                                           Sequence.experiment_type_id == experiment_type_id,
+    #                                           Sequence.experiment_type_id == experiment_id,
     #                                           Sequence.sequencing_project_id == sequencing_project_id,
     #                                           Sequence.virus_id == virus_id,
     #                                           Sequence.host_sample_id == host_sample_id).one_or_none()
@@ -164,7 +159,7 @@ def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, ex
                         gc_percentage=gc_percentage,
                         lineage=lineage,
                         clade=clade,
-                        experiment_type_id=experiment_type_id,
+                        experiment_type_id=experiment_id,
                         sequencing_project_id=sequencing_project_id,
                         virus_id=virus_id,
                         host_sample_id=host_sample_id)

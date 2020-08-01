@@ -1,3 +1,4 @@
+import pickle
 from collections import Counter, OrderedDict
 from datetime import datetime
 from decimal import Decimal
@@ -326,7 +327,10 @@ class NMDCVirusSample:
         return None
 
     def taxon_name(self):
-        return self.metadata.get("spciesname")
+        name = self.metadata.get("spciesname")
+        if name and name.lower() == 'human':
+            name = 'Homo sapiens'
+        return name
 
     def gisa_id(self):
         return self.metadata.get('gisaid')
@@ -441,16 +445,15 @@ def import_samples_into_vcm():
     refseq_sc1_len = len(refseq_sc1)
 
     def virus_taxonomy_pipeline(session: database_tom, taxon: AnyNCBITaxon):
-        virus = vcm.create_or_get_virus(session, taxon)
-        return virus.virus_id
+        return vcm.create_or_get_virus(session, taxon)
 
     # noinspection PyTypeChecker
     def metadata_pipeline(session: database_tom.Session, a_sample: NMDCVirusSample):
         try:
-            experiment = vcm.create_or_get_experiment(session, a_sample)
-            host_sample = vcm.create_or_get_host_sample(session, a_sample)
-            sequencing_project = vcm.create_or_get_sequencing_project(session, a_sample)
-            sequence = vcm.create_or_get_sequence(session, a_sample, virus_id, experiment, host_sample, sequencing_project)
+            experiment_id = vcm.create_or_get_experiment(session, a_sample)
+            host_sample_id = vcm.create_or_get_host_sample(session, a_sample)
+            sequencing_project_id = vcm.create_or_get_sequencing_project(session, a_sample)
+            sequence = vcm.create_or_get_sequence(session, a_sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
             return sequence.sequence_id
         except Exception as e:
             if str(e).startswith('duplicate key value violates unique constraint "sequence_accession_id_key"'):
@@ -467,20 +470,29 @@ def import_samples_into_vcm():
         else:
             raise Exception(f'unknown taxon organism {a_sample.taxon_name()}')
         try:
-            annotations, nuc_variants = sequence_aligner(
-                db_sequence_id,
-                refseq,
-                a_sample.nucleotide_sequence(),
-                'NC_045512',
-                f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv',
-                'new_ncbi_sars_cov_2')
+            file_path = get_local_folder_for('NMDC', FileType.Annotations)+str(sample.primary_accession_number())+".pickle"
+            if not os.path.exists(file_path):
+                annotations_and_nuc_variants = sequence_aligner(
+                    db_sequence_id,
+                    refseq,
+                    a_sample.nucleotide_sequence(),
+                    'NC_045512',
+                    f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv',
+                    'new_ncbi_sars_cov_2')
+                with open(file_path, mode='wb') as cache_file:
+                    pickle.dump(annotations_and_nuc_variants, cache_file, protocol=pickle.HIGHEST_PROTOCOL)
+            else:
+                with open(file_path, mode='rb') as cache_file:
+                    annotations_and_nuc_variants = pickle.load(cache_file)
+            annotations, nuc_variants = annotations_and_nuc_variants
             for ann in annotations:
                 vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
             for nuc in nuc_variants:
                 vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
         except Exception:
             logger.exception(
-                f'exception occurred while working on annotations and nuc_variants of virus sample {a_sample}. Rollback transaction.')
+                f'exception occurred while working on annotations and nuc_variants of virus sample '
+                f'{a_sample.primary_accession_number()}. Rollback transaction.')
             raise database_tom.RollbackTransactionWithoutError()
 
     logger.info('begin import of selected records')
@@ -518,9 +530,9 @@ def import_samples_into_vcm():
                 if gisa_id:
                     log_of_gisaid_id.write(gisa_id+'\n')
 
-                # sequence_id = database_tom.try_py_function(metadata_pipeline, sample)
-                # if sequence_id:
-                #     database_tom.try_py_function(nucleotide__annotations__pipeline, sample, sequence_id)
+                sequence_id = database_tom.try_py_function(metadata_pipeline, sample)
+                if sequence_id:
+                    database_tom.try_py_function(nucleotide__annotations__pipeline, sample, sequence_id)
                 total_sequences_imported += 1
 
         logger.info(f'{total_sequences_imported} sequences imported.')
