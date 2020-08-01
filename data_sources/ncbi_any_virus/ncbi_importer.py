@@ -658,7 +658,8 @@ def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSampl
         for nuc in nuc_variants:
             vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
     except Exception:
-        logger.exception(f'exception occurred while working on annotations and nuc_variants of virus sample {sample}. Rollback transaction.')
+        logger.exception(f'exception occurred while working on annotations and nuc_variants of virus sample '
+                         f'{sample.internal_id()}. Rollback transaction.')
         raise database_tom.RollbackTransactionWithoutError()
 
 

@@ -1,3 +1,4 @@
+import pickle
 from collections import Counter, OrderedDict
 from datetime import datetime
 from decimal import Decimal
@@ -469,20 +470,29 @@ def import_samples_into_vcm():
         else:
             raise Exception(f'unknown taxon organism {a_sample.taxon_name()}')
         try:
-            annotations, nuc_variants = sequence_aligner(
-                db_sequence_id,
-                refseq,
-                a_sample.nucleotide_sequence(),
-                'NC_045512',
-                f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv',
-                'new_ncbi_sars_cov_2')
+            file_path = get_local_folder_for('NMDC', FileType.Annotations)+str(sample.primary_accession_number())+".pickle"
+            if not os.path.exists(file_path):
+                annotations_and_nuc_variants = sequence_aligner(
+                    db_sequence_id,
+                    refseq,
+                    a_sample.nucleotide_sequence(),
+                    'NC_045512',
+                    f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv',
+                    'new_ncbi_sars_cov_2')
+                with open(file_path, mode='wb') as cache_file:
+                    pickle.dump(annotations_and_nuc_variants, cache_file, protocol=pickle.HIGHEST_PROTOCOL)
+            else:
+                with open(file_path, mode='rb') as cache_file:
+                    annotations_and_nuc_variants = pickle.load(cache_file)
+            annotations, nuc_variants = annotations_and_nuc_variants
             for ann in annotations:
                 vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
             for nuc in nuc_variants:
                 vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
         except Exception:
             logger.exception(
-                f'exception occurred while working on annotations and nuc_variants of virus sample {a_sample}. Rollback transaction.')
+                f'exception occurred while working on annotations and nuc_variants of virus sample '
+                f'{a_sample.primary_accession_number()}. Rollback transaction.')
             raise database_tom.RollbackTransactionWithoutError()
 
     logger.info('begin import of selected records')
