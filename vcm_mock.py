@@ -164,7 +164,7 @@ def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, ex
                         virus_id=virus_id,
                         host_sample_id=host_sample_id)
     sequence.sequence_id = 1
-    return sequence.sequence_id
+    return sequence
 
 
 def create_annotation_and_aa_variants(session, sample: VirusSample, sequence: Sequence, reference_sample: VirusSample):
