@@ -99,11 +99,11 @@ class Sequential:
         self.reference_sample: Optional[VirusSample] = None
 
     def import_virus_sample(self, session: Session, sample: VirusSample):
-        experiment = vcm.create_or_get_experiment(session, sample)
-        host_sample = vcm.create_or_get_host_sample(session, sample)
-        sequencing_project = vcm.create_or_get_sequencing_project(session, sample)
-        sequence = vcm.create_or_get_sequence(session, sample, self.virus_id, experiment, host_sample,
-                                              sequencing_project)
+        experiment_id = vcm.create_or_get_experiment(session, sample)
+        host_sample_id = vcm.create_or_get_host_sample(session, sample)
+        sequencing_project_id = vcm.create_or_get_sequencing_project(session, sample)
+        sequence = vcm.create_or_get_sequence(session, sample, self.virus_id, experiment_id, host_sample_id,
+                                              sequencing_project_id)
         vcm.create_annotation_and_aa_variants(session, sample, sequence, self.reference_sample)
 
         if self.aligner is None and sample.is_reference():
@@ -132,11 +132,11 @@ class Parallel:
 
     def import_virus_sample(self, session: Session, sample):
         # do this synchronously
-        experiment = vcm.create_or_get_experiment(session, sample)
-        host_sample = vcm.create_or_get_host_sample(session, sample)
-        sequencing_project = vcm.create_or_get_sequencing_project(session, sample)
-        sequence = vcm.create_or_get_sequence(session, sample, self.virus_id, experiment, host_sample,
-                                              sequencing_project)
+        experiment_id = vcm.create_or_get_experiment(session, sample)
+        host_sample_id = vcm.create_or_get_host_sample(session, sample)
+        sequencing_project_id = vcm.create_or_get_sequencing_project(session, sample)
+        sequence = vcm.create_or_get_sequence(session, sample, self.virus_id, experiment_id, host_sample_id,
+                                              sequencing_project_id)
         vcm.create_annotation_and_aa_variants(session, sample, sequence, self.reference_sample)
 
         if not self.workers and sample.is_reference():
@@ -213,7 +213,7 @@ class Parallel:
 def run():
 
     def import_virus(session: Session, virus: VirusSource):
-        return vcm.create_or_get_virus(session, virus).virus_id
+        return vcm.create_or_get_virus(session, virus)
 
     def try_import_virus_sample(sample: VirusSample):
         nonlocal successful_imports

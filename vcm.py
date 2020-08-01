@@ -3,6 +3,7 @@ from typing import List
 # noinspection PyPackageRequirements
 from Bio import Entrez
 from lxml import etree
+from sqlalchemy.orm import joinedload
 
 from data_sources.virus import VirusSource
 from database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
@@ -21,13 +22,13 @@ cache_virus = dict()
 
 
 #   #############################    VCM    ############################
-def create_or_get_virus(session, a_virus) -> Virus:
+def create_or_get_virus(session, a_virus):
     global cache_virus
 
     virus_key = (a_virus.taxon_id(), a_virus.taxon_name(), a_virus.family(), a_virus.sub_family(), a_virus.genus(), a_virus.species(), a_virus.equivalent_names(), a_virus.molecule_type(), a_virus.is_single_stranded(), a_virus.is_positive_stranded())
-    virus = cache_virus.get(virus_key)
+    virus_id = cache_virus.get(virus_key)
 
-    if not virus:
+    if not virus_id:
         virus = session.query(Virus).filter(Virus.taxon_id == a_virus.taxon_id()).one_or_none()
         if not virus:
             virus = Virus(taxon_id=a_virus.taxon_id(),
@@ -43,8 +44,9 @@ def create_or_get_virus(session, a_virus) -> Virus:
                           )
             session.add(virus)
             session.flush()
-        cache_virus[virus_key] = virus
-    return virus
+        virus_id = virus.virus_id
+        cache_virus[virus_key] = virus_id
+    return virus_id
 
 
 def create_or_get_experiment(session, sample: VirusSample):
@@ -55,9 +57,9 @@ def create_or_get_experiment(session, sample: VirusSample):
     coverage = sample.coverage()
 
     exp_key = (sequencing_technology, assembly_method, coverage)
-    experiment = cache_experiment_type.get(exp_key)
+    experiment_id = cache_experiment_type.get(exp_key)
 
-    if not experiment:
+    if not experiment_id:
         experiment = session.query(ExperimentType).filter(
             ExperimentType.sequencing_technology == sequencing_technology,
             ExperimentType.assembly_method == assembly_method,
@@ -69,8 +71,9 @@ def create_or_get_experiment(session, sample: VirusSample):
                 coverage=coverage)
             session.add(experiment)
             session.flush()
-        cache_experiment_type[exp_key] = experiment
-    return experiment
+        experiment_id = experiment.experiment_type_id
+        cache_experiment_type[exp_key] = experiment_id
+    return experiment_id
 
 
 def create_or_get_sequencing_project(session, sample: VirusSample):
@@ -82,9 +85,9 @@ def create_or_get_sequencing_project(session, sample: VirusSample):
     database_source = sample.database_source()
 
     project_key = (submission_date, sequencing_lab, bioproject_id, database_source)
-    sequencing_project = cache_sequencing_project.get(project_key)
+    sequencing_project_id = cache_sequencing_project.get(project_key)
 
-    if not sequencing_project:
+    if not sequencing_project_id:
         sequencing_project = session.query(SequencingProject).filter(SequencingProject.sequencing_lab == sequencing_lab,
                                                                      SequencingProject.submission_date == submission_date,
                                                                      SequencingProject.bioproject_id == bioproject_id,
@@ -97,8 +100,9 @@ def create_or_get_sequencing_project(session, sample: VirusSample):
                                                    database_source=database_source)
             session.add(sequencing_project)
             session.flush()
-        cache_sequencing_project[project_key] = sequencing_project
-    return sequencing_project
+        sequencing_project_id = sequencing_project.sequencing_project_id
+        cache_sequencing_project[project_key] = sequencing_project_id
+    return sequencing_project_id
 
 
 def create_or_get_host_sample(session, sample: VirusSample):
@@ -118,7 +122,7 @@ def create_or_get_host_sample(session, sample: VirusSample):
     host_sample_key = (host_taxon_name, host_taxon_id, gender, age, originating_lab, collection_date, isolation_source, country, region, geo_group)
 
     if host_sample_key in cache_host_sample:
-        host_sample = cache_host_sample[host_sample_key]
+        host_sample_id = cache_host_sample[host_sample_key]
     else:
         host_sample = session.query(HostSample).filter(HostSample.host_taxon_id == host_taxon_id,
                                                        HostSample.host_taxon_name == host_taxon_name,
@@ -151,11 +155,12 @@ def create_or_get_host_sample(session, sample: VirusSample):
 
             session.add(host_sample)
             session.flush()
-        cache_host_sample[host_sample_key] = host_sample
-    return host_sample
+        host_sample_id = host_sample.host_sample_id
+        cache_host_sample[host_sample_key] = host_sample_id
+    return host_sample_id
 
 
-def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, experiment: ExperimentType, host_sample: HostSample, sequencing_project: SequencingProject):
+def create_or_get_sequence(session, virus_sample: VirusSample, virus_id, experiment_id, host_sample_id, sequencing_project_id):
     # data from sample
     accession_id = virus_sample.primary_accession_number()
     alternative_accession_id = virus_sample.alternative_accession_number()
@@ -169,11 +174,7 @@ def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, ex
     n_percentage = virus_sample.n_percent()
     lineage = virus_sample.lineage()
     clade = virus_sample.clade()
-    # foreign keys
-    experiment_type_id = experiment.experiment_type_id
-    sequencing_project_id = sequencing_project.sequencing_project_id
-    virus_id = virus_id
-    host_sample_id = host_sample.host_sample_id
+
     sequence = Sequence(accession_id=accession_id,
                         alternative_accession_id=alternative_accession_id,
                         strain_name=strain_name,
@@ -186,7 +187,7 @@ def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, ex
                         gc_percentage=gc_percentage,
                         lineage=lineage,
                         clade=clade,
-                        experiment_type_id=experiment_type_id,
+                        experiment_type_id=experiment_id,
                         sequencing_project_id=sequencing_project_id,
                         virus_id=virus_id,
                         host_sample_id=host_sample_id)
@@ -315,9 +316,9 @@ def get_virus(session, a_virus) -> Optional[Virus]:
     return session.query(Virus).filter(Virus.taxon_id == a_virus.taxon_id()).one_or_none()
 
 
-def get_reference_sequence_of_virus(session, a_virus: Virus) -> Optional[Sequence]:
+def get_reference_sequence_of_virus(session, virus_id) -> Optional[Sequence]:
     return session.query(Sequence).filter(
-        Sequence.virus_id == a_virus.virus_id,
+        Sequence.virus_id == virus_id,
         # noqa              # == ignore warning on " == True" for this case
         Sequence.is_reference == True
     ).one_or_none()
