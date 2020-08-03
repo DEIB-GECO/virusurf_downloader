@@ -506,8 +506,8 @@ def import_samples_into_vcm():
                 sample = NMDCVirusSample(file)
 
                 organism_name = sample.taxon_name()
-                if organism_name == 'Rhinolophus malayanus':
-                    logger.info(f'Sample {file} skipped because related to organims Rhinolophus malayanus')
+                if organism_name != 'Severe acute respiratory syndrome coronavirus 2':
+                    logger.info(f'Sample {file} skipped because related to organims {organism_name}')
                     total_sequences_skipped += 1
                     continue
                 organism = cached_taxonomy.get('organism_name')
