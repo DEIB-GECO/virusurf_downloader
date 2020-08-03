@@ -133,16 +133,16 @@ class GISAIDSarsCov2Sample(VirusSample):
         return submission_date
 
     def originating_lab(self) -> Optional[str]:
-        try:
-            return self.sequence_dict['covv_orig_lab']
-        except KeyError:
-            return None
+        lab = self.sequence_dict.get('covv_orig_lab')
+        if lab:
+            lab = lab.strip()
+        return lab
 
     def sequencing_lab(self) -> Optional[str]:
-        try:
-            return self.sequence_dict['covv_subm_lab']
-        except KeyError:
-            return None
+        lab = self.sequence_dict.get('covv_subm_lab')
+        if lab:
+            lab = lab.strip()
+        return lab
 
     def host_taxon_name(self) -> Optional[str]:
         return self.sequence_dict.get('covv_host')

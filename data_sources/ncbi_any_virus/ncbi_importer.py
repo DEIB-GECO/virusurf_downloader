@@ -842,5 +842,6 @@ prepared_parameters = {
     'bombali_ebolavirus': ('txid2010960[Organism:noexp]', 2010960, 'Bombali ebolavirus', f'.{sep}annotations{sep}bombali_ebolavirus.tsv', 'NC_039345', 'bombali_ebolavirus'),
     'tai_forest_ebolavirus': ('txid186541[Organism:exp]', 186541, 'Tai Forest ebolavirus', f'.{sep}annotations{sep}tai_forest_ebolavirus.tsv', 'NC_014372', 'tai_forest_ebolavirus'),
     'new_ncbi_sars_cov_2': ('txid2697049[Organism]', 2697049, 'New NCBI SARS-Cov-2', f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv', 'NC_045512', 'new_ncbi_sars_cov_2'),
-    'new_ncbi_sars_cov_1': ('txid694009[Organism:noexp] NOT txid2697049[Organism]', 694009, 'New NCBI SARS-Cov-1', f'.{sep}annotations{sep}sars_cov_1.tsv', 'NC_004718', 'sars_cov_1')
+    'new_ncbi_sars_cov_1': ('txid694009[Organism:noexp] NOT txid2697049[Organism]', 694009, 'New NCBI SARS-Cov-1', f'.{sep}annotations{sep}sars_cov_1.tsv', 'NC_004718', 'sars_cov_1'),
+    'reference_of_sc1': ('txid694009[Organism] NOT txid2697049[Organism] AND srcdb_refseq[Properties]', 694009, 'New NCBI SARS-Cov-1', f'.{sep}annotations{sep}sars_cov_1.tsv', 'NC_004718', 'sars_cov_1')
 }

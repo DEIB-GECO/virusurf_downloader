@@ -77,19 +77,18 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
         nuc_seq = "".join(
             [x[1] for x in zip(ref_positions, seq_aligned) if nuc_start <= x[0] and nuc_stop >= x[0]]).replace("-", "")
 
-        if nuc_seq is not None and aa_seq is None:
-            logger.warning('nuc_seq is not None and aa_seq is None')
+        #if nuc_seq is not None and aa_seq is None:
+        #    logger.warning('nuc_seq is not None and aa_seq is None (' + gene + ',' + protein + ')')
 
 
         list_mutations = []
         if annotation.ann_type == 'mature_protein_region' or annotation.ann_type == 'CDS':
-            aa_seq = ''
+            dna_ref = ''
             for (start, stop) in annotation.ann_pos:
-                dna_ref = "".join([x[1] for x in zip(ref_positions, seq_aligned) if start <= x[0] and stop >= x[0]])
-                dna_ref = dna_ref.replace("-", "")
-
+                dna_ref += "".join([x[1] for x in zip(ref_positions, seq_aligned) if start <= x[0] and stop >= x[0]]).replace("-", "")
+                            
             if len(dna_ref)%3 == 0 and len(dna_ref) > 0:
-                aa_seq += Seq._translate_str(dna_ref, table, cds=False).replace("*", "")
+                aa_seq = Seq._translate_str(dna_ref, table, cds=False).replace("*", "")
 
                 alignment_aa = pairwise2.align.globalms(annotation.aa_seq, aa_seq, 2, -1, -1, -.5)
 
@@ -114,30 +113,97 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
                         pos += 1
                     ref_positions_aa[i] = pos
 
-                aligned_aa = list(zip(ref_positions_aa, ref_aligned_aa, seq_aligned_aa))
-                # print(annotation.protein, "aligned_aa, ", [x[1] for x in aligned_aa])
-                mut_set = set()
-                for t in aligned_aa:
-                    if t[2] == "-":
-                        mutpos = int(t[0])
-                        original = t[1]
-                        alternative = t[2]
-                        mut_type = "DEL"
-                        mut_set.add((gene, protein, protein_id, mutpos, original, alternative, mut_type))
-                    elif (t[1] != t[2]) & (t[1] != "-"):
-                        mutpos = int(t[0])
-                        original = [r for (p, r, s) in aligned_aa if p == mutpos][0]
-                        alternative = "".join([s for (p, r, s) in aligned_aa if p == mutpos])
-                        mut_type = "SUB"
-                        mut_set.add((gene, protein, protein_id, mutpos, original, alternative, mut_type))
-                    elif t[1] == "-":
-                        mutpos = int(t[0])
-                        original = t[1]
-                        alternative = t[2]
-                        mut_type = "SUB"
-                        mut_set.add((gene, protein, protein_id, mutpos, original, alternative, mut_type))
+                seq_positions_aa = np.zeros(len(seq_aligned_aa), dtype=int)
+                pos = 0
+                for i in range(len(ref_aligned_aa)):
+                    if seq_aligned_aa[i] != '-':
+                        pos += 1
+                    seq_positions_aa[i] = pos
 
-                list_mutations = list(mut_set)
+
+
+                list_mutations = []
+
+                ins_open = False
+                ins_len = 0
+                ins_pos = None
+                ins_seq = ""
+                for i in range(len(ref_aligned_aa)):
+                    if ref_aligned_aa[i] == '-':
+                        ins_open = True
+                        ins_len += 1
+                        ins_pos = ref_positions_aa[i]
+                        ins_seq += seq_aligned_aa[i]
+                    else:
+                        if ins_open:
+                            v = (gene, protein, protein_id, ins_pos, "-" * ins_len, ins_seq, "INS")
+                            list_mutations.append(v)
+            
+                            ins_open = False
+                            ins_len = 0
+                            ins_pos = None
+                            ins_seq = ""
+                if ins_open:
+                    v = (gene, protein, protein_id, ins_pos, "-" * ins_len, ins_seq, "INS")
+                    list_mutations.append(v)
+
+                del_open = False
+                del_len = 0
+                del_pos = None
+                del_seq = ""
+                for i in range(len(ref_aligned_aa)):
+                    if seq_aligned_aa[i] == '-':
+                        if not del_open:
+                            del_pos = ref_positions_aa[i]
+                        del_pos_seq = seq_positions_aa[i]
+                        del_open = True
+                        del_len += 1
+                        del_seq += ref_aligned_aa[i]
+                    else:
+                        if del_open:
+                            v = (gene, protein, protein_id, ins_pos, del_seq, "-" * del_len, "DEL")
+                            list_mutations.append(v)
+
+                            del_open = False
+                            del_len = 0
+                            del_pos = None
+                            del_pos_seq = None
+                            del_seq = ""
+
+                if del_open:
+                    v = (gene, protein, protein_id, ins_pos, del_seq, "-" * del_len, "DEL")
+                    list_mutations.append(v)
+
+                mut_open = False
+                mut_len = 0
+                mut_pos = None
+                mut_pos_seq = None
+                mut_seq_original = ""
+                mut_seq_mutated = ""
+                for i in range(len(ref_aligned_aa)):
+                    if ref_aligned_aa[i] != '-' and seq_aligned_aa[i] != '-' and ref_aligned_aa[i] != seq_aligned_aa[i]:
+                        if not mut_open:
+                            mut_pos = ref_positions_aa[i]
+                            mut_pos_seq = seq_positions_aa[i]
+                        mut_open = True
+                        mut_len += 1
+                        mut_seq_original += ref_aligned_aa[i]
+                        mut_seq_mutated += seq_aligned_aa[i]
+                    else:
+                        if mut_open:
+                            v = (gene, protein, protein_id, mut_pos, mut_seq_original, mut_seq_mutated, "SUB")
+                            list_mutations.append(v)
+
+                            mut_open = False
+                            mut_len = 0
+                            mut_pos = None
+                            mut_pos_seq = None
+                            mut_seq_original = ""
+                            mut_seq_mutated = ""
+
+                if mut_open:
+                    v = (gene, protein, protein_id, mut_pos, mut_seq_original, mut_seq_mutated, "SUB")
+                    list_mutations.append(v)
 
                 list_annotations.append(
                     (gene, protein, protein_id, atype, nuc_start, nuc_stop, nuc_seq, aa_seq, list_mutations))
