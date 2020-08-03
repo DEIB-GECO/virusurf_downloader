@@ -248,7 +248,7 @@ def create_annotation_and_amino_acid_variants(session, sequence_id, *args):
             aa_variant = AminoacidVariant(annotation_id=annotation.annotation_id,
                                           sequence_aa_original=sequence_aa_original,
                                           sequence_aa_alternative=sequence_aa_alternative,
-                                          start_aa_original=start_pos,
+                                          start_aa_original=int(start_pos) if start_pos else None,
                                           variant_aa_length=max(len(sequence_aa_original), len(sequence_aa_alternative)),
                                           variant_aa_type=variant_aa_type)
             session.add(aa_variant)
