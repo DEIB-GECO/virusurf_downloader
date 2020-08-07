@@ -1,0 +1,11 @@
+### Betacorona England 1 ###
+
+Go to Genbank link:
+https://www.ncbi.nlm.nih.gov/nuccore/NC_038294
+
+Download the protein (whole antigen body) that IEDB contains epitopes for:
+
+ - Spike glycoprotein
+
+Save it using the protein's uniprot id .fa:
+https://www.uniprot.org/uniprot/?query=taxonomy%3A%22Betacoronavirus+England+1+%5B1263720%5D%22+spike+glycoprotein&sort=score

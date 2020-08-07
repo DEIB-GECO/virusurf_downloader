@@ -1,0 +1,17 @@
+ORF,POS,REF_ID,TARGET_ID,REF,ALT
+test_ORF,1,test_ref,Seq1,C,-
+test_ORF,2,test_ref,Seq1,C,-
+test_ORF,3,test_ref,Seq1,C,-
+test_ORF,4,test_ref,Seq1,A,-
+test_ORF,5,test_ref,Seq1,T,-
+test_ORF,6,test_ref,Seq1,T,-
+test_ORF,7,test_ref,Seq1,A,-
+test_ORF,8,test_ref,Seq1,G,-
+test_ORF,9,test_ref,Seq1,C,-
+test_ORF,10,test_ref,Seq1,C,-
+test_ORF,11,test_ref,Seq1,C,-
+test_ORF,12,test_ref,Seq1,T,-
+test_ORF,18,test_ref,Seq1,G,C
+test_ORF,32,test_ref,Seq1,A,C
+test_ORF,54,test_ref,Seq1,C,A
+test_ORF,60,test_ref,Seq1,A,G

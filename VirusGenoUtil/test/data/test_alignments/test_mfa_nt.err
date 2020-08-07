@@ -1,0 +1,8 @@
+Align target 0 (Seq1)
+Align target 1 (Seq2)
+Seq2: Alignment error. (scores nt: 183; codon: 0)
+Align target 2 (Seq3)
+Seq3: Alignment error. (scores nt: 151.3; codon: 0)
+Align target 3 (Seq4)
+Seq4: Alignment error. (scores nt: 105.4; codon: 0)
+Computing global alignment... done.

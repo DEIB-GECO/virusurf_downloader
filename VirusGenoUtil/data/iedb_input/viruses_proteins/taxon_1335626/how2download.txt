@@ -1,0 +1,14 @@
+### MERS ###
+Go to NCBI GenBank file:
+https://www.ncbi.nlm.nih.gov/nuccore/NC_019843.3?report=graph
+
+Download the proteins:
+
+ - spike glycoprotein > K9N5Q8
+ - nucleoprotein > K9N4V7
+ - membrane protein > K9N7A1
+
+name each protein with uniprot id
+and save it with .fa 
+
+example uniprot query: https://www.uniprot.org/uniprot/?query=taxonomy%3A%22Middle+East+respiratory+syndrome-related+coronavirus+%28MERS-CoV%29+%5B1335626%5D%22+membrane+protein&sort=score
