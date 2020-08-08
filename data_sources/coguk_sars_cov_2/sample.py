@@ -43,7 +43,7 @@ class COGUKSarsCov2Sample(VirusSample):
             else:
                 output = {
                     self.STRAIN_NAME: sample_dict['strain_name'],
-                    self.NUC_SEQUENCE: sample_dict['nuc_sequence'],
+                    self.NUC_SEQUENCE: sample_dict['nuc_sequence'].replace('-', ''),
                     self.COUNTRY: country,
                     self.REGION: region,
                     self.COLLECTION_DATE: collection_date,

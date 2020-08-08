@@ -5,6 +5,7 @@ from loguru import logger
 from typing import Callable, Optional, List, Union
 import database_tom
 import vcm as vcm
+from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
 from data_sources.virus_sample import VirusSample
 from data_sources.virus import VirusSource
 from data_sources.coguk_sars_cov_2.virus import COGUKSarsCov2
@@ -69,7 +70,7 @@ class Sequential:
 
 class Parallel:
 
-    MAX_PROCESSES = 90
+    MAX_PROCESSES = 30
 
     def __init__(self):
         # empty job queue
