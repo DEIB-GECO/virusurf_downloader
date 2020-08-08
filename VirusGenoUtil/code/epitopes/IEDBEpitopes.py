@@ -80,10 +80,10 @@ class IEDBEpitopes:
 		epi_fragments = []
 		for epi_fragment in self.current_virus_epi_fragments:
 			epi_frag_attributes = epi_fragment.get_all_attributes()
-			fragment = tuple([epi_frag_attributes["fragment_id"], epi_frag_attributes["parent_epi_id"],
+			fragment = tuple([int(epi_frag_attributes["fragment_id"]), int(epi_frag_attributes["parent_epi_id"]),
 			                  epi_frag_attributes["fragment_seq"],
-			                  epi_frag_attributes["fragment_start"],
-			                  epi_frag_attributes["fragment_stop"]])
+			                  int(epi_frag_attributes["fragment_start"]),
+			                  int(epi_frag_attributes["fragment_stop"])])
 			epi_fragments.append(fragment)
 		return epi_fragments
 
@@ -131,12 +131,13 @@ class IEDBEpitopes:
 			if epi_attributes["is_linear"]:
 				epi_seq = epi_attributes["region_seq"]
 			else:
-				epi_seq = "Null"
-			epitope = tuple([epi_attributes["epitope_id"], epi_attributes["virus_taxid"], epi_attributes["host_taxid"],
-			                 epi_attributes["protein_ncbi_id"], epi_attributes["cell_type"],
+				epi_seq = None
+			epitope = tuple([int(epi_attributes["epitope_id"]), int(epi_attributes["virus_taxid"]),
+			                 str(epi_attributes["host_taxid"]),
+			                 str(epi_attributes["protein_ncbi_id"]), str(epi_attributes["cell_type"]),
 			                 epi_attributes["hla_restriction"],
-			                 epi_attributes["response_frequency"], epi_seq,
-			                 epi_attributes["region_start"], epi_attributes["region_stop"],
+			                 float(epi_attributes["response_frequency"]), epi_seq,
+			                 int(epi_attributes["region_start"]), int(epi_attributes["region_stop"]),
 			                 epi_attributes["is_imported"], ",".join(epi_attributes["external_links"]),
 			                 epi_attributes["prediction_process"], epi_attributes["is_linear"]])
 			epitopes.append(epitope)
@@ -168,7 +169,7 @@ class IEDBEpitopes:
 				if epi_attributes["is_linear"]:
 					epi_seq = epi_attributes["region_seq"]
 				else:
-					epi_seq = "Null"
+					epi_seq = None
 				epitope_row = "\t".join(
 					[str(epi_attributes["epitope_id"]), epi_attributes["virus_taxid"], epi_attributes["host_taxid"],
 					 epi_attributes["protein_ncbi_id"], epi_attributes["cell_type"], epi_attributes["hla_restriction"],
@@ -439,7 +440,7 @@ class IEDBEpitopes:
 										                                                              normalized])))
 					external_links = normalized2external_links[normalized]
 					if normalized2rf_score[
-						normalized] != "Null":  # if tested subjects information is given, export epitope
+						normalized] > -1:  # if tested subjects information is given, export epitope
 						epitope = Epitope(self.current_virus_taxon_id, protein.get_ncbi_id(), host_taxon_id, "B cell",
 						                  normalized2allele[normalized], normalized2rf_score[normalized],
 						                  str(normalized), reg_start,
@@ -552,7 +553,7 @@ class IEDBEpitopes:
 						all_allele_names.remove("unknown")
 					normalized2allele[normalized_epi] = ",".join(all_allele_names)
 			else:
-				normalized2allele[normalized_epi] = "not applicable"
+				normalized2allele[normalized_epi] = None
 		return normalized2allele
 
 	def find_epitope_regions(self, iedb_assay, normalized2unique):
@@ -630,7 +631,7 @@ class IEDBEpitopes:
 
 		Returns
 		-------
-		dict of str : str
+		dict of str : float
 			dictionary mapping the normalized epitope to RF score value
 		"""
 		print("Map unique epitope sequence to RF score")
@@ -648,10 +649,10 @@ class IEDBEpitopes:
 					r = r + 1.0
 				else:
 					r = r + row["Number of Subjects Responded"]
-			if t == 0:  # no information of tested subjects from all occurences of the epitope
-				rf_score = "Null"
+			if t == 0:  # no information of tested subjects from all occurences of the epitope, assign -1
+				rf_score = -1.0
 			else:
-				rf_score = str("{:.4f}".format((r - sqrt(r)) / t))
+				rf_score = (r - sqrt(r)) / t
 			rf_scores[normalized] = rf_score
 		assert len(rf_scores) == len(list(
 			normalized2unique.keys())), "AssertionError: number of epitopes is not equal to the number of RF scores"
@@ -718,7 +719,7 @@ class IEDBEpitopes:
 							"iedb frag:{}, ncbi prot:{}, iedb epitope link(s): {}".format(normalized, ncbi_prot_epi,
 							                                                              " ".join(external_links)))
 					if normalized2rf_score[
-						normalized] != "Null":  # if tested subjects information is given, export epitope
+						normalized] > -1:  # if tested subjects information is given, export epitope
 						epitope = Epitope(self.current_virus_taxon_id, protein.get_ncbi_id(), host_taxon_id, "T cell",
 						                  normalized2allele[normalized], normalized2rf_score[normalized],
 						                  str(normalized),

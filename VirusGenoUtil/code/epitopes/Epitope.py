@@ -49,7 +49,7 @@ class Epitope:
 		self.host_taxid = host_taxid
 		self.cell_type = cell_type
 		if cell_type == "B cell":
-			self.hla_restriction = "not applicable"
+			self.hla_restriction = None
 		else:
 			self.hla_restriction = hla_restriction
 		self.response_frequency = response_frequency
