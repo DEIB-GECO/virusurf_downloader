@@ -1,13 +1,14 @@
 from collections import OrderedDict
-from typing import List
+from typing import List, Tuple
 # noinspection PyPackageRequirements
 from Bio import Entrez
+from loguru import logger
 from lxml import etree
 from sqlalchemy.orm import joinedload
 
 from data_sources.virus import VirusSource
 from database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
-    VariantImpact, AminoacidVariant
+    VariantImpact, AminoacidVariant, Epitope, EpitopeFragment
 from locations import *
 from tqdm import tqdm
 from data_sources.virus_sample import VirusSample
@@ -19,6 +20,7 @@ cache_host_sample = dict()
 cache_experiment_type = dict()
 cache_sequencing_project = dict()
 cache_virus = dict()
+epitope_id_mappings = dict()
 
 
 #   #############################    VCM    ############################
@@ -310,6 +312,50 @@ def create_nuc_variants_and_impacts(session, sequence_id, args):
                                       impact_gene_name=impact_gene_name)
         session.add(impact_db_row)
     session.flush()
+
+
+def create_epitopes(session, epitopes: List[Tuple], virus_id):
+    global epitope_id_mappings
+    epitope_id_mappings = dict()
+    for elem in epitopes:
+        pseudo_epi_id, _virus_taxon_id, _host_id, protein_ncbi_id, _type, hla_restriction, response_frequency, epitope_sequence, \
+        epi_annotation_start, epi_annotation_stop, is_imported, external_link, predition_processm, is_linear = elem
+        epitope = Epitope(virus_id=virus_id,
+                          host_id=_host_id,
+                          protein_ncbi_id=protein_ncbi_id,
+                          epitope_type=_type,
+                          hla_restriction=hla_restriction,
+                          response_frequency=response_frequency,
+                          epitope_sequence=epitope_sequence,
+                          epi_annotation_start=epi_annotation_start,
+                          epi_annotation_stop=epi_annotation_stop,
+                          is_imported=is_imported,
+                          external_link=external_link,
+                          prediction_process=predition_processm,
+                          is_linear=is_linear
+                          )
+        session.add(epitope)
+        session.flush()
+        epitope_id_mappings[pseudo_epi_id] = epitope.epitope_id
+
+
+def create_epitopes_fragments(session, epi_fragments: List[Tuple]):
+    global epitope_id_mappings
+    if not epitope_id_mappings or len(epitope_id_mappings.keys()) == 0:
+        raise ValueError('You should create epitopes rows before calling this method')
+    for elem in epi_fragments:
+        _, epitope_pseudo_id, epi_fragment_sequence, epi_fragment_annot_start, epi_fragment_annot_stop = elem
+        try:
+            real_id = epitope_id_mappings[epitope_pseudo_id]
+        except KeyError as e:
+            logger.error(f'the epitope fragment ID {epitope_pseudo_id} does not appear in the epitope IDs. This epitope fragment'
+                         f' will be not inserted into the DB.')
+            continue
+        fragment = EpitopeFragment(epitope_id=real_id,
+                                   epi_fragment_sequence=epi_fragment_sequence,
+                                   epi_frag_annotation_start=epi_fragment_annot_start,
+                                   epi_frag_annotation_stop=epi_fragment_annot_stop)
+        session.add(fragment)
 
 
 def get_virus(session, a_virus) -> Optional[Virus]:

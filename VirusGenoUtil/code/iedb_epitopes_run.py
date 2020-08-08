@@ -1,5 +1,5 @@
-from code.utils import create_dir
-from code.epitopes.IEDBEpitopes import IEDBEpitopes
+from VirusGenoUtil.code.utils import create_dir
+from VirusGenoUtil.code.epitopes.IEDBEpitopes import IEDBEpitopes
 
 ###                                                          ###
 ###                  Import IEDB epitopes                    ###

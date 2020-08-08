@@ -1,6 +1,6 @@
 from os.path import join, exists
 from os import scandir
-from code.utils import is_fasta_file_extension
+from VirusGenoUtil.code.utils import is_fasta_file_extension
 from pandas import read_csv
 from Bio import SeqIO
 

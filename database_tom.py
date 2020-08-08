@@ -1,5 +1,5 @@
 import sqlalchemy
-from sqlalchemy import Column, ForeignKey, select, join, Index, column
+from sqlalchemy import Column, ForeignKey, select, join, Index, column, REAL
 from sqlalchemy import String, Integer, Boolean, Float, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
@@ -222,7 +222,7 @@ class Sequence(_base):
     n_percentage = Column(Float)
     lineage = Column(String)
     clade = Column(String)
-    gisaid_only = Column(Boolean)
+    gisaid_only = Column(Boolean, default=True, nullable=False)
 
 
 class Annotation(_base):
@@ -276,7 +276,7 @@ class VariantImpact(_base):
 class AminoacidVariant(_base):
     __tablename__ = 'aminoacid_variant'
 
-    aminoacid_variant_id = Column(Integer, primary_key=True)
+    aminoacid_variant_id = Column(Integer, primary_key=True)        # TODO remove foreign_keys
     annotation_id = Column(Integer, ForeignKey(Annotation.annotation_id), nullable=False)
 
     sequence_aa_original = Column(String, nullable=False)
@@ -284,6 +284,35 @@ class AminoacidVariant(_base):
     start_aa_original = Column(Integer)
     variant_aa_length = Column(Integer, nullable=False)
     variant_aa_type = Column(String, nullable=False)
+
+
+class Epitope(_base):
+    __tablename__ = 'epitope'
+
+    epitope_id = Column(Integer, primary_key=True, autoincrement=True)
+    virus_id = Column(Integer, nullable=False)
+    host_id = Column(String, nullable=False)
+    protein_ncbi_id = Column(String)
+    epitope_type = Column(String)
+    hla_restriction = Column(String)
+    response_frequency = Column(REAL)
+    epitope_sequence = Column(String)
+    epi_annotation_start = Column(Integer)
+    epi_annotation_stop = Column(Integer)
+    is_imported = Column(Boolean)
+    external_link = Column(String)
+    prediction_process = Column(String)
+    is_linear = Column(Boolean)
+
+
+class EpitopeFragment(_base):
+    __tablename__ = 'epitope_fragment'
+
+    epi_fragment_id = Column(Integer, primary_key=True, autoincrement=True)
+    epitope_id = Column(Integer)
+    epi_fragment_sequence = Column(String)
+    epi_frag_annotation_start = Column(Integer)
+    epi_frag_annotation_stop = Column(Integer)
 
 
 #   ###################################     VIEWS       ##################################

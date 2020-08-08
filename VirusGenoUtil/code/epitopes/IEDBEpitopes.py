@@ -1,7 +1,7 @@
-from code.utils import is_fasta_file_extension
-from code.epitopes.Protein import Protein
-from code.epitopes.Epitope import Epitope
-from code.epitopes.EpitopeFragment import EpitopeFragment
+from VirusGenoUtil.code.utils import is_fasta_file_extension
+from VirusGenoUtil.code.epitopes.Protein import Protein
+from VirusGenoUtil.code.epitopes.Epitope import Epitope
+from VirusGenoUtil.code.epitopes.EpitopeFragment import EpitopeFragment
 from os.path import join, splitext, isfile, exists, isdir
 from pathlib import Path
 from os import scandir
@@ -400,6 +400,11 @@ class IEDBEpitopes:
 				bcells_current_protein = bcells_current_virus.loc[
 					bcells_current_virus["Parent Protein"].str.split("[").str[
 						0].str.strip().str.lower() == protein.get_name().lower()]
+			if bcells_current_protein.shape[0] == 0:
+				print("Could not match using parent protein name")
+				print("3rd attempt: Match with antigen name")
+				bcells_current_protein = bcells_current_virus.loc[
+					bcells_current_virus["Antigen Name"].str.strip().str.lower() == protein.get_name().lower()]
 			print("Number of non unique epitopes for protein = {}".format(bcells_current_protein.shape[0]))
 
 			if bcells_current_protein.shape[0] == 0:
@@ -686,6 +691,12 @@ class IEDBEpitopes:
 				tcells_current_protein = tcells_current_virus.loc[
 					tcells_current_virus["Parent Protein"].str.split("[").str[
 						0].str.strip().str.lower() == protein.get_name().lower()]
+			if tcells_current_protein.shape[0] == 0:
+				print("Could not match using protein name")
+				print("3rd attempt: Match with antigen name")
+				tcells_current_protein = tcells_current_virus.loc[
+					tcells_current_virus["Antigen Name"].str.strip().str.lower()
+					== protein.get_name().lower()]
 			print("Number of non unique epitopes for protein = {}".format(tcells_current_protein.shape[0]))
 
 			if tcells_current_protein.shape[0] == 0:

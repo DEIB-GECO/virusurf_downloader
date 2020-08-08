@@ -1,5 +1,5 @@
-from code.utils import create_dir
-from code.epitopes.BepiPredEpitopes import BepiPredEpitopes
+from VirusGenoUtil.code.utils import create_dir
+from VirusGenoUtil.code.epitopes.BepiPredEpitopes import BepiPredEpitopes
 
 ###               SARS-CoV-2                 ###
 ### Bepipred 2.0 output  --> epitopes csv    ###

@@ -1,5 +1,5 @@
-from code.epitopes.Protein import Protein
-from code.utils import is_fasta_file_extension
+from VirusGenoUtil.code.epitopes.Protein import Protein
+from VirusGenoUtil.code.utils import is_fasta_file_extension
 from os.path import join
 from os import scandir
 from pandas import read_csv, Series, unique

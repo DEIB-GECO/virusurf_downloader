@@ -24,6 +24,7 @@ from Bio import Entrez
 import pickle
 Entrez.email = "Your.Name.Here@example.org"
 from pipeline_nuc_variants__annotations__aa import sequence_aligner
+from VirusGenoUtil.code.integrate_iedb_epitopes import epitopes_for_virus_taxon
 
 nucleotide_reference_sequence: Optional[str] = None # initialized elsewhere
 annotation_file_path: Optional[str] = None  # initialized elsewhere
@@ -791,6 +792,18 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
                 logger.exception(f'exception occurred while working on virus sample {sample}')
             raise database_tom.RollbackTransactionWithoutError()
 
+    def main_pipeline_part_4(session: database_tom.Session):
+        logger.debug(f'calling epitopes for virus taxon {bind_to_organism_taxon_id} as bound to DB virus with id {virus_id}')
+        try:
+            epitopes, fragments = epitopes_for_virus_taxon(bind_to_organism_taxon_id)
+
+            vcm.create_epitopes(session, epitopes, virus_id)
+            vcm.create_epitopes_fragments(session, fragments)
+        except:
+            logger.exception('Excpetion occurred while computing and importing epitopes. Epitopes won\'t be inserted '
+                             'into the DB.')
+            raise database_tom.RollbackTransactionWithoutError()
+
     check_user_query()
 
     global nucleotide_reference_sequence
@@ -814,7 +827,6 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
                 # carries out main_pipeline_3 with many processes
                 the_boss.assign_job(ImportAnnotationsAndNucVariants(sequence_id, sample))
                 logger.debug(f'queue size: {the_boss._queue.qsize()}\t\t alive processes: {len([x for x in the_boss._workers if x.is_alive()])}')
-                print(len([x for x in the_boss._workers if x.is_alive()]))
                 # database_tom.try_py_function(
                 #     main_pipeline_part_3, sample, sequence_id
                 # )
@@ -825,6 +837,11 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
     finally:
         # pass
         the_boss.stop_workers()
+
+    # epitopes
+    database_tom.try_py_function(
+        main_pipeline_part_4
+    )
 
 
 
