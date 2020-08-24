@@ -145,7 +145,7 @@ class ExperimentType(_base):
 
     sequencing_technology = Column(String)
     assembly_method = Column(String)
-    coverage = Column(String)
+    coverage = Column(Integer)
 
 
 class SequencingProject(_base):

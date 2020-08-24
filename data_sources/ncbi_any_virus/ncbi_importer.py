@@ -276,7 +276,7 @@ class AnyNCBIVNucSample:
             if o3 and len(o3) < 3:
                 decimals = round(int(o3) / 10)
                 output += decimals
-            return str(output)
+            return output
 
     def collection_date(self):
         collection_date = text_at_node(self.sample_xml,
