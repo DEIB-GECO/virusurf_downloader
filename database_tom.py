@@ -49,9 +49,7 @@ def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch
 
         # CREATE TABLES if not existing
         _base.metadata.create_all(_db_engine)   # throws sqlalchemy.exc.OperationalError if connection is not available
-        # CREATE OR REPLACE VIEWS
-        for v in views:
-            v.create()
+
     except sqlalchemy.exc.OperationalError as e:
         logger.error('DB connection not available')
         raise e
@@ -341,6 +339,32 @@ class View:
         _db_engine.execute(f'DROP VIEW IF EXISTS {view_name}')
 
 
+class MaterializedView:
+    """
+    SQLAlchemy gives a create_view function but it doesn't checks
+    the existence of the view before creating, so without a prior DROP VIEW, the create_all raises Exception.
+    This class offers a workaround to create and drop views when necessary.
+    """
+
+    @staticmethod
+    def create():
+        raise NotImplementedError('Override this method to call _create_view with the correct parameters')
+
+    @staticmethod
+    def drop():
+        raise NotImplementedError('Override this method to call _drop_view with the correct parameters')
+
+    @staticmethod
+    def _create_view(view_name, view_stmt):
+        MaterializedView._drop_view(view_name)
+        compiled_stmt = view_stmt.compile(compile_kwargs={"literal_binds": True}, dialect=_db_engine.dialect)
+        _db_engine.execute(f'CREATE MATERIALIZED VIEW {view_name} AS {compiled_stmt}')
+
+    @staticmethod
+    def _drop_view(view_name):
+        _db_engine.execute(f'DROP MATERIALIZED VIEW IF EXISTS {view_name}')
+
+
 class ViewAnnotationCDS(View):
     stmt = select([
         Annotation.annotation_id,
@@ -355,11 +379,11 @@ class ViewAnnotationCDS(View):
 
     @staticmethod
     def create():
-        View._create_view('annotation_cds', ViewAnnotationCDS.stmt)
+        ViewAnnotationCDS._create_view('annotation_cds', ViewAnnotationCDS.stmt)
 
     @staticmethod
     def drop():
-        View._drop_view('annotation_cds')
+        ViewAnnotationCDS._drop_view('annotation_cds')
 
 
 class ViewAnnotation(View):
@@ -376,14 +400,14 @@ class ViewAnnotation(View):
 
     @staticmethod
     def create():
-        View._create_view('annotation_view', ViewAnnotation.stmt)
+        ViewAnnotation._create_view('annotation_view', ViewAnnotation.stmt)
 
     @staticmethod
     def drop():
-        View._drop_view('annotation_view')
+        ViewAnnotation._drop_view('annotation_view')
 
 
-class ViewNucleotideVariantAnnoatation(View):
+class ViewNucleotideVariantAnnoatation(MaterializedView):
     stmt = select([
         NucleotideVariant.nucleotide_variant_id,
         Annotation.feature_type.label('n_feature_type'),
@@ -396,11 +420,11 @@ class ViewNucleotideVariantAnnoatation(View):
 
     @staticmethod
     def create():
-        View._create_view('nucleotide_variant_annotation', ViewNucleotideVariantAnnoatation.stmt)
+        ViewNucleotideVariantAnnoatation._create_view('nucleotide_variant_annotation', ViewNucleotideVariantAnnoatation.stmt)
 
     @staticmethod
     def drop():
-        View._drop_view('nucleotide_variant_annotation')
+        ViewNucleotideVariantAnnoatation._drop_view('nucleotide_variant_annotation')
 
     # try:
     #     __table__ = create_view('nucleotide_variant_annotation', stmt, _base.metadata)
@@ -415,11 +439,11 @@ class ViewNucleotideVariantLimited(View):
 
     @staticmethod
     def create():
-        View._create_view('nucleotide_variant_limited', ViewNucleotideVariantLimited.stmt)
+        ViewNucleotideVariantLimited._create_view('nucleotide_variant_limited', ViewNucleotideVariantLimited.stmt)
 
     @staticmethod
     def drop():
-        View._drop_view('nucleotide_variant_limited')
+        ViewNucleotideVariantLimited._drop_view('nucleotide_variant_limited')
 
 
 views = [ViewAnnotationCDS, ViewNucleotideVariantAnnoatation, ViewNucleotideVariantLimited, ViewAnnotation]
@@ -431,7 +455,7 @@ def delete_indexes():
                         'ann__seq_id', 'ann__start', 'ann__stop',
                         'nuc_var__seq_id', 'nuc_var__start_alt', 'nuc_var__start_orig', 'nuc_var__length',
                         'seq__experiment_id', 'seq__host_id', 'seq__seq_proj_id', 'seq__virus_id',
-                        'impact__var_id'
+                        'impact__var_id', 'nuc_var_ann__var_id'
                         ]
     for i in indexes_to_drop:
         try:
@@ -471,3 +495,32 @@ def create_indexes():
     _db_engine.execute(f'CREATE INDEX seq__virus_id ON {Sequence.__table__}({column_name(Sequence.virus_id)})')
 
     _db_engine.execute(f'CREATE INDEX impact__var_id ON {VariantImpact.__table__}({column_name(VariantImpact.nucleotide_variant_id)})')
+
+    # next index is built on top of a materialized view (check if it exists first)
+    nuc_var_matview_exists = _db_engine\
+        .execute(f"SELECT EXISTS ( SELECT FROM pg_catalog.pg_matviews WHERE matviewname = 'nucleotide_variant_annotation' )")\
+        .first().values()[0] is True
+    if nuc_var_matview_exists:
+        _db_engine\
+            .execute(f'CREATE INDEX nuc_var_ann__var_id ON nucleotide_variant_annotation(nucleotide_variant_id)')
+
+
+def create_views():
+    # CREATE OR REPLACE VIEWS
+    for v in views:
+        v.create()
+
+
+def disambiguate_chimera_sequences():
+    stmt = """
+        update sequence 
+        set accession_id = CONCAT(accession_id, '_', (select right(virus.taxon_name,1) from virus where virus.virus_id = sequence.virus_id)), 
+        alternative_accession_id = CONCAT(alternative_accession_id, '_', (select right(virus.taxon_name,1) from virus where virus.virus_id = sequence.virus_id)) 
+        from virus 
+        where accession_id in( 
+            select distinct accession_id 
+            from sequence 
+            group by accession_id 
+            having count(accession_id)>1
+    """
+    _db_engine.execute(stmt)

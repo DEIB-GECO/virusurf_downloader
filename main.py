@@ -24,13 +24,13 @@ Entrez.email = "Your.Name.Here@example.org"
 wrong_arguments_message = 'The module main.py expects the following arguments:' \
                           'db_name, recreate_db?, db_user, db_password, db_port, source_to_import\n' \
                           'source_to_import accept values:\n' \
-                          'genbank-sars-cov2\n' \
                           'cog-uk\n' \
-                          'gisaid\n' \
-                          'genbank-sars-cov1\n'
+                          'gisaid\n'
 for p in prepared_parameters.keys():
     wrong_arguments_message += f'{p}\n'
 wrong_arguments_message += 'just_make_indexes\n'
+wrong_arguments_message += 'create_views\n'
+wrong_arguments_message += 'disambiguate_chimera_sequences\n'
 wrong_arguments_message += 'optionally you can specify a range of samples to import as <min> (included) <max> (excluded)'
 # noinspection PyBroadException
 try:
@@ -246,20 +246,16 @@ def run():
 try:
     if 'index' in source:
         database_tom.create_indexes()
+    elif 'view' in source:
+        database_tom.create_views()
+    elif 'chimera_sequence' in source:
+        database_tom.disambiguate_chimera_sequences()
     elif source in ['coguk', 'cog-uk']:
         from data_sources.coguk_sars_cov_2.procedure import run as run_coguk
         run_coguk(from_sample=_from, to_sample=to)
-    elif source in ['ncbi-sars-cov2', 'genbank-sars-cov2', 'genbank-sarscov2', 'genbank-sars-cov-2']:
-        import_method = Parallel
-        viruses = [NCBISarsCov2()]
-        run()
     elif source == 'gisaid':
         import_method = Sequential
         viruses = [GISAIDSarsCov2()]
-        run()
-    elif source in ['ncbi-sars-cov1', 'genbank-sars-cov1', 'genbank-sarscov1', 'genbank-sars-cov']:
-        import_method = Parallel
-        viruses = [NCBISarsCov1()]
         run()
     elif source in prepared_parameters.keys():
         import_samples_into_vcm_except_annotations_nuc_vars(*prepared_parameters[source], from_sample=_from, to_sample=to)
