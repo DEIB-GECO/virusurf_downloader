@@ -31,7 +31,7 @@ wrong_arguments_message = 'The module main.py expects the following arguments:' 
 for p in prepared_parameters.keys():
     wrong_arguments_message += f'{p}\n'
 wrong_arguments_message += 'just_make_indexes\n'
-wrong_arguments_message += 'optionally you can specify a range of samples to import as <min> <max>'
+wrong_arguments_message += 'optionally you can specify a range of samples to import as <min> (included) <max> (excluded)'
 # noinspection PyBroadException
 try:
     db_name = sys.argv[1]
@@ -44,6 +44,9 @@ try:
     try:
         _from = int(sys.argv[7])
         to = int(sys.argv[8])
+        if not _from < to:
+            logger.error('Optional parameter <min> must be less than <max>')
+            sys.exit(1)
     except Exception:
         _from = None
         to = None

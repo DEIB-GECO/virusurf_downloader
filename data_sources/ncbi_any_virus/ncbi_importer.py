@@ -31,6 +31,7 @@ annotation_file_path: Optional[str] = None  # initialized elsewhere
 virus_sequence_chromosome_name: Optional[str] = None  # initialized elsewhere
 snpeff_db_name: Optional[str] = None  # initialized elsewhere
 log_with_name: Optional[str] = None
+user_provided_reference_query: Optional[str] = None
 DOWNLOAD_ATTEMPTS = 3
 DOWNLOAD_FAILED_PAUSE_SECONDS = 30
 
@@ -505,8 +506,14 @@ def _all_samples_from_organism(samples_query: str, log_with_name: str, SampleWra
 
     logger.trace(f'getting accession ids of samples...')
     accession_ids = _get_samples_accession_ids(samples_query)
+    accession_ids.sort()
+
+    # if the reference sample is not selected already from samples_query, add it as first sample
+    global user_provided_reference_query
+    if user_provided_reference_query:
+        accession_ids.insert(0, _get_samples_accession_ids(user_provided_reference_query)[0])
+
     if from_sample is not None and to_sample is not None:
-        accession_ids.sort()
         accession_ids = accession_ids[from_sample:to_sample]
 
     logger.trace(f'download and processing of sequences...')
@@ -529,20 +536,35 @@ def _reference_sample_from_organism(samples_query: str, log_with_name: str, Samp
     logger.trace(f'importing reference sample of organism "{log_with_name}"')
 
     logger.trace(f'getting accession ids of refseq...')
-    accession_ids = _get_samples_accession_ids(samples_query+' AND srcdb_refseq[Properties]')
-    if len(accession_ids) == 0:
-        logger.warning(f'No reference sequence exists in the sample group identified by the query\n'
-                       f'<<<'
-                       f'{samples_query}'
-                       f'>>>\n'
-                       f'Type a valid query selecting only one sample to be used as reference sample or press Ctrl+C to abort')
-        return _reference_sample_from_organism(input().strip(), log_with_name, SampleWrapperClass)
-    assert len(accession_ids) == 1, f'More than one reference sequence found in the sample group identified by the query\n' \
-                                    f'<<<\n' \
-                                    f'{samples_query}\n' \
-                                    f'>>>\n' \
-                                    f'Reference sequence accession ids: {accession_ids}'
+    reference_query = samples_query+' AND srcdb_refseq[Properties]'
+    accession_ids = _get_samples_accession_ids(reference_query)
 
+    def test_query():
+        global user_provided_reference_query
+        nonlocal accession_ids, reference_query
+        if len(accession_ids) == 0:
+            logger.warning(f'No reference sequence exists in the sample group identified by the query\n'
+                           f'<<<\n'
+                           f'{reference_query}\n'
+                           f'>>>\n'
+                           f'Type a valid query selecting only one sample to be used as reference sample or press Ctrl+C to abort')
+            user_provided_reference_query = input().strip()
+            reference_query = user_provided_reference_query
+            accession_ids = _get_samples_accession_ids(reference_query)
+            test_query()
+        if len(accession_ids) != 1:
+            logger.warning(f'More than one reference sequence found in the sample group identified by the query\n'
+                           f'<<<\n'
+                           f'{reference_query}\n'
+                           f'>>>\n'
+                           f'Reference sequence accession ids: {accession_ids}\n'
+                           f'Type a valid query selecting only one sample to be used as reference sample or press Ctrl+C to abort')
+            user_provided_reference_query = input().strip()
+            reference_query = user_provided_reference_query
+            accession_ids = _get_samples_accession_ids(reference_query)
+            test_query()
+
+    test_query()
     logger.trace(f'download and processing of the reference sample...')
     download_sample_dir_path = get_local_folder_for(source_name=log_with_name, _type=FileType.SequenceOrSampleData)
     sample_path = _download_or_get_virus_sample_as_xml(download_sample_dir_path, accession_ids[0])
@@ -859,6 +881,7 @@ prepared_parameters = {
     'bombali_ebolavirus': ('txid2010960[Organism:noexp]', 2010960, 'Bombali ebolavirus', f'.{sep}annotations{sep}bombali_ebolavirus.tsv', 'NC_039345', 'bombali_ebolavirus'),
     'tai_forest_ebolavirus': ('txid186541[Organism:exp]', 186541, 'Tai Forest ebolavirus', f'.{sep}annotations{sep}tai_forest_ebolavirus.tsv', 'NC_014372', 'tai_forest_ebolavirus'),
     'new_ncbi_sars_cov_2': ('txid2697049[Organism]', 2697049, 'New NCBI SARS-Cov-2', f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv', 'NC_045512', 'new_ncbi_sars_cov_2'),
-    'new_ncbi_sars_cov_1': ('txid694009[Organism:noexp] NOT txid2697049[Organism]', 694009, 'New NCBI SARS-Cov-1', f'.{sep}annotations{sep}sars_cov_1.tsv', 'NC_004718', 'sars_cov_1'),
-    'reference_of_sc1': ('txid694009[Organism] NOT txid2697049[Organism] AND srcdb_refseq[Properties]', 694009, 'New NCBI SARS-Cov-1', f'.{sep}annotations{sep}sars_cov_1.tsv', 'NC_004718', 'sars_cov_1')
+    'new_ncbi_sars_cov_1': ('txid694009[Organism:noexp] NOT txid2697049[Organism]', 694009, 'New NCBI SARS-Cov-1', f'.{sep}annotations{sep}sars_cov_1.tsv', 'NC_004718', 'sars_cov_1')
 }
+# QUERY TO SELECT THE REFERENCE OF SARS COV 1
+# txid694009[Organism] NOT txid2697049[Organism] AND srcdb_refseq[Properties]
