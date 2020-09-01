@@ -306,3 +306,13 @@ def get_reference_sequence_of_virus(session, a_virus: Virus) -> Optional[Sequenc
 
 def random_string():
     return ''.join(random.choices(string.ascii_uppercase, k=4))
+
+
+def all_sequence_accession_ids(session, virus_id):
+    return session.query(Sequence.accession_id).filter(
+        Sequence.virus_id == virus_id
+    ).all()
+
+
+def remove_sequence_and_meta(session, sequence_accession_id):
+    pass

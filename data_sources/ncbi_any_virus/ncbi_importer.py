@@ -8,7 +8,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from queuable_jobs import Job, Boss, Worker
 from datetime import datetime
 from decimal import Decimal
-from typing import Callable, List, Optional, Tuple
+from typing import Callable, List, Optional, Tuple, Iterator
 
 import dateutil.parser as dateparser
 import lxml
@@ -500,36 +500,35 @@ class AnyNCBIVNucSample:
         self.sample_xml = None  # release xml reference to prevent errors with multiprocessing
 
 
-# noinspection PyPep8Naming
-def _all_samples_from_organism(samples_query: str, log_with_name: str, SampleWrapperClass=AnyNCBIVNucSample, from_sample: Optional[int] = None, to_sample: Optional[int] = None):
+def _alt_ids_of_selected_sequences(samples_query: str, log_with_name: str) -> List[int]:
     logger.trace(f'importing samples of organism "{log_with_name}"')
 
     logger.trace(f'getting accession ids of samples...')
     accession_ids = _get_samples_accession_ids(samples_query)
-    accession_ids.sort()
 
     # if the reference sample is not selected already from samples_query, add it as first sample
     global user_provided_reference_query
     if user_provided_reference_query:
         accession_ids.insert(0, _get_samples_accession_ids(user_provided_reference_query)[0])
+    return accession_ids
 
-    if from_sample is not None and to_sample is not None:
-        accession_ids = accession_ids[from_sample:to_sample]
 
+# noinspection PyPep8Naming
+def _download_as_sample_object(alternative_accession_ids, log_with_name: str, SampleWrapperClass=AnyNCBIVNucSample) -> Iterator:
     logger.trace(f'download and processing of sequences...')
     download_sample_dir_path = get_local_folder_for(source_name=log_with_name, _type=FileType.SequenceOrSampleData)
     skipped_samples = 0
-    for sample_id in tqdm(accession_ids):
+    for sample_id in tqdm(alternative_accession_ids):
         try:
             sample_path = _download_or_get_virus_sample_as_xml(download_sample_dir_path, sample_id)
         except urllib.error.URLError:
-            logger.exception(f"Network error while downloading sample {sample_id} can't be solved. This sample 'll be skipped.")
+            logger.exception(
+                f"Network error while downloading sample {sample_id} can't be solved. This sample 'll be skipped.")
             skipped_samples += 1
             continue
         other_sample = SampleWrapperClass(sample_path, sample_id)
         yield other_sample
     logger.info(f"{skipped_samples} 've been skipped due to network errors.")
-
 
 # noinspection PyPep8Naming
 def _reference_sample_from_organism(samples_query: str, log_with_name: str, SampleWrapperClass=AnyNCBIVNucSample):
@@ -832,16 +831,32 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
     virus_id, nucleotide_reference_sequence = main_pipeline_part_1()   # id of the virus in the VCM.Virus table, to which imported sequences will be bound
 
     logger.info(f'importing the samples identified by the query provided as bound to organism txid{bind_to_organism_taxon_id}')
+
+    # find outdated and new samples from source
+    id_all_current_sequences = set(_alt_ids_of_selected_sequences(samples_query, log_with_name))
+    id_previously_imported_sequences = set(database_tom.try_py_function(
+        vcm.sequence_alternative_accession_ids, virus_id, ['GenBank', 'RefSeq']
+    ))
+    id_outdated_sequences = id_previously_imported_sequences - id_all_current_sequences
+    id_new_sequences = id_all_current_sequences - id_previously_imported_sequences
+    logger.info(f'\n# total current sequences from source: {len(id_all_current_sequences)}. Of which\n'
+                f'# {len(id_previously_imported_sequences)} imported in previous runs\n'
+                f'# {len(id_new_sequences)} new sequences\n'
+                f'# {len(id_outdated_sequences)} are outdated and must be removed from previous import')
+
+    # select range
+    id_new_sequences = sorted(list(id_new_sequences))
+    if from_sample is not None and to_sample is not None:
+        id_new_sequences = id_new_sequences[from_sample:to_sample]
+
+    # prepare multiprocessing
     database_tom.dispose_db_engine()
     the_boss.wake_up_workers()
     database_tom.re_config_db_engine(False)
-    # counter = 30
+
+    logger.info('begin importing new sequences')
     try:
-        for sample in _all_samples_from_organism(samples_query, log_with_name, SampleWrapperClass, from_sample, to_sample):
-        # if sample.length() < 29000: # TODO remove this
-        #     continue
-        # if counter > 0:             # TODO remove this
-        #     counter -= 1
+        for sample in _download_as_sample_object(id_new_sequences, log_with_name, SampleWrapperClass):
             sequence_id = database_tom.try_py_function(
                 main_pipeline_part_2, sample
             )
@@ -852,19 +867,20 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
                 # database_tom.try_py_function(
                 #     main_pipeline_part_3, sample, sequence_id
                 # )
-        # else:
-        #     break
     except:
         logger.exception("AN EXCEPTION CAUSED THE LOOP TO TERMINATE. Workers will be terminated.")
     finally:
         # pass
         the_boss.stop_workers()
 
+    # remove outdated sequences
+    for alt_seq_acc_id in id_outdated_sequences:
+        database_tom.try_py_function(vcm.remove_sequence_and_meta, alt_seq_acc_id)
+
     # epitopes
     database_tom.try_py_function(
         main_pipeline_part_4
     )
-
 
 
 prepared_parameters = {

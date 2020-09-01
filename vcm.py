@@ -7,6 +7,8 @@ from lxml import etree
 from sqlalchemy.orm import joinedload
 
 from data_sources.virus import VirusSource
+from sqlalchemy.sql.expression import cast
+import sqlalchemy
 from database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
     VariantImpact, AminoacidVariant, Epitope, EpitopeFragment
 from locations import *
@@ -368,3 +370,60 @@ def get_reference_sequence_of_virus(session, virus_id) -> Optional[Sequence]:
         # noqa              # == ignore warning on " == True" for this case
         Sequence.is_reference == True
     ).one_or_none()
+
+
+def sequence_alternative_accession_ids(session, virus_id: int, sources: Optional[List[str]] = None):
+    query = session.query(cast(Sequence.alternative_accession_id, sqlalchemy.Integer)).filter(
+        Sequence.virus_id == virus_id
+    )
+    if sources:
+        query = query\
+            .join(SequencingProject, Sequence.sequencing_project_id == SequencingProject.sequencing_project_id)\
+            .filter(SequencingProject.database_source.in_(sources))
+    result = query.all()
+    return [_[0] for _ in result]
+
+
+def remove_sequence_and_meta(session, alternative_sequence_accession_id):
+    # get metadata ids
+    sequence_id, experiment_id, sequence_project_id, host_sample_id = session \
+        .query(Sequence.sequence_id, Sequence.experiment_type_id, Sequence.sequencing_project_id,
+               Sequence.host_sample_id) \
+        .filter(Sequence.alternative_accession_id == alternative_sequence_accession_id).one()
+
+    # delete aa variants and annotations
+    annotation_ids = session.query(Annotation.annotation_id).filter(Annotation.sequence_id == sequence_id).all()
+    annotation_ids = [_[0] for _ in annotation_ids]
+    session.query(AminoacidVariant).filter(AminoacidVariant.annotation_id.in_(annotation_ids)).delete(synchronize_session=False)
+    session.query(Annotation).filter(Annotation.sequence_id == sequence_id).delete(synchronize_session=False)
+
+    # delete impacts and nuc variants
+    nuc_variant_ids = session.query(NucleotideVariant.nucleotide_variant_id).filter(NucleotideVariant.sequence_id == sequence_id).all()
+    nuc_variant_ids = [_[0] for _ in nuc_variant_ids]
+    session.query(VariantImpact).filter(VariantImpact.nucleotide_variant_id.in_(nuc_variant_ids)).delete(synchronize_session=False)
+    session.query(NucleotideVariant).filter(NucleotideVariant.sequence_id == sequence_id).delete(synchronize_session=False)
+
+    # delete sequence
+    session.query(Sequence).filter(Sequence.sequence_id == sequence_id).delete(synchronize_session=False)
+
+    # delete related meta
+    # (host sample)
+    sequences_with_same_host = session.query(Sequence.sequence_id)\
+        .filter(Sequence.host_sample_id == host_sample_id,
+                Sequence.sequence_id != sequence_id).first()
+    if not sequences_with_same_host:
+        session.query(HostSample).filter(HostSample.host_sample_id == host_sample_id).delete(synchronize_session=False)
+
+    # (experiment)
+    sequences_with_same_experiment = session.query(Sequence.sequence_id) \
+        .filter(Sequence.experiment_type_id == experiment_id,
+                Sequence.sequence_id != sequence_id).first()
+    if not sequences_with_same_experiment:
+        session.query(ExperimentType).filter(ExperimentType.experiment_type_id == experiment_id).delete(synchronize_session=False)
+
+    # (seq project)
+    sequences_with_same_sequencing_project = session.query(Sequence.sequence_id) \
+        .filter(Sequence.sequencing_project_id == host_sample_id,
+                Sequence.sequence_id != sequence_id).first()
+    if not sequences_with_same_sequencing_project:
+        session.query(SequencingProject).filter(SequencingProject.sequencing_project_id == sequence_project_id).delete(synchronize_session=False)
