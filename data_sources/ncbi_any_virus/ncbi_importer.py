@@ -890,7 +890,7 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
 
     # remove outdated sequences
     for alt_seq_acc_id in id_outdated_sequences:
-        database_tom.try_py_function(vcm.remove_sequence_and_meta, alt_seq_acc_id)
+        database_tom.try_py_function(vcm.remove_sequence_and_meta, None, alt_seq_acc_id)
 
     # epitopes
     database_tom.try_py_function(

@@ -12,6 +12,8 @@ from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
 from data_sources.ncbi_sars_cov_2.sample import NCBISarsCov2Sample
 from data_sources.ncbi_sars_cov_2.virus import NCBISarsCov2
 from locations import get_local_folder_for, FileType
+import database_tom
+from vcm import sequence_primary_accession_ids, remove_sequence_and_meta
 
 
 class COGUKSarsCov2(NCBISarsCov2):
@@ -56,7 +58,7 @@ class COGUKSarsCov2(NCBISarsCov2):
     def is_positive_stranded(self):
         return super().is_positive_stranded()
 
-    def virus_samples(self, from_sample: Optional[int] = None, to_sample: Optional[int] = None) -> Generator[COGUKSarsCov2Sample, None, None]:
+    def virus_samples(self, virus_id: int, from_sample: Optional[int] = None, to_sample: Optional[int] = None) -> Generator[COGUKSarsCov2Sample, None, None]:
         # import metadata (few KB, we can save it in memory)
         # noinspection PyAttributeOutsideInit
         logger.info('parsing metadata file...')
@@ -65,12 +67,33 @@ class COGUKSarsCov2(NCBISarsCov2):
             metadata_file.readline()    # skip header
             for line in metadata_file:
                 try:
-                    key, content = line.split(sep=',', maxsplit=1)
+                    key, content = line.split(sep=',', maxsplit=1)  # key = <sequence name>, content = <other metadata>
                     meta[key] = content.rstrip()
                     # logger.debug(f'new meta_key: {key}')
                 except:
                     logger.error(f'Unable to parse the following line from the metadata file {self.metadata_file_path}:\n\t'
                                  f'{line}')
+
+        # compare data with already imported data
+        id_current_sequences = meta.keys()
+        id_previously_imported_sequences = set(database_tom.try_py_function(
+            sequence_primary_accession_ids, virus_id, 'COG-UK'
+        ))
+        id_outdated_sequences = id_previously_imported_sequences - id_current_sequences
+        id_new_sequences = id_current_sequences - id_previously_imported_sequences
+        logger.info(f'\n# total current sequences from source: {len(id_current_sequences)}. Of which\n'
+                    f'# {len(id_previously_imported_sequences)} imported in previous runs\n'
+                    f'# {len(id_new_sequences)} new sequences\n'
+                    f'# {len(id_outdated_sequences)} are outdated and must be removed from previous import')
+
+        # remove outdated sequences
+        for prim_acc_id in id_outdated_sequences:
+            database_tom.try_py_function(
+                remove_sequence_and_meta, prim_acc_id, None
+            )
+
+        # proceed importing only new sequences
+        meta = dict(filter(lambda kv: kv[0] in id_new_sequences, meta.items()))
 
         # generate a VirusSample for each line from region data file
         logger.info('reading sample sequence file...')
@@ -83,26 +106,29 @@ class COGUKSarsCov2(NCBISarsCov2):
                 if not sample_sequence or not sample_key:
                     break  # EOF
                 else:
-                    if from_sample is not None and to_sample is not None:
-                        if counter < from_sample:
-                            progress.update()
-                            counter += 1
-                            continue
-                        elif counter >= to_sample:
-                            break
-                        else:
-                            counter += 1
-                    progress.update()
                     sample_key = sample_key[1:].rstrip()  # in the sequence file, the strain name is preceded by a '>', while in the metadata file not
-                    sample = {
-                        COGUKSarsCov2Sample.STRAIN_NAME: sample_key,
-                        COGUKSarsCov2Sample.NUC_SEQUENCE: sample_sequence.rstrip()
-                    }
-                    try:
-                        sample[COGUKSarsCov2Sample.METADATA_RAW_STRING] = meta[sample_key]
-                    except KeyError:
-                        logger.error(f'Found a sequence without a paired metadata string. Foreign key was {sample_key}')
-                    yield COGUKSarsCov2Sample(sample)
+                    if sample_key not in meta.keys():
+                        continue
+                    else:
+                        if from_sample is not None and to_sample is not None:
+                            if counter < from_sample:
+                                progress.update()
+                                counter += 1
+                                continue
+                            elif counter >= to_sample:
+                                break
+                            else:
+                                counter += 1
+                                progress.update()
+                                sample = {
+                                    COGUKSarsCov2Sample.STRAIN_NAME: sample_key,
+                                    COGUKSarsCov2Sample.NUC_SEQUENCE: sample_sequence.rstrip()
+                                }
+                                try:
+                                    sample[COGUKSarsCov2Sample.METADATA_RAW_STRING] = meta[sample_key]
+                                except KeyError:
+                                    logger.error(f'Found a sequence without a paired metadata string. Foreign key was {sample_key}')
+                                yield COGUKSarsCov2Sample(sample)
 
     def reference_sequence(self) -> str:
         if not hasattr(self, 'reference_sample'):

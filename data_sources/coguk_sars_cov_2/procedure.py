@@ -188,7 +188,7 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
             logger.exception(f'exception occurred while working on virus sample {sample.primary_accession_number()}')
 
     # total_s = 2
-    for s in virus.virus_samples(from_sample, to_sample):
+    for s in virus.virus_samples(virus_id, from_sample, to_sample):
         if not s.nucleotide_sequence():
             logger.info(f'sample {s.primary_accession_number()} skipped because nucleotide sequence is empty or null')
             continue

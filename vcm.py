@@ -384,12 +384,32 @@ def sequence_alternative_accession_ids(session, virus_id: int, sources: Optional
     return [_[0] for _ in result]
 
 
-def remove_sequence_and_meta(session, alternative_sequence_accession_id):
+def sequence_primary_accession_ids(session, virus_id: int, sources: Optional[List[str]] = None):
+    query = session.query(Sequence.accession_id).filter(
+        Sequence.virus_id == virus_id
+    )
+    if sources:
+        query = query\
+            .join(SequencingProject, Sequence.sequencing_project_id == SequencingProject.sequencing_project_id)\
+            .filter(SequencingProject.database_source.in_(sources))
+    result = query.all()
+    return [_[0] for _ in result]
+
+
+def remove_sequence_and_meta(session, primary_sequence_accession_id: Optional[str], alternative_sequence_accession_id: Optional[str]):
     # get metadata ids
-    sequence_id, experiment_id, sequence_project_id, host_sample_id = session \
-        .query(Sequence.sequence_id, Sequence.experiment_type_id, Sequence.sequencing_project_id,
-               Sequence.host_sample_id) \
-        .filter(Sequence.alternative_accession_id == alternative_sequence_accession_id).one()
+    query = session.query(Sequence.sequence_id, Sequence.experiment_type_id, Sequence.sequencing_project_id,
+                          Sequence.host_sample_id)
+    if primary_sequence_accession_id:
+        query = query\
+            .filter(Sequence.accession_id == primary_sequence_accession_id)
+    elif alternative_sequence_accession_id:
+        query = query\
+            .filter(Sequence.alternative_accession_id == alternative_sequence_accession_id)
+    else:
+        raise ValueError('one between primary_sequence_accession_id and alternative_sequence_accession_id arguments must '
+                         'be specified')
+    sequence_id, experiment_id, sequence_project_id, host_sample_id = query.one()
 
     # delete aa variants and annotations
     annotation_ids = session.query(Annotation.annotation_id).filter(Annotation.sequence_id == sequence_id).all()
