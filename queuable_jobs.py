@@ -1,5 +1,6 @@
 from multiprocessing import JoinableQueue, cpu_count, Process
 import os
+from queue import Empty
 from typing import List, Optional
 from loguru import logger
 
@@ -7,6 +8,11 @@ from loguru import logger
 class Job:
 
     def execute(self):
+        """
+        It's advisable to handle KeyboardInterrupt exceptions by doing any necessary clean-up operation before returning.
+        If there are no clean-up operations, you may want to pause the process for one second to let the main thread have
+        the time to cancel scheduled jobs before eager workers get them.
+        """
         raise NotImplementedError()
 
 
@@ -17,25 +23,44 @@ class Worker(Process):
         logger.info('worker started')
 
     def get_a_job(self) -> Optional[Job]:
+        """
+        :return: a Job instance. None objects are reserved for use by the Boss.
+        """
         return self.jobs.get(block=True, timeout=None)
 
     def run(self):
+        """
+        KeyboardInterrupt are handled only when occurring in the two most common conditions:
+        - A worker is waiting to receive a job.
+        - A worker is executing a supposedly long task and it's interrupted before it is completed.
+        In both cases, the queue is maintained in a consistent state and the worker process won't hang. The best
+        way to terminate the processes is by catching the KeyboardInterrupt in the main thread and use the prepared
+        methods to discard the remaining jobs and stop the workers.
+        """
         while True:
-            job = self.get_a_job()
-            if job is None:
-                logger.info('shutting down a consumer')
-                self.jobs.task_done()
-                self.release_resources()
-                break
+            try:
+                job = self.get_a_job()
+            except KeyboardInterrupt:
+                continue   # Ctrl+C arrived while waiting to receive a job
             else:
-                try:
-                    job.execute()
-                    self.jobs.task_done()
-                except Exception:
-                    logger.exception('An exception reached the Worker loop. Worker is being disposed.')
+                if job is None:
                     self.jobs.task_done()
                     self.release_resources()
                     break
+                else:
+                    try:
+                        job.execute()
+                        self.jobs.task_done()
+                    except KeyboardInterrupt:
+                        self.jobs.task_done()
+                        logger.info('KeyboardInterrupt caused a worker to interrupt a job before completing it. '
+                                    'You may want to handle this exception inside the Job definition instead.')
+                    except Exception:
+                        logger.exception('An exception reached the Worker loop. Worker is being disposed.')
+                        self.jobs.task_done()
+                        self.release_resources()
+                        break
+        logger.info('worker left')
 
     def release_resources(self):
         self.jobs = None
@@ -61,11 +86,19 @@ class Boss:
         self._queue.put(job)
 
     def stop_workers(self):
+        logger.info('waiting all workers to finish')
         for _ in self._workers:
             self._queue.put(None, block=True, timeout=None)
-        logger.info('waiting all workers to finish')
         self._queue.join()
         logger.info('all processes_finished')
+
+    def discard_left_jobs(self):
+        while not self._queue.empty():
+            try:
+                self._queue.get(False)
+            except Empty:
+                continue
+            self._queue.task_done()
 
 
 def max_number_of_workers(user_defined_max_processes):

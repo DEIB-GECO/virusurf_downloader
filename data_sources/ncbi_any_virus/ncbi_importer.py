@@ -19,7 +19,7 @@ from geo_groups import geo_groups
 from xml_helper import text_at_node
 from loguru import logger
 from lxml import etree
-from locations import get_local_folder_for, FileType
+from locations import get_local_folder_for, FileType, remove_file
 from Bio import Entrez
 import pickle
 Entrez.email = "Your.Name.Here@example.org"
@@ -526,6 +526,10 @@ def _download_as_sample_object(alternative_accession_ids, log_with_name: str, Sa
                 f"Network error while downloading sample {sample_id} can't be solved. This sample 'll be skipped.")
             skipped_samples += 1
             continue
+        except KeyboardInterrupt:
+            #  downloaded file may be incomplete
+            remove_file(file_path=f"{download_sample_dir_path}{os.path.sep}{sample_id}.xml")
+            return
         other_sample = SampleWrapperClass(sample_path, sample_id)
         yield other_sample
     logger.info(f"{skipped_samples} 've been skipped due to network errors.")
@@ -679,6 +683,11 @@ def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSampl
             vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
         for nuc in nuc_variants:
             vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
+    except KeyboardInterrupt:
+        # cached file may be incomplete
+        file_path = get_local_folder_for(log_with_name, FileType.Annotations)+str(sample.internal_id())+".pickle"
+        remove_file(file_path)
+        raise database_tom.RollbackTransactionWithoutError()
     except Exception:
         logger.exception(f'exception occurred while working on annotations and nuc_variants of virus sample '
                          f'{sample.internal_id()}. Rollback transaction.')
@@ -806,6 +815,8 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
             sequencing_project_id = vcm.create_or_get_sequencing_project(session, sample)
             sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
             return sequence.sequence_id
+        except KeyboardInterrupt as e:
+            raise e
         except Exception as e:
             if str(e).startswith('duplicate key value violates unique constraint "sequence_accession_id_key"'):
                 logger.error(f'exception occurred while working on virus sample {sample}: {str(e)}')
@@ -863,14 +874,18 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
             if sequence_id:
                 # carries out main_pipeline_3 with many processes
                 the_boss.assign_job(ImportAnnotationsAndNucVariants(sequence_id, sample))
-                logger.debug(f'queue size: {the_boss._queue.qsize()}\t\t alive processes: {len([x for x in the_boss._workers if x.is_alive()])}')
+                logger.debug(f'queue size: {the_boss._queue.qsize()}')
                 # database_tom.try_py_function(
                 #     main_pipeline_part_3, sample, sequence_id
                 # )
+    except KeyboardInterrupt:
+        # When using multiprocessing, each process receives KeyboardInterrupt. Child process should take care of clean up.
+        # Child process should not raise themselves KeyboardInterrupt
+        the_boss.discard_left_jobs()
+        logger.info('Execution aborted by the user. Cancelling waiting tasks...')
     except:
         logger.exception("AN EXCEPTION CAUSED THE LOOP TO TERMINATE. Workers will be terminated.")
     finally:
-        # pass
         the_boss.stop_workers()
 
     # remove outdated sequences

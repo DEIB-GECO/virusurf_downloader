@@ -1,6 +1,8 @@
 import os
 from enum import Enum
 
+from loguru import logger
+
 download_folder = f".{os.path.sep}downloads{os.path.sep}"
 local_folder = download_folder + f"entrez_api{os.path.sep}"
 local_folder_taxonomy = download_folder + f"entrez_api_taxonomy{os.path.sep}"
@@ -17,6 +19,7 @@ class FileType(Enum):
     Logs = 'logs'
     Annotations = 'annotations'
 
+
 def get_local_folder_for(source_name: str, _type: FileType) -> str:
     """
     :param source_name: the name of the source requiring the directory. As this name will be part of the path, it is
@@ -29,3 +32,10 @@ def get_local_folder_for(source_name: str, _type: FileType) -> str:
         os.makedirs(path, exist_ok=True)
     return path
 
+
+def remove_file(file_path):
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+        except OSError as e:
+            logger.error(f"Failed to remove file {file_path} with error: {e.strerror}")
