@@ -30,9 +30,9 @@ class COGUKSarsCov2Sample(VirusSample):
 
     def __init__(self, sample_dict):
         super().__init__()
-        self.sample_dict = self.parse_sample_dict(sample_dict)
+        self.sample_dict = self._parse_sample_dict(sample_dict)
 
-    def parse_sample_dict(self, sample_dict):
+    def _parse_sample_dict(self, sample_dict):
         meta: str = sample_dict.get(self.METADATA_RAW_STRING)
         if meta:
             try:

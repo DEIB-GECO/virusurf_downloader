@@ -100,6 +100,9 @@ class Boss:
                 continue
             self._queue.task_done()
 
+    def number_of_waiting_jobs(self):
+        return self._queue.qsize()
+
 
 def max_number_of_workers(user_defined_max_processes):
     max_p = []

@@ -1,5 +1,5 @@
 import sqlalchemy
-from sqlalchemy import Column, ForeignKey, select, join, Index, column, REAL
+from sqlalchemy import Column, select, join, Index, column, REAL
 from sqlalchemy import String, Integer, Boolean, Float, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
@@ -16,7 +16,6 @@ _db_engine: Engine
 _base = declarative_base()
 _session_factory: sessionmaker
 _last_config_parameters = ()
-
 
 
 def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch: bool = False):
@@ -43,7 +42,7 @@ def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch
 
             # DROP TABLES
             _base.metadata.drop_all(_db_engine, tables=[ExperimentType.__table__, SequencingProject.__table__, Virus.__table__,
-                                                        HostSample.__table__, Sequence.__table__, AminoacidVariant.__table__,
+                                                        HostSample.__table__, Sequence.__table__, AminoAcidVariant.__table__,
                                                         Annotation.__table__, NucleotideVariant.__table__,
                                                         VariantImpact.__table__])
 
@@ -70,6 +69,13 @@ def re_config_db_engine(recreate_db_from_scratch=False):
     config_db_engine(*_last_config_parameters[0:4], recreate_db_from_scratch)
 
 
+def rollback(session):
+    try:
+        session.rollback()
+    except SQLAlchemyError:
+        logger.exception('An error occurred during DB transaction. Rollback failed')
+
+
 def try_py_function(func, *args, **kwargs):
     """
     Use this function to perform any action on the database.
@@ -92,18 +98,16 @@ def try_py_function(func, *args, **kwargs):
         result = func(session, *args, **kwargs)
         session.commit()
         return result
-    except SQLAlchemyError as e:
-        logger.trace('rollback of current transaction')
+    except Rollback:
+        logger.trace('Rollback of current transaction')
         rollback(session)
-        raise e
-    except RollbackTransactionWithoutError as e:
-        logger.trace('rollback of current transaction')
+    except RollbackAndRaise as e:
+        logger.trace('Rollback of current transaction')
         rollback(session)
-        if str(e) is not None:
-            logger.error(str(e))
-    except RaiseNoRollback as e:
+        raise e.wrapped_exception
+    except CommitAndRaise as e:
         session.commit()
-        raise e.true_exception
+        raise e.wrapped_exception
     except Exception as e:
         logger.info('Rollback of current transaction.')
         rollback(session)
@@ -112,22 +116,22 @@ def try_py_function(func, *args, **kwargs):
         session.close()
 
 
-def rollback(session):
-    try:
-        session.rollback()
-    except SQLAlchemyError:
-        logger.exception('An error occurred during DB transaction. Rollback failed')
-
-
-class RollbackTransactionWithoutError(Exception):
+#            ##################  EXCEPTIONS WITH SPECIAL BEHAVIOURS  #####################
+class Rollback(Exception):
     pass
 
 
-class RaiseNoRollback(Exception):
-    def __init__(self, true_exception=Exception):
-        self.true_exception = true_exception
+class RollbackAndRaise(Exception):
+    def __init__(self, wrap_exception: Exception):
+        self.wrapped_exception = wrap_exception
 
 
+class CommitAndRaise(Exception):
+    def __init__(self, wrap_exception: Exception):
+        self.wrapped_exception = wrap_exception
+
+
+#           ######################  VCM SCHEMA DEFINITION       #############################
 class ExperimentType(_base):
     __tablename__ = 'experiment_type'
 
@@ -219,7 +223,7 @@ class Annotation(_base):
     __tablename__ = 'annotation'
 
     annotation_id = Column(Integer, primary_key=True, autoincrement=True)
-    sequence_id = Column(Integer, ForeignKey(Sequence.sequence_id), nullable=False)
+    sequence_id = Column(Integer, nullable=False)
 
     feature_type = Column(String, nullable=False)
     start = Column(Integer)
@@ -235,7 +239,7 @@ class NucleotideVariant(_base):
     __tablename__ = 'nucleotide_variant'
 
     nucleotide_variant_id = Column(Integer, primary_key=True)
-    sequence_id = Column(Integer, ForeignKey(Sequence.sequence_id), nullable=False)
+    sequence_id = Column(Integer, nullable=False)
 
     sequence_original = Column(String, nullable=False)
     sequence_alternative = Column(String, nullable=False)
@@ -256,18 +260,18 @@ class VariantImpact(_base):
     __tablename__ = 'variant_impact'
 
     variant_impact_id = Column(Integer, primary_key=True)
-    nucleotide_variant_id = Column(Integer, ForeignKey(NucleotideVariant.nucleotide_variant_id), nullable=False)
+    nucleotide_variant_id = Column(Integer, nullable=False)
 
     effect = Column(String)
     putative_impact = Column(String)
     impact_gene_name = Column(String)
 
 
-class AminoacidVariant(_base):
+class AminoAcidVariant(_base):
     __tablename__ = 'aminoacid_variant'
 
-    aminoacid_variant_id = Column(Integer, primary_key=True)        # TODO remove foreign_keys
-    annotation_id = Column(Integer, ForeignKey(Annotation.annotation_id), nullable=False)
+    aminoacid_variant_id = Column(Integer, primary_key=True)
+    annotation_id = Column(Integer, nullable=False)
 
     sequence_aa_original = Column(String, nullable=False)
     sequence_aa_alternative = Column(String, nullable=False)
@@ -399,7 +403,7 @@ class ViewAnnotation(View):
         ViewAnnotation._drop_view('annotation_view')
 
 
-class ViewNucleotideVariantAnnoatation(MaterializedView):
+class ViewNucleotideVariantAnnotation(MaterializedView):
     stmt = select([
         NucleotideVariant.nucleotide_variant_id,
         Annotation.feature_type.label('n_feature_type'),
@@ -412,11 +416,11 @@ class ViewNucleotideVariantAnnoatation(MaterializedView):
 
     @staticmethod
     def create():
-        ViewNucleotideVariantAnnoatation._create_view('nucleotide_variant_annotation', ViewNucleotideVariantAnnoatation.stmt)
+        ViewNucleotideVariantAnnotation._create_view('nucleotide_variant_annotation', ViewNucleotideVariantAnnotation.stmt)
 
     @staticmethod
     def drop():
-        ViewNucleotideVariantAnnoatation._drop_view('nucleotide_variant_annotation')
+        ViewNucleotideVariantAnnotation._drop_view('nucleotide_variant_annotation')
 
     # try:
     #     __table__ = create_view('nucleotide_variant_annotation', stmt, _base.metadata)
@@ -438,8 +442,16 @@ class ViewNucleotideVariantLimited(View):
         ViewNucleotideVariantLimited._drop_view('nucleotide_variant_limited')
 
 
-views = [ViewAnnotationCDS, ViewNucleotideVariantAnnoatation, ViewNucleotideVariantLimited, ViewAnnotation]
+views = [ViewAnnotationCDS, ViewNucleotideVariantAnnotation, ViewNucleotideVariantLimited, ViewAnnotation]
 
+
+def create_views():
+    # CREATE OR REPLACE VIEWS
+    for v in views:
+        v.create()
+
+
+#                   ##############################      INDEXES     ##################################
 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
 def delete_indexes():
     # the following names must match the ones declared during the generation of the indexes (see code below)
@@ -455,6 +467,7 @@ def delete_indexes():
         except sqlalchemy.exc.ProgrammingError:
             pass
 
+
 # noinspection SqlNoDataSourceInspection,SqlDialectInspection
 def create_indexes():
     
@@ -465,10 +478,10 @@ def create_indexes():
     delete_indexes()
     logger.info('Generating indexes...')
 
-    _db_engine.execute(f'CREATE INDEX aa__ann_id ON {AminoacidVariant.__table__}({column_name(AminoacidVariant.annotation_id)})')
-    _db_engine.execute(f'CREATE INDEX aa__var_type_lower ON {AminoacidVariant.__table__}(lower({column_name(AminoacidVariant.variant_aa_type)}))')
-    _db_engine.execute(f'CREATE INDEX aa__start_original ON {AminoacidVariant.__table__}({column_name(AminoacidVariant.start_aa_original)})')
-    _db_engine.execute(f'CREATE INDEX aa__var_type_normal ON {AminoacidVariant.__table__}({column_name(AminoacidVariant.variant_aa_type)})')
+    _db_engine.execute(f'CREATE INDEX aa__ann_id ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.annotation_id)})')
+    _db_engine.execute(f'CREATE INDEX aa__var_type_lower ON {AminoAcidVariant.__table__}(lower({column_name(AminoAcidVariant.variant_aa_type)}))')
+    _db_engine.execute(f'CREATE INDEX aa__start_original ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.start_aa_original)})')
+    _db_engine.execute(f'CREATE INDEX aa__var_type_normal ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.variant_aa_type)})')
 
     _db_engine.execute(f'CREATE INDEX ann__seq_id ON {Annotation.__table__}({column_name(Annotation.sequence_id)})')
     _db_engine.execute(f'CREATE INDEX ann__start ON {Annotation.__table__}({column_name(Annotation.start)})')
@@ -497,12 +510,7 @@ def create_indexes():
             .execute(f'CREATE INDEX nuc_var_ann__var_id ON nucleotide_variant_annotation(nucleotide_variant_id)')
 
 
-def create_views():
-    # CREATE OR REPLACE VIEWS
-    for v in views:
-        v.create()
-
-
+#                   ##############################      CHIMERA SEQUENCES       ######################
 def disambiguate_chimera_sequences():
     stmt = """
         update sequence 

@@ -1,11 +1,14 @@
 import json
 
 from json import JSONDecodeError
+from typing import Optional
+
 from loguru import logger
 from tqdm import tqdm
 
 from data_sources.gisaid_sars_cov_2.sample import GISAIDSarsCov2Sample
 from data_sources.virus import VirusSource
+import stats_module
 
 
 # noinspection PyMethodMayBeStatic
@@ -51,12 +54,24 @@ class GISAIDSarsCov2(VirusSource):
     def is_positive_stranded(self):
         return True
 
-    def virus_samples(self):
+    def virus_samples(self, virus_id: int, from_sample: Optional[int] = None, to_sample: Optional[int] = None):
         with open(self.data_path, mode='r') as input_file:
             num_lines = sum(1 for line in input_file)
             input_file.seek(0, 0)   # reset pointer
-            for line in tqdm(input_file, total=num_lines):
+            lines_read = 0
+            lines_to_read = num_lines if (from_sample is None or to_sample is None) else to_sample - from_sample
+            progress = tqdm(total=lines_to_read)
+            stats_module.schedule_samples(stats_module.StatsBasedOnTotals(lines_to_read, virus_id, ['GISAID']))
+            for line in input_file:
+                if from_sample is not None and to_sample is not None:
+                    if lines_read < from_sample:
+                        lines_read += 1
+                        continue    # read line without action
+                    elif lines_read >= to_sample:
+                        return      # terminate loop
                 try:
+                    lines_read += 1
+                    progress.update()
                     yield GISAIDSarsCov2Sample(json.loads(line))
                 except JSONDecodeError:
                     pass

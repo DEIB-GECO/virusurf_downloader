@@ -606,7 +606,7 @@ def import_into_vcm_all_except_annotations_nuc_vars(session: database_tom.Sessio
     experiment = vcm.create_or_get_experiment(session, sample)
     host_sample = vcm.create_or_get_host_sample(session, sample)
     sequencing_project = vcm.create_or_get_sequencing_project(session, sample)
-    sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment, host_sample, sequencing_project)
+    sequence = vcm.create_and_get_sequence(session, sample, virus_id, experiment, host_sample, sequencing_project)
 
 
 def import_references_into_vcm(session: database_tom.Session, sample: AnyNCBIVNucSample):

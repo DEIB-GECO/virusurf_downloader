@@ -6,8 +6,6 @@ from typing import Callable, Optional, List, Union
 import database_tom
 import vcm as vcm
 from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
-from data_sources.virus_sample import VirusSample
-from data_sources.virus import VirusSource
 from data_sources.coguk_sars_cov_2.virus import COGUKSarsCov2
 from multiprocessing import JoinableQueue, cpu_count, Process
 from sqlalchemy.orm.session import Session
@@ -15,6 +13,7 @@ from Bio import Entrez
 
 from locations import get_local_folder_for, FileType
 from pipeline_nuc_variants__annotations__aa import sequence_aligner
+import stats_module
 Entrez.email = "Your.Name.Here@example.org"
 
 
@@ -46,9 +45,10 @@ def main_pipeline_part_3(session: database_tom.Session, sample, db_sequence_id):
             vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
         for nuc in nuc_variants:
             vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
+        stats_module.completed_sample(sample.primary_accession_number())
     except Exception:
         logger.exception(f'exception occurred while working on annotations and nuc_variants of virus sample {sample.primary_accession_number()}. Rollback transaction.')
-        raise database_tom.RollbackTransactionWithoutError()
+        raise database_tom.Rollback()
 
 
 class Sequential:
@@ -57,12 +57,12 @@ class Sequential:
         global reference_sequence
         reference_sequence = virus.reference_sequence()
 
-    def import_virus_sample(self, session: Session, sample: VirusSample):
+    def import_virus_sample(self, session: Session, sample: COGUKSarsCov2Sample):
         experiment_id = vcm.create_or_get_experiment(session, sample)
         host_sample_id = vcm.create_or_get_host_sample(session, sample)
         sequencing_project_id = vcm.create_or_get_sequencing_project(session, sample)
-        sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment_id, host_sample_id,
-                                              sequencing_project_id)
+        sequence = vcm.create_and_get_sequence(session, sample, virus_id, experiment_id, host_sample_id,
+                                               sequencing_project_id)
         main_pipeline_part_3(session, sample, sequence.sequence_id)
 
     def tear_down(self):
@@ -70,7 +70,7 @@ class Sequential:
 
 class Parallel:
 
-    MAX_PROCESSES = 30
+    MAX_PROCESSES = 10
 
     def __init__(self):
         # empty job queue
@@ -79,13 +79,13 @@ class Parallel:
         logger.info(f'queue set to accapt at most {queue_size} jobs before pausing the producer')
         self.workers: List[Parallel.Consumer] = []
 
-    def import_virus_sample(self, session: Session, sample: VirusSample):
+    def import_virus_sample(self, session: Session, sample: COGUKSarsCov2Sample):
         # do this synchronously
         experiment_id = vcm.create_or_get_experiment(session, sample)
         host_sample_id = vcm.create_or_get_host_sample(session, sample)
         sequencing_project_id = vcm.create_or_get_sequencing_project(session, sample)
-        sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment_id, host_sample_id,
-                                              sequencing_project_id)
+        sequence = vcm.create_and_get_sequence(session, sample, virus_id, experiment_id, host_sample_id,
+                                               sequencing_project_id)
 
         if not self.workers:
             global reference_sequence
@@ -99,7 +99,7 @@ class Parallel:
         # schedule nucleotide variants to be called asynchronously
         sample.on_before_multiprocessing()
         self._queue.put([sample, sequence.sequence_id])
-        logger.debug(f'nuc_var for sequence {sample.primary_accession_number()} scheduled\tQueue size: {self._queue.qsize()}\tAlive processes:{len([x for x in self.workers if x.is_alive()])}')
+        logger.debug(f'nuc_var for sequence {sample.primary_accession_number()} scheduled\tQueue size: {self._queue.qsize()}')
 
     class Consumer(Process):
         def __init__(self, jobs: JoinableQueue, refseq: str, shared_session: Session):
@@ -123,7 +123,7 @@ class Parallel:
                             main_pipeline_part_3(self.shared_session, sample, sequence_id)
                             self.shared_session.commit()
                             logger.info(f'pipeline_part_3 of sequence with id {sequence_id} imported')
-                        except database_tom.RollbackTransactionWithoutError:
+                        except database_tom.Rollback:
                             database_tom.rollback(self.shared_session)
                         except:
                             logger.exception(
@@ -164,8 +164,8 @@ class Parallel:
         logger.info('all processes_finished')
 
 
-def import_virus(session: Session, virus: VirusSource):
-    return vcm.create_or_get_virus(session, virus)
+def import_virus(session: Session, _virus: COGUKSarsCov2):
+    return vcm.create_or_get_virus(session, _virus)
 
 
 def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
@@ -179,7 +179,7 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     import_method = Parallel()
     successful_imports = 0
 
-    def try_import_virus_sample(sample: VirusSample):
+    def try_import_virus_sample(sample: COGUKSarsCov2Sample):
         global successful_imports
         try:
             database_tom.try_py_function(import_method.import_virus_sample, sample)

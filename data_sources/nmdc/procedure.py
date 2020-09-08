@@ -6,19 +6,20 @@ from typing import Tuple, Optional
 from Bio import Entrez
 from tqdm import tqdm
 
+import stats_module
 from pipeline_nuc_variants__annotations__aa import sequence_aligner
 from loguru import logger
 from time import sleep
 from lxml import html, etree
 import requests
-from data_sources.ncbi_sars_cov_2.sample import NCBISarsCov2Sample
+from data_sources.ncbi_any_virus.ncbi_importer import AnyNCBIVNucSample
 from xml_helper import text_at_node
 from locations import get_local_folder_for, FileType
 import wget
 import os
 from os.path import sep
 from data_sources.common_methods_host_sample import host_taxon_id_from_ncbi_taxon_name
-from data_sources.common_methods_virus import _download_virus_taxonomy_as_xml_from_name
+from data_sources.common_methods_virus import download_ncbi_taxonomy_as_xml_from_name
 import vcm
 import database_tom
 import dateutil.parser as dateparser
@@ -409,7 +410,7 @@ def reference_sequence(nuccore_query) -> str:
             for line in handle:
                 f.write(line)
 
-    reference_sample = NCBISarsCov2Sample(reference_seq_file_path, reference_seq_id)
+    reference_sample = AnyNCBIVNucSample(reference_seq_file_path, reference_seq_id)
     return reference_sample.nucleotide_sequence()
 
 
@@ -432,6 +433,8 @@ def import_samples_into_vcm():
     fasta_folder = get_local_folder_for('NMDC', FileType.SequenceOrSampleData)
     taxonomy_folder = get_local_folder_for('NMDC', FileType.TaxonomyData)
     fasta_list = get_fasta_list()
+    stats_module.schedule_samples(
+        set_info=stats_module.StatsBasedOnIds([x.rstrip('.fasta') for x in fasta_list], True))
     logger.warning(
         f'{len(fasta_list)} files found at {base_url}. Some of them may be skipped because they have not metadata'
         f' or because they are not realted to SARS or SARS-coV2.')
@@ -453,14 +456,14 @@ def import_samples_into_vcm():
             experiment_id = vcm.create_or_get_experiment(session, a_sample)
             host_sample_id = vcm.create_or_get_host_sample(session, a_sample)
             sequencing_project_id = vcm.create_or_get_sequencing_project(session, a_sample)
-            sequence = vcm.create_or_get_sequence(session, a_sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
+            sequence = vcm.create_and_get_sequence(session, a_sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
             return sequence.sequence_id
         except Exception as e:
             if str(e).startswith('duplicate key value violates unique constraint "sequence_accession_id_key"'):
                 logger.error(f'exception occurred while working on virus sample {a_sample}: {str(e)}')
             else:
                 logger.exception(f'exception occurred while working on virus sample {a_sample}')
-            raise database_tom.RollbackTransactionWithoutError()
+            raise database_tom.Rollback()
 
     def nucleotide__annotations__pipeline(session: database_tom.Session, a_sample: NMDCVirusSample, db_sequence_id):
         if a_sample.taxon_name() == 'Severe acute respiratory syndrome coronavirus 2':
@@ -489,14 +492,14 @@ def import_samples_into_vcm():
                 vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
             for nuc in nuc_variants:
                 vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
+            stats_module.completed_sample(sample.primary_accession_number())
         except Exception:
             logger.exception(
                 f'exception occurred while working on annotations and nuc_variants of virus sample '
                 f'{a_sample.primary_accession_number()}. Rollback transaction.')
-            raise database_tom.RollbackTransactionWithoutError()
+            raise database_tom.Rollback()
 
     logger.info('begin import of selected records')
-    logger.warning('nucleotide and annotation calling disabled')    # TODO remove
     total_sequences_imported = 0
     total_sequences_skipped = 0
     log_of_gisaid_id_path = f"{get_local_folder_for('NMDC', FileType.Logs)}{os.path.sep}gisa_ids.txt"
@@ -505,14 +508,16 @@ def import_samples_into_vcm():
             try:
                 sample = NMDCVirusSample(file)
 
+                # filter samples by organism
                 organism_name = sample.taxon_name()
                 if organism_name != 'Severe acute respiratory syndrome coronavirus 2':
                     logger.info(f'Sample {file} skipped because related to organims {organism_name}')
                     total_sequences_skipped += 1
                     continue
+                # download taxonomy for new organisms
                 organism = cached_taxonomy.get('organism_name')
                 if not organism:
-                    organism_file = _download_virus_taxonomy_as_xml_from_name(taxonomy_folder, organism_name)
+                    organism_file = download_ncbi_taxonomy_as_xml_from_name(taxonomy_folder, organism_name)
                     organism = AnyNCBITaxon(organism_file)
                     cached_taxonomy[organism_name] = organism
             except FileNotFoundError:
@@ -524,12 +529,14 @@ def import_samples_into_vcm():
                 total_sequences_skipped += 1
                 continue
 
+            # virus id associated to this sample
             virus_id = database_tom.try_py_function(virus_taxonomy_pipeline, organism)
             if virus_id:
                 gisa_id = sample.gisa_id()
                 if gisa_id:
                     log_of_gisaid_id.write(gisa_id+'\n')
 
+                # import sample
                 sequence_id = database_tom.try_py_function(metadata_pipeline, sample)
                 if sequence_id:
                     database_tom.try_py_function(nucleotide__annotations__pipeline, sample, sequence_id)

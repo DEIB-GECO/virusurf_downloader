@@ -1,15 +1,15 @@
-import os
 from os.path import sep
-import re
-import time
-import urllib
 from collections import Counter, OrderedDict
-from concurrent.futures.thread import ThreadPoolExecutor
+from pipeline_nuc_variants__annotations__aa import sequence_aligner
+import re
+import os
+import urllib
+import stats_module
 from queuable_jobs import Job, Boss, Worker
 from datetime import datetime
 from decimal import Decimal
 from typing import Callable, List, Optional, Tuple, Iterator
-
+from data_sources.common_methods_virus import _try_n_times, download_ncbi_taxonomy_as_xml, download_or_get_ncbi_sample_as_xml
 import dateutil.parser as dateparser
 import lxml
 from tqdm import tqdm
@@ -23,8 +23,7 @@ from locations import get_local_folder_for, FileType, remove_file
 from Bio import Entrez
 import pickle
 Entrez.email = "Your.Name.Here@example.org"
-from pipeline_nuc_variants__annotations__aa import sequence_aligner
-from VirusGenoUtil.code.integrate_iedb_epitopes import epitopes_for_virus_taxon
+
 
 nucleotide_reference_sequence: Optional[str] = None # initialized elsewhere
 annotation_file_path: Optional[str] = None  # initialized elsewhere
@@ -520,11 +519,13 @@ def _download_as_sample_object(alternative_accession_ids, log_with_name: str, Sa
     skipped_samples = 0
     for sample_id in tqdm(alternative_accession_ids):
         try:
-            sample_path = _download_or_get_virus_sample_as_xml(download_sample_dir_path, sample_id)
+            sample_path = download_or_get_ncbi_sample_as_xml(download_sample_dir_path, sample_id)
         except urllib.error.URLError:
             logger.exception(
                 f"Network error while downloading sample {sample_id} can't be solved. This sample 'll be skipped.")
             skipped_samples += 1
+            #  downloaded file may be incomplete
+            remove_file(file_path=f"{download_sample_dir_path}{os.path.sep}{sample_id}.xml")
             continue
         except KeyboardInterrupt:
             #  downloaded file may be incomplete
@@ -533,6 +534,7 @@ def _download_as_sample_object(alternative_accession_ids, log_with_name: str, Sa
         other_sample = SampleWrapperClass(sample_path, sample_id)
         yield other_sample
     logger.info(f"{skipped_samples} 've been skipped due to network errors.")
+
 
 # noinspection PyPep8Naming
 def _reference_sample_from_organism(samples_query: str, log_with_name: str, SampleWrapperClass=AnyNCBIVNucSample):
@@ -570,45 +572,9 @@ def _reference_sample_from_organism(samples_query: str, log_with_name: str, Samp
     test_query()
     logger.trace(f'download and processing of the reference sample...')
     download_sample_dir_path = get_local_folder_for(source_name=log_with_name, _type=FileType.SequenceOrSampleData)
-    sample_path = _download_or_get_virus_sample_as_xml(download_sample_dir_path, accession_ids[0])
+    sample_path = download_or_get_ncbi_sample_as_xml(download_sample_dir_path, accession_ids[0])
     ref_sample = SampleWrapperClass(sample_path, accession_ids[0])
     return ref_sample
-
-
-def _download_virus_taxonomy_as_xml(containing_directory: str, taxon_id: int) -> str:
-    def count_organisms():
-        with Entrez.esearch(db="taxonomy", term=f'{taxon_id}[uid]', rettype='count', retmode="xml") as handle_1:
-            response = Entrez.read(handle_1)
-        return int(response['Count'])
-    how_many_organisms = _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, count_organisms)
-    assert how_many_organisms == 1, f'The passed taxon id should match exactly one organism in the NCBI Taxonomy DB but\n' \
-                                    f'{taxon_id} does not match any.'
-
-    def do():
-        # download and write the taxonomy tree for the taxon id
-        destination_file_path = f"{containing_directory}{os.path.sep}{taxon_id}.xml"
-        if not os.path.exists(destination_file_path):
-            with Entrez.efetch(db="taxonomy", id=taxon_id, rettype=None, retmode="xml") as handle, \
-                    open(destination_file_path, 'w') as f:
-                for line in handle:
-                    f.write(line)
-        return destination_file_path
-    return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
-
-
-def _download_or_get_virus_sample_as_xml(containing_directory: str, sample_accession_id: int) -> str:
-    """
-    :param containing_directory: directory where the file will be downloaded and cached
-    :param sample_accession_id: sequence accession id ( == numeric part of a GI id, e.g. '1798174254' of 'gi|1798174254')
-    :return: the local file path of the download INSDSeq XML file.
-    """
-    def do():
-        local_file_path = f"{containing_directory}{os.path.sep}{sample_accession_id}.xml"
-        with Entrez.efetch(db="nuccore", id=sample_accession_id, rettype="gbc", retmode="xml") as handle, open(local_file_path, 'w') as f:
-            for line in handle:
-                f.write(line)
-        return local_file_path
-    return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
 
 
 def _get_samples_accession_ids(all_samples_query: str) -> List[int]:
@@ -643,28 +609,35 @@ def _get_samples_accession_ids(all_samples_query: str) -> List[int]:
     return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
 
 
-def _try_n_times(n_times: int, or_wait_secs: int, function: Callable, *args, **kwargs):
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        try:
-            return executor.submit(function, *args, **kwargs).result()
-        except IOError as e:
-            n_times -= 1
-            if n_times > 0:
-                logger.error(f'Error while invoking {function.__name__} with args: {args}\nkwargs: {kwargs}. '
-                             f'New attempt in {or_wait_secs} secs.'
-                             f'Reason of error: {str(type(e))} {e.args}')
-                logger.warning(f'new attempt to download in 30s. Left attempts {n_times}')
-                executor.submit(time.sleep, or_wait_secs).result()
-                return _try_n_times(n_times, or_wait_secs, function, *args, **kwargs)
-            else:
-                raise e
+def _deltas(virus_id, id_remote_samples):
+    """
+    :param virus_id: virus_id from the DB of the virus being imported
+    :param id_remote_samples: alternative accession id of the sequences avbailable from remote
+    :return: three sets containing the alternative accession ids of
+        1. sequences that are unchanged (local == remote)
+        2. outdated sequences (to be removed)
+        3. sequences new and to be imported
+    """
+    id_local_samples = set([int(i) for i in database_tom.try_py_function(
+        vcm.sequence_alternative_accession_ids, virus_id, ['GenBank', 'RefSeq']
+    )])
+    id_outdated_sequences = id_local_samples - id_remote_samples
+    id_new_sequences = id_remote_samples - id_local_samples
+    id_unchanged_sequences = id_local_samples - id_outdated_sequences
+    logger.info(f'\n'
+                f'# Sequences from remote source: {len(id_remote_samples)}. Of which\n'
+                f'# {len(id_unchanged_sequences)} present also locally and unchanged\n'
+                f'# {len(id_new_sequences)} never seen before.\n'
+                f'# Sequences from local source: {len(id_local_samples)}. Of which\n'
+                f'# {len(id_outdated_sequences)} outdated and must be removed from local')
+    return id_unchanged_sequences, id_outdated_sequences, id_new_sequences
 
 
 def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSample, db_sequence_id):
+    file_path = get_local_folder_for(log_with_name, FileType.Annotations) + str(sample.internal_id()) + ".pickle"
     try:
         # logger.debug(f'callling sequence aligner with args: {db_sequence_id}, <ref_seq>, <seq>, {virus_sequence_chromosome_name}, {annotation_file_path}, {snpeff_db_name}')
         # logger.debug('seq: '+sample.nucleotide_sequence())
-        file_path = get_local_folder_for(log_with_name, FileType.Annotations)+str(sample.internal_id())+".pickle"
         if not os.path.exists(file_path):
             annotations_and_nuc_variants = sequence_aligner(
                 sample.internal_id(),
@@ -685,13 +658,12 @@ def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSampl
             vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
     except KeyboardInterrupt:
         # cached file may be incomplete
-        file_path = get_local_folder_for(log_with_name, FileType.Annotations)+str(sample.internal_id())+".pickle"
         remove_file(file_path)
-        raise database_tom.RollbackTransactionWithoutError()
+        raise database_tom.Rollback()
     except Exception:
         logger.exception(f'exception occurred while working on annotations and nuc_variants of virus sample '
                          f'{sample.internal_id()}. Rollback transaction.')
-        raise database_tom.RollbackTransactionWithoutError()
+        raise database_tom.Rollback()
 
 
 class ImportAnnotationsAndNucVariants(Job):
@@ -705,8 +677,8 @@ class ImportAnnotationsAndNucVariants(Job):
         try:
             main_pipeline_part_3(self.session, self.sample, self.sequence_id)
             self.session.commit()
-            logger.info(f'pipeline_part_3 of sequence with id {self.sequence_id} imported')
-        except database_tom.RollbackTransactionWithoutError:
+            stats_module.completed_sample(self.sample.alternative_accession_number())
+        except database_tom.Rollback:
             database_tom.rollback(self.session)
         except:
             logger.exception(f'unknown exception while running pipeline_part_3 of sequence with id {self.sequence_id}')
@@ -734,7 +706,7 @@ class TheWorker(Worker):
 
 
 # noinspection PyPep8Naming
-def import_samples_into_vcm_except_annotations_nuc_vars(
+def import_samples_into_vcm(
         samples_query,
         bind_to_organism_taxon_id: int,
         _log_with_name: str,
@@ -779,7 +751,7 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
         :return:
         """
         taxonomy_download_dir = get_local_folder_for(log_with_name, FileType.TaxonomyData)
-        taxon_file_path = _download_virus_taxonomy_as_xml(taxonomy_download_dir, bind_to_organism_taxon_id)
+        taxon_file_path = download_ncbi_taxonomy_as_xml(taxonomy_download_dir, bind_to_organism_taxon_id)
         organism = OrganismWrapperClass(taxon_file_path)
 
         def get_virus_id_and_nuc_reference_sequence(session: database_tom.Session):
@@ -813,28 +785,25 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
             experiment_id = vcm.create_or_get_experiment(session, sample)
             host_sample_id = vcm.create_or_get_host_sample(session, sample)
             sequencing_project_id = vcm.create_or_get_sequencing_project(session, sample)
-            sequence = vcm.create_or_get_sequence(session, sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
+            sequence = vcm.create_and_get_sequence(session, sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
             return sequence.sequence_id
-        except KeyboardInterrupt as e:
-            raise e
-        except Exception as e:
-            if str(e).startswith('duplicate key value violates unique constraint "sequence_accession_id_key"'):
-                logger.error(f'exception occurred while working on virus sample {sample}: {str(e)}')
+        except ValueError as e:
+            if str(e).endswith('missing nucleotide seq.'):
+                logger.warning(f'Sample {sample.internal_id()} is given without nucleotide sequence. Sample import skipped. File deleted')
+                remove_file(f"{get_local_folder_for(log_with_name, FileType.SequenceOrSampleData)}{sample.alternative_accession_number()}.xml")
             else:
-                logger.exception(f'exception occurred while working on virus sample {sample}')
-            raise database_tom.RollbackTransactionWithoutError()
-
-    def main_pipeline_part_4(session: database_tom.Session):
-        logger.debug(f'calling epitopes for virus taxon {bind_to_organism_taxon_id} as bound to DB virus with id {virus_id}')
-        try:
-            epitopes, fragments = epitopes_for_virus_taxon(bind_to_organism_taxon_id)
-
-            vcm.create_epitopes(session, epitopes, virus_id)
-            vcm.create_epitopes_fragments(session, fragments)
-        except:
-            logger.exception('Excpetion occurred while computing and importing epitopes. Epitopes won\'t be inserted '
-                             'into the DB.')
-            raise database_tom.RollbackTransactionWithoutError()
+                logger.exception(f"exception occurred while working on virus sample {sample.internal_id()}. Sample won't be imported")
+            raise database_tom.Rollback()
+        except AssertionError:
+            logger.exception(f"Sample {sample.internal_id()} may have a corrupted XML. The XML will be deleted. Sample won't be imported")
+            remove_file(f"{get_local_folder_for(log_with_name, FileType.SequenceOrSampleData)}{sample.alternative_accession_number()}.xml")
+            raise database_tom.Rollback()
+        except KeyboardInterrupt as e:
+            logger.info(f"import of sample {sample.internal_id()} interrupted. Sample won't be imported")
+            raise e  # i.e. it is handled outside but I don't want it to be logged as an unexpected error
+        except Exception as e:
+            logger.exception(f"exception occurred while working on virus sample {sample.internal_id()}. Sample won't be imported")
+            raise database_tom.Rollback()
 
     check_user_query()
 
@@ -845,20 +814,19 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
 
     # find outdated and new samples from source
     id_all_current_sequences = set(_alt_ids_of_selected_sequences(samples_query, log_with_name))
-    id_previously_imported_sequences = set(database_tom.try_py_function(
-        vcm.sequence_alternative_accession_ids, virus_id, ['GenBank', 'RefSeq']
-    ))
-    id_outdated_sequences = id_previously_imported_sequences - id_all_current_sequences
-    id_new_sequences = id_all_current_sequences - id_previously_imported_sequences
-    logger.info(f'\n# total current sequences from source: {len(id_all_current_sequences)}. Of which\n'
-                f'# {len(id_previously_imported_sequences)} imported in previous runs\n'
-                f'# {len(id_new_sequences)} new sequences\n'
-                f'# {len(id_outdated_sequences)} are outdated and must be removed from previous import')
+    _, id_outdated_sequences, id_new_sequences = _deltas(virus_id, id_all_current_sequences)
+
+    # remove outdated sequences
+    for alt_seq_acc_id in id_outdated_sequences:
+        database_tom.try_py_function(vcm.remove_sequence_and_meta, None, str(alt_seq_acc_id))
 
     # select range
     id_new_sequences = sorted(list(id_new_sequences))
     if from_sample is not None and to_sample is not None:
         id_new_sequences = id_new_sequences[from_sample:to_sample]
+
+    stats_module.schedule_samples(
+        stats_module.StatsBasedOnIds([str(x) for x in id_new_sequences], False, virus_id, ['GenBank', 'RefSeq']))
 
     # prepare multiprocessing
     database_tom.dispose_db_engine()
@@ -874,10 +842,11 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
             if sequence_id:
                 # carries out main_pipeline_3 with many processes
                 the_boss.assign_job(ImportAnnotationsAndNucVariants(sequence_id, sample))
-                logger.debug(f'queue size: {the_boss._queue.qsize()}')
+                logger.debug(f'new job queued. waiting jobs: {the_boss.number_of_waiting_jobs()}')
                 # database_tom.try_py_function(
                 #     main_pipeline_part_3, sample, sequence_id
                 # )
+                # reliability_module.completed_sample(sample.alternative_accession_number())
     except KeyboardInterrupt:
         # When using multiprocessing, each process receives KeyboardInterrupt. Child process should take care of clean up.
         # Child process should not raise themselves KeyboardInterrupt
@@ -888,14 +857,6 @@ def import_samples_into_vcm_except_annotations_nuc_vars(
     finally:
         the_boss.stop_workers()
 
-    # remove outdated sequences
-    for alt_seq_acc_id in id_outdated_sequences:
-        database_tom.try_py_function(vcm.remove_sequence_and_meta, None, alt_seq_acc_id)
-
-    # epitopes
-    database_tom.try_py_function(
-        main_pipeline_part_4
-    )
 
 
 prepared_parameters = {

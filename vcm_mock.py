@@ -1,6 +1,11 @@
+from typing import List
+
+import sqlalchemy
+from sqlalchemy import cast
+
 from data_sources.virus_sample import VirusSample
-from database_tom import AminoacidVariant, ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, \
-    NucleotideVariant, VariantImpact
+from database_tom import AminoAcidVariant, ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, \
+    NucleotideVariant, VariantImpact, Epitope
 from xml_helper import *
 import string
 import random
@@ -115,7 +120,7 @@ def create_or_get_host_sample(session, sample: VirusSample):
     return host_sample.host_sample_id
 
 
-def create_or_get_sequence(session, virus_sample: VirusSample, virus_id: int, experiment_id, host_sample_id, sequencing_project_id):
+def create_and_get_sequence(session, virus_sample: VirusSample, virus_id: int, experiment_id, host_sample_id, sequencing_project_id):
     # data from sample
     accession_id = virus_sample.primary_accession_number()
     alternative_accession_id = virus_sample.alternative_accession_number()
@@ -188,7 +193,7 @@ def create_annotation_and_aa_variants(session, sample: VirusSample, sequence: Se
                                     aminoacid_sequence=amino_acid_sequence)
             if aa_variants:
                 for original, alternative, mutpos, mut_len, mut_type in aa_variants:
-                    aa_variant = AminoacidVariant(annotation_id=annotation.annotation_id,
+                    aa_variant = AminoAcidVariant(annotation_id=annotation.annotation_id,
                                                   sequence_aa_original=original,
                                                   sequence_aa_alternative=alternative,
                                                   start_aa_original=mutpos,
@@ -221,7 +226,7 @@ def create_annotation_and_amino_acid_variants(session, sequence_id, *args):
     #                             aminoacid_sequence=amino_acid_seq)
     #     if aa_variants:
     #         for gen_name, protein, protein_id, start_pos, sequence_aa_original, sequence_aa_alternative, variant_aa_type in aa_variants:
-    #             aa_variant = AminoacidVariant(annotation_id=annotation.annotation_id,
+    #             aa_variant = AminoAcidVariant(annotation_id=annotation.annotation_id,
     #                                           sequence_aa_original=sequence_aa_original,
     #                                           sequence_aa_alternative=sequence_aa_alternative,
     #                                           start_aa_original=start_pos,
@@ -308,11 +313,34 @@ def random_string():
     return ''.join(random.choices(string.ascii_uppercase, k=4))
 
 
-def all_sequence_accession_ids(session, virus_id):
-    return session.query(Sequence.accession_id).filter(
+def sequence_alternative_accession_ids(session, virus_id: int, sources: Optional[List[str]] = None):
+    query = session.query(cast(Sequence.alternative_accession_id, sqlalchemy.Integer)).filter(
         Sequence.virus_id == virus_id
-    ).all()
+    )
+    if sources:
+        query = query\
+            .join(SequencingProject, Sequence.sequencing_project_id == SequencingProject.sequencing_project_id)\
+            .filter(SequencingProject.database_source.in_(sources))
+    result = query.all()
+    return [_[0] for _ in result]
 
 
-def remove_sequence_and_meta(session, sequence_accession_id):
+def sequence_primary_accession_ids(session, virus_id: int, sources: Optional[List[str]] = None):
+    query = session.query(Sequence.accession_id).filter(
+        Sequence.virus_id == virus_id
+    )
+    if sources:
+        query = query\
+            .join(SequencingProject, Sequence.sequencing_project_id == SequencingProject.sequencing_project_id)\
+            .filter(SequencingProject.database_source.in_(sources))
+    result = query.all()
+    return [_[0] for _ in result]
+
+
+def remove_sequence_and_meta(session, primary_sequence_accession_id: Optional[str], alternative_sequence_accession_id: Optional[str]):
     pass
+
+
+def check_existence_epitopes(session, virus_id):
+    one_epitope = session.query(Epitope).filter(Epitope.virus_id == virus_id).first()
+    return one_epitope is not None

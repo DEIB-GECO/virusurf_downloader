@@ -3,14 +3,8 @@ from enum import Enum
 
 from loguru import logger
 
-download_folder = f".{os.path.sep}downloads{os.path.sep}"
-local_folder = download_folder + f"entrez_api{os.path.sep}"
-local_folder_taxonomy = download_folder + f"entrez_api_taxonomy{os.path.sep}"
-local_folder_nuc_variant_and_effects = download_folder + f"nuc_variants_and_effects{os.path.sep}"
-local_folder_annotations_and_aa_var = download_folder + f"annotations_and_aa_variants{os.path.sep}"
-local_folder_sequence = download_folder + f"sequence{os.path.sep}"
+_generated_folder = f".{os.path.sep}generated{os.path.sep}"
 
-base_folder = f".{os.path.sep}generated{os.path.sep}"
 
 class FileType(Enum):
     TaxonomyData = 'taxonomy'
@@ -27,7 +21,7 @@ def get_local_folder_for(source_name: str, _type: FileType) -> str:
     :param _type: one of locations.FileType
     :return: the path to an existing and usable folder.
     """
-    path = f"{base_folder}{source_name}{os.path.sep}{_type.value}{os.path.sep}"
+    path = f"{_generated_folder}{source_name}{os.path.sep}{_type.value}{os.path.sep}"
     if not os.path.exists(path):
         os.makedirs(path, exist_ok=True)
     return path

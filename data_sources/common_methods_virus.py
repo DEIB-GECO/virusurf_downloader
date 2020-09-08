@@ -15,7 +15,7 @@ DOWNLOAD_ATTEMPTS = 3
 DOWNLOAD_FAILED_PAUSE_SECONDS = 30
 
 
-def _download_virus_taxonomy_as_xml_from_name(containing_directory: str, taxon_name: int) -> str:
+def download_ncbi_taxonomy_as_xml_from_name(containing_directory: str, taxon_name: str) -> str:
     def count_organisms():
         with Entrez.esearch(db="taxonomy", term=f'{taxon_name}', rettype='count', retmode="xml") as handle_1:
             response = Entrez.read(handle_1)
@@ -42,7 +42,7 @@ def _download_virus_taxonomy_as_xml_from_name(containing_directory: str, taxon_n
     return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
 
 
-def _download_virus_taxonomy_as_xml(containing_directory: str, taxon_id: int) -> str:
+def download_ncbi_taxonomy_as_xml(containing_directory: str, taxon_id: int) -> str:
     def count_organisms():
         with Entrez.esearch(db="taxonomy", term=f'{taxon_id}[uid]', rettype='count', retmode="xml") as handle_1:
             response = Entrez.read(handle_1)
@@ -62,6 +62,22 @@ def _download_virus_taxonomy_as_xml(containing_directory: str, taxon_id: int) ->
         return destination_file_path
     return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
 
+
+def download_or_get_ncbi_sample_as_xml(containing_directory: str, sample_accession_id: int) -> str:
+    """
+    :param containing_directory: directory where the file will be downloaded and cached
+    :param sample_accession_id: sequence accession id ( == numeric part of a GI id, e.g. '1798174254' of 'gi|1798174254')
+    :return: the local file path of the download INSDSeq XML file.
+    """
+    def do():
+        local_file_path = f"{containing_directory}{os.path.sep}{sample_accession_id}.xml"
+        with Entrez.efetch(db="nuccore", id=sample_accession_id, rettype="gbc", retmode="xml") as handle, open(local_file_path, 'w') as f:
+            for line in handle:
+                f.write(line)
+        return local_file_path
+    return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
+
+
 def _try_n_times(n_times: int, or_wait_secs: int, function: Callable, *args, **kwargs):
     with ThreadPoolExecutor(max_workers=1) as executor:
         try:
@@ -69,9 +85,9 @@ def _try_n_times(n_times: int, or_wait_secs: int, function: Callable, *args, **k
         except IOError as e:
             n_times -= 1
             if n_times > 0:
-                logger.error(f'Error while invoking {function.__name__} with args: {args}\nkwargs: {kwargs}. '
-                             f'New attempt in {or_wait_secs} secs.'
-                             f'Reason of error: {str(type(e))} {e.args}')
+                logger.error(f'Error while invoking {function.__name__} with args: {args}\nkwargs: {kwargs}\n'
+                             f'\tReason of error: {str(type(e))} {e.args}'
+                             f'\tNew attempt in {or_wait_secs}s. Left attempts {n_times}')
                 executor.submit(time.sleep, or_wait_secs).result()
                 return _try_n_times(n_times, or_wait_secs, function, *args, **kwargs)
             else:
