@@ -12,19 +12,21 @@ Entrez.email = "Your.Name.Here@example.org"
 
 
 #   #################################       PROGRAM ARGUMENTS   ##########################
-wrong_arguments_message = 'The module main.py expects the following arguments:' \
-                          'db_name, recreate_db?, db_user, db_password, db_port, source_to_import\n' \
-                          'source_to_import accept values:\n' \
-                          'cog-uk\n' \
-                          'gisaid\n'
+wrong_arguments_message = 'The module main.py always expects at least these arguments: ' \
+                          'db_name, recreate_db?, db_user, db_password, db_port, action\n' \
+                          'Acceptable values for action are\n:' \
+                          '\timport\n' \
+                          '\tepitopes\n' \
+                          '\tindexes\n' \
+                          '\tviews\n' \
+                          '\tchimera_sequences\n' \
+                          'When action is "import" or "epitopes", it must be followed by the name of a source to be imported\n.' \
+                          '\tAcceptable source names are:\n' \
+                          '\tcog-uk\n' \
+                          '\tgisaid\n'
 for p in prepared_parameters.keys():
-    wrong_arguments_message += f'{p}\n'
-wrong_arguments_message += 'just_make_indexes\n'
-wrong_arguments_message += 'create_views\n'
-wrong_arguments_message += 'disambiguate_chimera_sequences\n'
-wrong_arguments_message += 'epitopes\n'
-wrong_arguments_message += 'If you want to import virus samples, you can optionally specify a range of samples to import as <min> (included) <max> (excluded).\n'
-wrong_arguments_message += 'If you want to import epitopes, you must specify a source name between the above ones.\n'
+    wrong_arguments_message += f'\t{p}\n'
+wrong_arguments_message += 'When action is "import", the source name can be optionally followed by a range of samples to import as <min> (included) <max> (excluded).\n'
 # noinspection PyBroadException
 try:
     db_name = sys.argv[1]
@@ -33,21 +35,20 @@ try:
     db_user = sys.argv[3]
     db_password = sys.argv[4]
     db_port = sys.argv[5]
-    source = sys.argv[6].lower()
-    try:
-        _from = int(sys.argv[7])
-        to = int(sys.argv[8])
-        if not _from < to:
-            logger.error('Optional parameter <min> must be less than <max>')
-            sys.exit(1)
-    except Exception:
-        _from = None
-        to = None
-    if 'epitope' in source:
+    action = sys.argv[6].lower()
+    if action == 'import':
+        source = sys.argv[7].lower()
+        try:
+            _from = int(sys.argv[8])
+            to = int(sys.argv[9])
+            if not _from < to:
+                logger.error('Optional parameter <min> must be less than <max>')
+                sys.exit(1)
+        except Exception:
+            _from = None
+            to = None
+    elif 'epitope' in action:
         _epitope_target = sys.argv[7]
-        if not _epitope_target:
-            logger.error('No epitope target specified. Type the target virus after "epitopes"')
-            raise Exception()
 except Exception:
     logger.error(wrong_arguments_message)
     sys.exit(1)
@@ -88,29 +89,34 @@ database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_d
 
 #   ###################################     MAIN OPERATION       ###############
 try:
-    if 'index' in source:
+    if 'index' in action:
         database_tom.create_indexes()
-    elif 'view' in source:
+    elif 'view' in action:
         database_tom.create_views()
-    elif 'chimera_sequence' in source:
+    elif 'chimera_sequence' in action:
         database_tom.disambiguate_chimera_sequences()
-    elif 'epitope' in source:
+    elif 'epitope' in action:
         from epitopes import import_epitopes
-        import_epitopes()
-    elif source in ['coguk', 'cog-uk']:
-        from data_sources.coguk_sars_cov_2.procedure import run as run_coguk
-        run_coguk(from_sample=_from, to_sample=to)
-    elif source == 'gisaid':
-        from data_sources.gisaid_sars_cov_2.procedure import run as run_gisaid
-        run_gisaid(from_sample=_from, to_sample=to)
-    elif source in prepared_parameters.keys():
-        import_samples_into_vcm(*prepared_parameters[source], from_sample=_from, to_sample=to)
-    elif 'nmdc' in source:
-        nmdc.import_samples_into_vcm()
+        import_epitopes(_epitope_target)
+    elif 'import' in action:
+        if source in ['coguk', 'cog-uk']:
+            from data_sources.coguk_sars_cov_2.procedure import run as run_coguk
+            run_coguk(from_sample=_from, to_sample=to)
+        elif source == 'gisaid':
+            from data_sources.gisaid_sars_cov_2.procedure import run as run_gisaid
+            run_gisaid(from_sample=_from, to_sample=to)
+        elif source in prepared_parameters.keys():
+            import_samples_into_vcm(*prepared_parameters[source], from_sample=_from, to_sample=to)
+        elif 'nmdc' in source:
+            nmdc.import_samples_into_vcm()
+        else:
+            logger.error(f'the argument {source} is not recognised.\n'+wrong_arguments_message)
     else:
-        logger.error(f'the argument {source} is not recognised.\n'+wrong_arguments_message)
+        logger.error(f'the argument {action} is not recognised.\n' + wrong_arguments_message)
 except:
     logger.exception('FATAL ERROR')  # this is just to make sure the exception is written to the log file before crashing
+    sys.exit(1)
 finally:
-    stats_module.check_samples_imported()
+    if 'import' in action:
+        stats_module.check_samples_imported()
     logger.complete()

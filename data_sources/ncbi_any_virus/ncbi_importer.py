@@ -24,6 +24,34 @@ from Bio import Entrez
 import pickle
 Entrez.email = "Your.Name.Here@example.org"
 
+uniformed_protein_names = {
+    'envelope protein': 'E (envelope protein)',
+    'membrane glycoprotein': 'M (membrane glycoprotein)',
+    'nucleocapsid phosphoprotein': 'N (nucleocapsid phosphoprotein)',
+    "2'-O-ribose methyltransferase": "NSP16 (2'-O-ribose methyltransferase)",
+    '3C-like proteinase': "NSP5 (3C-like proteinase)",
+    "3'-to-5' exonuclease": "NSP14 (3'-to-5' exonuclease)",
+    'endoRNAse': 'NSP15 (endoRNAse)',
+    'helicase': 'NSP13 (helicase)',
+    'leader protein': 'NSP1 (leader protein)',
+    'nsp10': 'NSP10',
+    'nsp11': 'NSP11',
+    'nsp2': 'NSP2',
+    'nsp3': 'NSP3',
+    'nsp4': 'NSP4',
+    'nsp6': 'NSP6',
+    'nsp7': 'NSP7',
+    'nsp8': 'NSP8',
+    'nsp9': 'NSP9',
+    'RNA-dependent RNA polymerase': 'NSP12 (RNA-dependent RNA polymerase)',
+    'ORF3a protein': 'NS3 (ORF3a protein)',
+    'ORF6 protein': 'NS6 (ORF6 protein)',
+    'ORF7a protein': 'NS7a (ORF7a protein)',
+    'ORF7b': 'NS7b (ORF7b)',
+    'ORF8 protein': 'NS8 (ORF8 protein)',
+    'surface glycoprotein': 'Spike (surface glycoprotein)'
+}
+
 
 nucleotide_reference_sequence: Optional[str] = None # initialized elsewhere
 annotation_file_path: Optional[str] = None  # initialized elsewhere
@@ -572,7 +600,12 @@ def _reference_sample_from_organism(samples_query: str, log_with_name: str, Samp
     test_query()
     logger.trace(f'download and processing of the reference sample...')
     download_sample_dir_path = get_local_folder_for(source_name=log_with_name, _type=FileType.SequenceOrSampleData)
-    sample_path = download_or_get_ncbi_sample_as_xml(download_sample_dir_path, accession_ids[0])
+    try:
+        sample_path = download_or_get_ncbi_sample_as_xml(download_sample_dir_path, accession_ids[0])
+    except Exception as e:
+        logger.error('Error while downloading or getting the reference sample XML. Partial file will be deleted')
+        remove_file(sample_path)
+        raise e
     ref_sample = SampleWrapperClass(sample_path, accession_ids[0])
     return ref_sample
 
@@ -653,7 +686,9 @@ def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSampl
                 annotations_and_nuc_variants = pickle.load(cache_file)
         annotations, nuc_variants = annotations_and_nuc_variants
         for ann in annotations:
-            vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
+            gene_name, product, protein_id, feature_type, start, stop, nuc_seq, amino_acid_seq, aa_variants = ann
+            product = uniformed_protein_names.get(product, product)
+            vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, gene_name, product, protein_id, feature_type, start, stop, nuc_seq, amino_acid_seq, aa_variants)
         for nuc in nuc_variants:
             vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
     except KeyboardInterrupt:
@@ -808,7 +843,15 @@ def import_samples_into_vcm(
     check_user_query()
 
     global nucleotide_reference_sequence
-    virus_id, nucleotide_reference_sequence = main_pipeline_part_1()   # id of the virus in the VCM.Virus table, to which imported sequences will be bound
+
+    # handle special case of SARS-Cov-1: The reference sample is not included in the sample set.
+    if log_with_name == 'New NCBI SARS-Cov-1':
+        previous_samples_query = samples_query
+        samples_query = 'txid694009[Organism] NOT txid2697049[Organism]'
+        virus_id, nucleotide_reference_sequence = main_pipeline_part_1()
+        samples_query = previous_samples_query
+    else:
+        virus_id, nucleotide_reference_sequence = main_pipeline_part_1()  # id of the virus in the VCM.Virus table, to which imported sequences will be bound
 
     logger.info(f'importing the samples identified by the query provided as bound to organism txid{bind_to_organism_taxon_id}')
 

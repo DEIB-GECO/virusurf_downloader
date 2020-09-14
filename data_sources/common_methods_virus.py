@@ -71,9 +71,10 @@ def download_or_get_ncbi_sample_as_xml(containing_directory: str, sample_accessi
     """
     def do():
         local_file_path = f"{containing_directory}{os.path.sep}{sample_accession_id}.xml"
-        with Entrez.efetch(db="nuccore", id=sample_accession_id, rettype="gbc", retmode="xml") as handle, open(local_file_path, 'w') as f:
-            for line in handle:
-                f.write(line)
+        if not os.path.exists(local_file_path):
+            with Entrez.efetch(db="nuccore", id=sample_accession_id, rettype="gbc", retmode="xml") as handle, open(local_file_path, 'w') as f:
+                for line in handle:
+                    f.write(line)
         return local_file_path
     return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
 

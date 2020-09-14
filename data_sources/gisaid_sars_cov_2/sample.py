@@ -9,6 +9,29 @@ from loguru import logger
 
 from data_sources.virus_sample import VirusSample
 
+protein_name_replacements = {
+    'E': 'E (envelope protein)',
+    'M': 'M (membrane glycoprotein)',
+    'N': 'N (nucleocapsid phosphoprotein)',
+    'NSP16': "NSP16 (2'-O-ribose methyltransferase)",
+    'NSP5': "NSP5 (3C-like proteinase)",
+    'NSP14': "NSP14 (3'-to-5' exonuclease)",
+    'NSP15': 'NSP15 (endoRNAse)',
+    'NSP13': 'NSP13 (helicase)',
+    'NSP1': 'NSP1 (leader protein)',
+    'NSP12': 'NSP12 (RNA-dependent RNA polymerase)',
+    'NS3': 'NS3 (ORF3a protein)',
+    'NS6': 'NS6 (ORF6 protein)',
+    'NS7a': 'NS7a (ORF7a protein)',
+    'NS7b': 'NS7b (ORF7b)',
+    'NS8': 'NS8 (ORF8 protein)',
+    'Spike': 'Spike (surface glycoprotein)'
+}
+
+
+def uniform_protein_name(protein_name):
+    return protein_name_replacements.get(protein_name, protein_name)
+
 
 class GISAIDSarsCov2Sample(VirusSample):
     cached_taxon_id = {}
@@ -239,6 +262,7 @@ class GISAIDSarsCov2Sample(VirusSample):
                         already_present_mutations.append((original_aa, alternative_aa, start_pos, length, _type))
 
                 for product, _mutations in zip(annotations, parsed_mutations):
+                    product = uniform_protein_name(product)
                     yield start, stop, feature_type, gene_name, product, db_xref_merged, amino_acid_sequence, _mutations
         except KeyError:
             yield from ()   # empty generator
