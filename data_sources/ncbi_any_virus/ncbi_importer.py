@@ -24,34 +24,6 @@ from Bio import Entrez
 import pickle
 Entrez.email = "Your.Name.Here@example.org"
 
-uniformed_protein_names = {
-    'envelope protein': 'E (envelope protein)',
-    'membrane glycoprotein': 'M (membrane glycoprotein)',
-    'nucleocapsid phosphoprotein': 'N (nucleocapsid phosphoprotein)',
-    "2'-O-ribose methyltransferase": "NSP16 (2'-O-ribose methyltransferase)",
-    '3C-like proteinase': "NSP5 (3C-like proteinase)",
-    "3'-to-5' exonuclease": "NSP14 (3'-to-5' exonuclease)",
-    'endoRNAse': 'NSP15 (endoRNAse)',
-    'helicase': 'NSP13 (helicase)',
-    'leader protein': 'NSP1 (leader protein)',
-    'nsp10': 'NSP10',
-    'nsp11': 'NSP11',
-    'nsp2': 'NSP2',
-    'nsp3': 'NSP3',
-    'nsp4': 'NSP4',
-    'nsp6': 'NSP6',
-    'nsp7': 'NSP7',
-    'nsp8': 'NSP8',
-    'nsp9': 'NSP9',
-    'RNA-dependent RNA polymerase': 'NSP12 (RNA-dependent RNA polymerase)',
-    'ORF3a protein': 'NS3 (ORF3a protein)',
-    'ORF6 protein': 'NS6 (ORF6 protein)',
-    'ORF7a protein': 'NS7a (ORF7a protein)',
-    'ORF7b': 'NS7b (ORF7b)',
-    'ORF8 protein': 'NS8 (ORF8 protein)',
-    'surface glycoprotein': 'Spike (surface glycoprotein)'
-}
-
 
 nucleotide_reference_sequence: Optional[str] = None # initialized elsewhere
 annotation_file_path: Optional[str] = None  # initialized elsewhere
@@ -686,9 +658,7 @@ def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSampl
                 annotations_and_nuc_variants = pickle.load(cache_file)
         annotations, nuc_variants = annotations_and_nuc_variants
         for ann in annotations:
-            gene_name, product, protein_id, feature_type, start, stop, nuc_seq, amino_acid_seq, aa_variants = ann
-            product = uniformed_protein_names.get(product, product)
-            vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, gene_name, product, protein_id, feature_type, start, stop, nuc_seq, amino_acid_seq, aa_variants)
+            vcm.create_annotation_and_amino_acid_variants(session, db_sequence_id, *ann)
         for nuc in nuc_variants:
             vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
     except KeyboardInterrupt:

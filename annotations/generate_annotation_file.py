@@ -147,6 +147,50 @@ def generate_annotation_file(from_reference_sammple_file_path: str, destination_
             ann_file.write(line+'\n')
 
 
+uniformed_protein_names = {
+    'envelope protein': 'E (envelope protein)',
+    'membrane glycoprotein': 'M (membrane glycoprotein)',
+    'nucleocapsid phosphoprotein': 'N (nucleocapsid phosphoprotein)',
+    "2'-O-ribose methyltransferase": "NSP16 (2'-O-ribose methyltransferase)",
+    '3C-like proteinase': "NSP5 (3C-like proteinase)",
+    "3'-to-5' exonuclease": "NSP14 (3'-to-5' exonuclease)",
+    'endoRNAse': 'NSP15 (endoRNAse)',
+    'helicase': 'NSP13 (helicase)',
+    'leader protein': 'NSP1 (leader protein)',
+    'nsp10': 'NSP10',
+    'nsp11': 'NSP11',
+    'nsp2': 'NSP2',
+    'nsp3': 'NSP3',
+    'nsp4': 'NSP4',
+    'nsp6': 'NSP6',
+    'nsp7': 'NSP7',
+    'nsp8': 'NSP8',
+    'nsp9': 'NSP9',
+    'RNA-dependent RNA polymerase': 'NSP12 (RNA-dependent RNA polymerase)',
+    'ORF3a protein': 'NS3 (ORF3a protein)',
+    'ORF6 protein': 'NS6 (ORF6 protein)',
+    'ORF7a protein': 'NS7a (ORF7a protein)',
+    'ORF7b': 'NS7b (ORF7b)',
+    'ORF8 protein': 'NS8 (ORF8 protein)',
+    'surface glycoprotein': 'Spike (surface glycoprotein)'
+}
+
+
+def uniform_protein_names_sc2(ann_file_path: str):
+    new_file_path = f"{ann_file_path}_2"
+    with open(ann_file_path, mode='r') as original, open(new_file_path, mode="w+") as new:
+        for original_line in original:
+
+            chromosome_name, source, feature_type, start_stop_string, gene_name, product, protein_id, amino_acid_sequence = original_line.split('\t')
+            # replace product ( == protein)
+            product = uniformed_protein_names.get(product, product)
+            # write
+            new_line = '\t'.join([chromosome_name, source, feature_type, start_stop_string, gene_name, product, protein_id, amino_acid_sequence])
+            new.write(new_line)     # trailing \n is already included in amino_acid_sequence
+    os.remove(ann_file_path)
+    os.rename(new_file_path, ann_file_path)
+
+
 def create_snpeff_folders_for_viruses():
     folders = [
         f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}betacoronavirus_england_1',
@@ -187,4 +231,6 @@ get_local_folder_for('NCBI_sars_cov_1', FileType.SequenceOrSampleData)
 # TODO you have to download the xml files listed in arguments and put them in the correct path manually in order for this to work
 for x in arguments.keys():
     generate_annotation_file(*arguments[x])
+    if x == "sars_cov_2":
+      uniform_protein_names_sc2(arguments[x][1])
 
