@@ -7,6 +7,7 @@ from Bio import Entrez
 from tqdm import tqdm
 import stats_module
 import warnings
+import notifications_module
 
 Entrez.email = "Your.Name.Here@example.org"
 
@@ -76,6 +77,7 @@ logger.add("./logs/log_"+source+"_{time}.log",
            backtrace=True,
            diagnose=True,
            enqueue=True)
+notifications_module.setup_any_additional_error_notifiers()
 # redirect warnings
 def customwarn(message, category, filename, lineno, file=None, line=None):
     logger.warning(warnings.formatwarning(message, category, filename, lineno))
