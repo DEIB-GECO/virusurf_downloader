@@ -10,7 +10,7 @@ from data_sources.virus import VirusSource
 from sqlalchemy.sql.expression import cast
 import sqlalchemy
 from database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
-    VariantImpact, AminoAcidVariant, Epitope, EpitopeFragment
+    VariantImpact, AminoAcidVariant, Epitope, EpitopeFragment, HostSpecie
 from locations import *
 from tqdm import tqdm
 from data_sources.virus_sample import VirusSample
@@ -18,11 +18,14 @@ from xml_helper import *
 
 # Set of methods that create the corresponding rows in the Virus Conceptual Model database tables
 
+cache_host_specie = dict()
 cache_host_sample = dict()
 cache_experiment_type = dict()
 cache_sequencing_project = dict()
 cache_virus = dict()
 epitope_id_mappings = dict()
+
+cache_typos_corrections = dict()
 
 
 #   #############################    VCM    ############################
@@ -109,11 +112,32 @@ def create_or_get_sequencing_project(session, sample: VirusSample):
     return sequencing_project_id
 
 
-def create_or_get_host_sample(session, sample: VirusSample):
-    global cache_host_sample
+def create_or_get_host_specie(session, sample: VirusSample) -> int:
+    global cache_host_specie
 
     host_taxon_name = sample.host_taxon_name()
+    if host_taxon_name:
+        host_taxon_name = host_taxon_name.lower()
     host_taxon_id = sample.host_taxon_id()
+
+    host_specie_key = (host_taxon_id, host_taxon_name)
+    host_specie_id = cache_host_specie.get(host_specie_key)
+    if not host_specie_id:
+        host_specie = session.query(HostSpecie).filter(HostSpecie.host_taxon_id == host_taxon_id,
+                                                       HostSpecie.host_taxon_name == host_taxon_name).one_or_none()
+        if not host_specie:
+            host_specie = HostSpecie(host_taxon_id=host_taxon_id,
+                                     host_taxon_name=host_taxon_name)
+            session.add(host_specie)
+            session.flush()
+        host_specie_id = host_specie.host_id
+        cache_host_specie[host_specie_key] = host_specie_id
+    return host_specie_id
+
+
+def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int) -> int:
+    global cache_host_sample
+
     gender = sample.gender()
     age = sample.age()
 
@@ -123,17 +147,14 @@ def create_or_get_host_sample(session, sample: VirusSample):
 
     country, region, geo_group = sample.country__region__geo_group()
 
-    host_sample_key = (host_taxon_name, host_taxon_id, gender, age, originating_lab, collection_date, isolation_source, country, region, geo_group)
+    host_sample_key = (host_specie_id, gender, age, originating_lab, collection_date, isolation_source, country, region, geo_group)
 
     if host_sample_key in cache_host_sample:
         host_sample_id = cache_host_sample[host_sample_key]
     else:
-        host_sample = session.query(HostSample).filter(HostSample.host_taxon_id == host_taxon_id,
-                                                       HostSample.host_taxon_name == host_taxon_name,
-
+        host_sample = session.query(HostSample).filter(HostSample.host_id == host_specie_id,
                                                        HostSample.collection_date == collection_date,
                                                        HostSample.isolation_source == isolation_source,
-
                                                        HostSample.originating_lab == originating_lab,
                                                        HostSample.country == country,
                                                        HostSample.region == region,
@@ -143,12 +164,9 @@ def create_or_get_host_sample(session, sample: VirusSample):
                                                        ).one_or_none()
         if not host_sample:
             #         print("not exists")
-            host_sample = HostSample(host_taxon_id=host_taxon_id,
-                                     host_taxon_name=host_taxon_name,
-
+            host_sample = HostSample(host_id=host_specie_id,
                                      collection_date=collection_date,
                                      isolation_source=isolation_source,
-
                                      originating_lab=originating_lab,
                                      country=country,
                                      region=region,
@@ -316,14 +334,14 @@ def create_nuc_variants_and_impacts(session, sequence_id, args):
     session.flush()
 
 
-def create_epitopes(session, epitopes: List[Tuple], virus_id):
+def create_epitopes(session, epitopes: List[Tuple], virus_id, _host_specie_id):
     global epitope_id_mappings
     epitope_id_mappings = dict()
     for elem in epitopes:
-        pseudo_epi_id, _virus_taxon_id, _host_id, protein_ncbi_id, _type, hla_restriction, response_frequency, epitope_sequence, \
-        epi_annotation_start, epi_annotation_stop, is_imported, external_link, predition_processm, is_linear = elem
+        pseudo_epi_id, _virus_taxon_id, _, protein_ncbi_id, _type, hla_restriction, response_frequency, epitope_sequence, \
+        epi_annotation_start, epi_annotation_stop, is_imported, external_link, perdition_process, is_linear = elem
         epitope = Epitope(virus_id=virus_id,
-                          host_id=_host_id,
+                          host_id=_host_specie_id,
                           protein_ncbi_id=protein_ncbi_id,
                           epitope_type=_type,
                           hla_restriction=hla_restriction,
@@ -333,7 +351,7 @@ def create_epitopes(session, epitopes: List[Tuple], virus_id):
                           epi_annotation_stop=epi_annotation_stop,
                           is_imported=is_imported,
                           external_link=external_link,
-                          prediction_process=predition_processm,
+                          prediction_process=perdition_process,
                           is_linear=is_linear
                           )
         session.add(epitope)

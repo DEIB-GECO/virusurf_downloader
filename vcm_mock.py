@@ -5,7 +5,7 @@ from sqlalchemy import cast
 
 from data_sources.virus_sample import VirusSample
 from database_tom import AminoAcidVariant, ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, \
-    NucleotideVariant, VariantImpact, Epitope
+    NucleotideVariant, VariantImpact, Epitope, HostSpecie
 from xml_helper import *
 import string
 import random
@@ -74,10 +74,16 @@ def create_or_get_sequencing_project(session, sample: VirusSample):
     return sequencing_project.sequencing_project_id
 
 
-def create_or_get_host_sample(session, sample: VirusSample):
-
+def create_or_get_host_specie(session, sample: VirusSample) -> int:
     host_taxon_name = sample.host_taxon_name()
+    if host_taxon_name:
+        host_taxon_name = host_taxon_name.lower()
     host_taxon_id = sample.host_taxon_id()
+    host_specie = HostSpecie(host_taxon_id=host_taxon_id,
+                             host_taxon_name=host_taxon_name)
+    return 1
+
+def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int) -> int:
     gender = sample.gender()
     age = sample.age()
 
@@ -87,12 +93,9 @@ def create_or_get_host_sample(session, sample: VirusSample):
 
     country, region, geo_group = sample.country__region__geo_group()
 
-    # host_sample = session.query(HostSample).filter(HostSample.host_taxon_id == host_taxon_id,
-    #                                                HostSample.host_taxon_name == host_taxon_name,
-    #
+    # host_sample = session.query(HostSample).filter(HostSample.host_id == host_specie_id,
     #                                                HostSample.collection_date == collection_date,
     #                                                HostSample.isolation_source == isolation_source,
-    #
     #                                                HostSample.originating_lab == originating_lab,
     #                                                HostSample.country == country,
     #                                                HostSample.region == region,
@@ -103,12 +106,9 @@ def create_or_get_host_sample(session, sample: VirusSample):
     #
     # if not host_sample:
         #         print("not exists")
-    host_sample = HostSample(host_taxon_id=host_taxon_id,
-                             host_taxon_name=host_taxon_name,
-
+    host_sample = HostSample(host_id=host_specie_id,
                              collection_date=collection_date,
                              isolation_source=isolation_source,
-
                              originating_lab=originating_lab,
                              country=country,
                              region=region,

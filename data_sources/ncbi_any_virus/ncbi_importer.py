@@ -10,6 +10,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Callable, List, Optional, Tuple, Iterator
 from data_sources.common_methods_virus import _try_n_times, download_ncbi_taxonomy_as_xml, download_or_get_ncbi_sample_as_xml
+from data_sources.common_methods_host_sample import host_taxon_id_from_ncbi_taxon_name, host_taxon_name_from_ncbi_taxon_id
 import dateutil.parser as dateparser
 import lxml
 from tqdm import tqdm
@@ -22,6 +23,7 @@ from lxml import etree
 from locations import get_local_folder_for, FileType, remove_file
 from Bio import Entrez
 import pickle
+import cleaning_module
 Entrez.email = "Your.Name.Here@example.org"
 
 
@@ -105,7 +107,6 @@ class AnyNCBIVNucSample:
     """
 
     re_structured_comment = re.compile(r'##Assembly-Data-START## ;(.*); ##Assembly-Data-END##')
-    cached_taxon_id = {}
     re_anna_RuL3z = re.compile(r'\D*(\d+)([,|.]?)(\d*).*')
     default_datetime = datetime(2020, 1, 1, 0, 0, 0, 0, None)
     re_patent_submission_date_lab = re.compile(r'^.* (\d+-\w+-\d+)(?: (.+))?$')
@@ -129,6 +130,8 @@ class AnyNCBIVNucSample:
         self._host_value_list = None
         self._annotations = None
         self._nuc_seq = None
+        self._host_taxon_name = None
+        self._host_taxon_id = None
         self.taxonomy_info: Optional[AnyNCBITaxon] = None
 
     def __str__(self):
@@ -396,49 +399,43 @@ class AnyNCBIVNucSample:
                     self._host_value_list[i] = self._host_value_list[i].lower()
         return self._host_value_list
 
-    # host taxon name
     def host_taxon_name(self) -> Optional[str]:
-        host = self._init_and_get_host_values()
-        if not host:
-            return None
-        host = host[0]
-        # remove stuff in parentheses
-        try:
-            first_par = host.index('(')     # raises ValueError if ( is not found
-            after_second_par = host.index(')', first_par) + 1
-            output = host[:first_par].strip()
-            if after_second_par < len(host):
-                output = output + ' ' + host[after_second_par:].strip()
-            return output
-        except ValueError:
-            return host
+        if not self._host_taxon_name:   # cached host_taxon_name
+            if not self.host_name_suggested_by_other_method:
+                # then find in sample XML
+                host = self._init_and_get_host_values()
+                if host:
+                    host = host[0]
+                    try:    # remove stuff in parentheses
+                        first_par = host.index('(')  # raises ValueError if ( is not found
+                        after_second_par = host.index(')', first_par) + 1
+                        output = host[:first_par].strip()
+                        if after_second_par < len(host):
+                            output = output + ' ' + host[after_second_par:].strip()
+                        host = output
+                    except ValueError:
+                        pass
+            else:
+                host = self.host_name_suggested_by_other_method
+            # correct typos
+            if host:
+                host = cleaning_module.correct_typos(host)
+                self._host_taxon_name = host
+            # at this point we may have None or a somehow valid host_taxon_name
+            # let's try to uniform this value with its synonyms by searching it in NCBI
+            # the NCBI API to search returns only IDs
+            txid = host_taxon_id_from_ncbi_taxon_name(self._host_taxon_name)
+            self._host_taxon_id = txid  # cache the taxon_id
+            ncbi_taxon_name = host_taxon_name_from_ncbi_taxon_id(txid)
+            if ncbi_taxon_name:
+                self._host_taxon_name = ncbi_taxon_name
+        return self._host_taxon_name
 
     # host taxon id
     def host_taxon_id(self) -> Optional[int]:
-        taxon_name = self.host_taxon_name()
-        if not taxon_name:
-            return None
-        else:
-            taxon_id = self.cached_taxon_id.get(taxon_name)
-            if taxon_id == -1:  # -1 means the cached taxon_id for this taxon name was searched before
-                return None
-            elif taxon_id is None:
-                try:
-                    with Entrez.esearch(db="taxonomy", term=taxon_name, rettype=None,
-                                        retmode="xml") as handle:
-                        response = Entrez.read(handle)
-                        if response['Count'] == '1':
-                            taxon_id = int(response['IdList'][0])
-                            self.cached_taxon_id[taxon_name] = taxon_id
-                        else:
-                            logger.warning(f'can\'t find the taxon id for taxon name {taxon_name}')
-                            self.cached_taxon_id[
-                                taxon_name] = -1  # save -1 in cache to distinguish from non cached taxon_ids
-                            taxon_id = None
-                except:
-                    logger.exception(
-                        f'Exception occurred while fetching the taxon id of {taxon_name} in sample {self.internal_id()}')
-            return taxon_id
+        taxon_name = self.host_taxon_name()  # this call may initialize the cached taxon id
+        return self._host_taxon_id or host_taxon_id_from_ncbi_taxon_name(taxon_name)
+
 
     def gender(self) -> Optional[str]:
         host = self._init_and_get_host_values()
@@ -788,7 +785,8 @@ def import_samples_into_vcm(
         """
         try:
             experiment_id = vcm.create_or_get_experiment(session, sample)
-            host_sample_id = vcm.create_or_get_host_sample(session, sample)
+            host_specie_id = vcm.create_or_get_host_specie(session, sample)
+            host_sample_id = vcm.create_or_get_host_sample(session, sample, host_specie_id)
             sequencing_project_id = vcm.create_or_get_sequencing_project(session, sample)
             sequence = vcm.create_and_get_sequence(session, sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
             return sequence.sequence_id

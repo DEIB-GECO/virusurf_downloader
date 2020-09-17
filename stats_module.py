@@ -31,7 +31,7 @@ class StatsType(ABC):
         end_time = datetime.now()
         elapsed_time = end_time - self._start_time
         add_to_message = f"Elapsed Time {elapsed_time}\n"
-        speed = elapsed_time / num_processed_samples
+        speed = elapsed_time / num_processed_samples if num_processed_samples != 0 else "--"
         add_to_message += f"Speed {speed} sec./samples\n"
         return add_to_message
 

@@ -174,14 +174,20 @@ class Virus(_base):
         return f'ID:{self.virus_id} TAXON_ID:{self.taxon_id} TAXON_NAME:{self.taxon_name}'
 
 
-class HostSample(_base):
-    __tablename__ = 'host_sample'
+class HostSpecie(_base):
+    __tablename__ = 'host_specie'
 
-    host_sample_id = Column(Integer, primary_key=True, autoincrement=True)
+    host_id = Column(Integer, primary_key=True, autoincrement=True)
 
     host_taxon_id = Column(Integer)
     host_taxon_name = Column(String)
 
+
+class HostSample(_base):
+    __tablename__ = 'host_sample'
+
+    host_sample_id = Column(Integer, primary_key=True, autoincrement=True)
+    host_id = Column(Integer)
     collection_date = Column(String)
     isolation_source = Column(String)
     originating_lab = Column(String)

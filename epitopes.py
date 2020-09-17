@@ -32,7 +32,12 @@ def import_epitopes(parameter_name: str):
         try:
             epitopes, fragments = epitopes_for_virus_taxon(bind_to_organism_taxon_id)
 
-            vcm.create_epitopes(session, epitopes, db_virus_id)
+            host_specie = session.query(database_tom.HostSpecie).filter(
+                database_tom.HostSpecie.host_taxon_id == 9606
+            ).first()
+            host_specie_id = host_specie.host_id
+
+            vcm.create_epitopes(session, epitopes, db_virus_id, host_specie_id)
             vcm.create_epitopes_fragments(session, fragments)
         except:
             logger.exception('Exception occurred while computing and importing epitopes. Epitopes won\'t be inserted into the DB.')
