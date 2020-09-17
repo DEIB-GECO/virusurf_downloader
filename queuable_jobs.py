@@ -73,7 +73,7 @@ class Boss:
         self._queue = JoinableQueue(maxsize=jobs_queue_capacity)
         logger.info(f'Queue size set to accept at most {jobs_queue_capacity} before pausing job assignment.')
         self.WorkerClass = WorkerClass
-        self.workers_num = workers_num
+        self.workers_num = max_number_of_workers(workers_num)
 
     _workers = []
 

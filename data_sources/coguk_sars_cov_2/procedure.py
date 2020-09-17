@@ -3,6 +3,7 @@ import pickle
 from os.path import sep
 from loguru import logger
 from typing import Callable, Optional, List, Union
+from queuable_jobs import max_number_of_workers
 import database_tom
 import vcm as vcm
 from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
@@ -71,7 +72,7 @@ class Sequential:
 
 class Parallel:
 
-    MAX_PROCESSES = 10
+    MAX_PROCESSES = max_number_of_workers(50)
 
     def __init__(self):
         # empty job queue

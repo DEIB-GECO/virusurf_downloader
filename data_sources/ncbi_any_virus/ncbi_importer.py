@@ -725,7 +725,7 @@ def import_samples_into_vcm(
     virus_sequence_chromosome_name = virus_chromosome_name
     snpeff_db_name = _snpeff_db_name
     log_with_name = _log_with_name
-    the_boss = Boss(10, 10, TheWorker)
+    the_boss = Boss(70, 70, TheWorker)
 
     def check_user_query():
         """
