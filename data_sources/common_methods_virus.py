@@ -86,7 +86,7 @@ def _try_n_times(n_times: int, or_wait_secs: int, function: Callable, *args, **k
         except IOError as e:
             n_times -= 1
             if n_times > 0:
-                logger.error(f'Error while invoking {function.__name__} with args: {args}\nkwargs: {kwargs}\n'
+                logger.info(f'Error while invoking {function.__name__} with args: {args}\nkwargs: {kwargs}\n'
                              f'\tReason of error: {str(type(e))} {e.args}'
                              f'\tNew attempt in {or_wait_secs}s. Left attempts {n_times}')
                 executor.submit(time.sleep, or_wait_secs).result()
