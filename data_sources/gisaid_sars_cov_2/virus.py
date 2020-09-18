@@ -1,4 +1,5 @@
 import json
+import os
 
 from json import JSONDecodeError
 from typing import Optional
@@ -18,7 +19,7 @@ from locations import get_local_folder_for, FileType
 class GISAIDSarsCov2(VirusSource):
 
     name = 'GISAID_sars_cov_2'
-    data_path = f'/home/alfonsi/GISAID/export.json'
+    data_path = f'.{os.path.sep}..{os.path.sep}GISAID{os.path.sep}export.json'
 
     def __init__(self):
         super().__init__()

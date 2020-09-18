@@ -42,8 +42,6 @@ def _read_params():
 
 
 def setup_telegram_notifier():
-    for x in _read_params():
-        print(x)
     t_settings = [x for x in _read_params() if x[0].lower() == "telegram"]
     if not t_settings:
         raise ValueError("To use the telegram notifier you need to edit the file ./notifier_params.tsv and specify "
