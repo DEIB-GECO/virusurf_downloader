@@ -46,7 +46,7 @@ def host_taxon_name_from_ncbi_taxon_id(taxon_id: int) -> Optional[str]:
                 with Entrez.efetch(db="taxonomy", id=taxon_id, retmode="xml") as taxon_handle:
                     response = Entrez.read(taxon_handle)  # response is an array of taxons
                     if len(response) > 0:
-                        taxon_name = response[0]['ScientificName']
+                        taxon_name = str(response[0]['ScientificName'])  # parse from Bio.Entrez.Parser.StringElement
                         cached_taxon_name[taxon_id] = taxon_name
                     else:
                         logger.warning(f'can\'t find the taxon_name for taxon_id {taxon_id}')

@@ -128,11 +128,9 @@ class AnyNCBIVNucSample:
         # init internal variables
         self._journal = None
         self._host_value_list = None
-        self._annotations = None
         self._nuc_seq = None
         self._host_taxon_name = None
         self._host_taxon_id = None
-        self.taxonomy_info: Optional[AnyNCBITaxon] = None
 
     def __str__(self):
         return f'{self.internal_id()}.xml'
@@ -260,7 +258,7 @@ class AnyNCBIVNucSample:
     def assembly_method(self):
         return self._structured_comment(self.sample_xml, 'Assembly Method')
 
-    def coverage(self) -> Optional[str]:
+    def coverage(self) -> Optional[int]:
         _input = self._structured_comment(self.sample_xml, 'Coverage')
         if not _input:
             return None
@@ -573,7 +571,7 @@ def _reference_sample_from_organism(samples_query: str, log_with_name: str, Samp
         sample_path = download_or_get_ncbi_sample_as_xml(download_sample_dir_path, accession_ids[0])
     except Exception as e:
         logger.error('Error while downloading or getting the reference sample XML. Partial file will be deleted')
-        remove_file(sample_path)
+        remove_file(f"{download_sample_dir_path}{accession_ids[0]}.xml")
         raise e
     ref_sample = SampleWrapperClass(sample_path, accession_ids[0])
     return ref_sample
@@ -857,7 +855,6 @@ def import_samples_into_vcm(
                 # database_tom.try_py_function(
                 #     main_pipeline_part_3, sample, sequence_id
                 # )
-                # reliability_module.completed_sample(sample.alternative_accession_number())
     except KeyboardInterrupt:
         # When using multiprocessing, each process receives KeyboardInterrupt. Child process should take care of clean up.
         # Child process should not raise themselves KeyboardInterrupt
