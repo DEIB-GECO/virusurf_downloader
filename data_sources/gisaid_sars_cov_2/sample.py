@@ -77,7 +77,7 @@ class GISAIDSarsCov2Sample(VirusSample):
 
     def strand(self):
         try:
-            return self.sequence_dict['covv_strand']
+            return strip_or_none(self.sequence_dict['covv_strand'])
         except KeyError:
             return None
 
@@ -98,13 +98,14 @@ class GISAIDSarsCov2Sample(VirusSample):
 
     def lineage(self):
         try:
-            return self.sequence_dict['covv_lineage']
+            return strip_or_none(self.sequence_dict['covv_lineage'])
         except KeyError:
             return None
 
     def clade(self):
         try:
-            return self.sequence_dict['covv_clade']
+            clade = self.sequence_dict['covv_clade']
+            return strip_or_none(clade)
         except KeyError:
             return None
 
@@ -129,7 +130,7 @@ class GISAIDSarsCov2Sample(VirusSample):
             if isol_source in ['unknown', 'other', '']:
                 return None
             else:
-                return isol_source
+                return strip_or_none(isol_source)
         except KeyError:
             return None
         except AttributeError:
@@ -147,7 +148,7 @@ class GISAIDSarsCov2Sample(VirusSample):
             pass
         except IndexError:
             pass
-        return country, region, geo_group
+        return strip_or_none(country), strip_or_none(region), strip_or_none(geo_group)
 
     def submission_date(self):
         submission_date = self.sequence_dict.get('covv_subm_date')
@@ -157,18 +158,15 @@ class GISAIDSarsCov2Sample(VirusSample):
 
     def originating_lab(self) -> Optional[str]:
         lab = self.sequence_dict.get('covv_orig_lab')
-        if lab:
-            lab = lab.strip()
-        return lab
+        return strip_or_none(lab)
 
     def sequencing_lab(self) -> Optional[str]:
         lab = self.sequence_dict.get('covv_subm_lab')
-        if lab:
-            lab = lab.strip()
-        return lab
+        return strip_or_none(lab)
 
     def host_taxon_name(self) -> Optional[str]:
-        return self.sequence_dict.get('covv_host')
+        taxon_name = self.sequence_dict.get('covv_host')
+        return strip_or_none(taxon_name)
 
     def host_taxon_id(self) -> Optional[int]:
         taxon_name = self.host_taxon_name()
@@ -272,3 +270,10 @@ class GISAIDSarsCov2Sample(VirusSample):
 
     def nucleotide_var_aligner(self):
         return lambda: None
+
+
+def strip_or_none(string_or_none: Optional[str]):
+    if string_or_none is not None:
+        return string_or_none.strip()
+    else:
+        return None

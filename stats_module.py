@@ -13,6 +13,9 @@ from collections import Counter
 class StatsType(ABC):
     def __init__(self):
         self._start_time = datetime.now()
+        self._is_primary_acc_id = True
+        self._virus_db_id = None
+        self._sources = None
 
     def _measure_delta_in_db(self, virus_db_id: int, is_primary_acc_id: bool, sources: Optional[List[str]] = None):
         self._is_primary_acc_id = is_primary_acc_id

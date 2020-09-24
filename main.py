@@ -10,6 +10,7 @@ import warnings
 import notifications_module
 
 Entrez.email = "Your.Name.Here@example.org"
+log_file_keyword = ""
 
 
 #   #################################       PROGRAM ARGUMENTS   ##########################
@@ -39,6 +40,7 @@ try:
     action = sys.argv[6].lower()
     if action == 'import':
         source = sys.argv[7].lower()
+        log_file_keyword = source
         try:
             _from = int(sys.argv[8])
             to = int(sys.argv[9])
@@ -50,6 +52,9 @@ try:
             to = None
     elif 'epitope' in action:
         _epitope_target = sys.argv[7]
+        log_file_keyword = f"epi_{_epitope_target}"
+    else:
+        log_file_keyword = action
 except Exception:
     logger.error(wrong_arguments_message)
     sys.exit(1)
@@ -67,7 +72,7 @@ logger.add(sink=lambda msg: tqdm.write(msg, end=''),
            diagnose=True,
            enqueue=True)
 # log to file any message of any security level
-logger.add("./logs/log_"+source+"_{time}.log",
+logger.add("./logs/log_"+log_file_keyword+"_{time}.log",
            level='TRACE',
            rotation='100 MB',
            format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "

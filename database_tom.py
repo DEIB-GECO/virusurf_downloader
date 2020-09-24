@@ -528,5 +528,6 @@ def disambiguate_chimera_sequences():
             from sequence 
             group by accession_id 
             having count(accession_id)>1
+        )
     """
     _db_engine.execute(stmt)
