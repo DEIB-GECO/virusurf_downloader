@@ -245,7 +245,7 @@ class IEDBEpitopes:
 		#                            compression='gzip', iterator=True, chunksize=10000)
 		# self.mhc_iedb_assays = concat(mhc_iedb_assays, ignore_index=True)
 		self.mhc_iedb_assays = read_csv(join(self.cell_epitopes_path, "mhc_ligand_full.csv.gz"), sep=",", header=1,
-		                                compression='gzip', nrows=1000)
+		                                compression='gzip')
 		print("B cell subset number of non-unique epitopes: {}".format(self.bcell_iedb_assays.shape[0]))
 		print("T cell subset number of non-unique epitopes: {}".format(self.tcell_iedb_assays.shape[0]))
 		print("MHC ligand subset number of non-unique epitopes: {}".format(self.mhc_iedb_assays.shape[0]))
