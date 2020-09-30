@@ -1,7 +1,7 @@
-from VirusGenoUtil.code.epitopes.Immunodominance import Immunodominance
-from VirusGenoUtil.code.epitopes.HomologyBasedEpitopes import HomologyBasedEpitopes
+from code.epitopes.Immunodominance import Immunodominance
+from code.epitopes.HomologyBasedEpitopes import HomologyBasedEpitopes
 
-from VirusGenoUtil.code.utils import create_dir
+from code.utils import create_dir
 
 ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### ### #
 # 1)sars cov1 proteins + immunome browser -> lower bound sliding window per position#

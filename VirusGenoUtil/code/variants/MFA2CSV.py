@@ -7,7 +7,7 @@ from os import scandir
 from pandas import read_csv
 import urllib
 import time
-from VirusGenoUtil.code.utils import create_dir, is_fasta_file_extension, extract_orf_name
+from code.utils import create_dir, is_fasta_file_extension, extract_orf_name
 
 
 class MFA2CSV:

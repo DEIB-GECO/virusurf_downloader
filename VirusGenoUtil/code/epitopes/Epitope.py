@@ -1,5 +1,5 @@
 import itertools
-from VirusGenoUtil.code.epitopes.EpitopeFragment import EpitopeFragment
+from code.epitopes.EpitopeFragment import EpitopeFragment
 
 
 class Epitope:
@@ -9,8 +9,9 @@ class Epitope:
 	# credits: https://stackoverflow.com/questions/1045344/how-do-you-create-an-incremental-id-in-a-python-class/54318273#54318273
 	new_id = itertools.count()
 
-	def __init__(self, virus_taxid, protein_ncbi_id, host_taxid, cell_type, hla_restriction, response_frequency,
-	             region_seq, region_start, region_stop, is_imported, external_links, prediction_process, is_linear):
+	def __init__(self, virus_taxid, protein_ncbi_id, host_iri, host_name, host_ncbi_id, cell_type, mhc_restriction,
+	             response_frequency_info,
+	             region_seq, region_start, region_stop, external_links, prediction_process, is_linear):
 		"""
 		Epitope construstor
 
@@ -20,22 +21,24 @@ class Epitope:
 			virus NCBI taxonomy id
 		protein_ncbi_id : str
 			protein (antigen) NCBI id
-		host_taxid : str
-			host NCBI taxonomy
+		host_iri : str
+			host taxon IRI
+		host_name : str
+			host name
+		host_ncbi_id : str
+			host ncbi id
 		cell_type : str
 			cell type
-		hla_restriction : str
-			HLA restriction (for T-cells)
-		response_frequency : float
-			response frequency of epitope
+		mhc_restriction : str
+			MHC restriction info (for T-cells)
+		response_frequency_info : dict of str : str, float
+			response frequency of epitope and if it was identified by a positive or negative assay
 		region_seq : str
 			epitope region sequence
 		region_start : int
 			epitope region start
 		region_stop : int
 			epitope region stop
-		is_imported : bool
-			epitope information is imported (True), otherwise is predicted (False)
 		external_links : list of str
 			IEDB reference links
 		prediction_process : str
@@ -46,17 +49,28 @@ class Epitope:
 		self.id = next(Epitope.new_id)
 		self.virus_taxid = virus_taxid
 		self.protein_ncbi_id = protein_ncbi_id
-		self.host_taxid = host_taxid
+		self.host_iri = host_iri
+		self.host_name = host_name
+		self.host_ncbi_id = host_ncbi_id
 		self.cell_type = cell_type
-		if cell_type == "B cell":
-			self.hla_restriction = None
+		self.mhc_class = mhc_restriction['class']
+		self.mhc_allele = mhc_restriction['allele']
+		if response_frequency_info["positive"]["rf_score"] == -1:
+			self.response_frequency_positive = None
 		else:
-			self.hla_restriction = hla_restriction
-		self.response_frequency = response_frequency
+			self.response_frequency_positive = str(response_frequency_info["positive"]["rf_score"])
+
+		# convert the two boolean to one categorical
+		if response_frequency_info["positive"]["exists_pos_assay"] and response_frequency_info["negative"]["exists_neg_assay"]:
+			self.assay_types = "both"
+		elif response_frequency_info["positive"]:
+			self.assay_types = "positive"
+		elif response_frequency_info["negative"]:
+			self.assay_type = "negative"
+
 		self.seq = region_seq
 		self.region_start = region_start
 		self.region_stop = region_stop
-		self.is_imported = is_imported
 		self.prediction_process = prediction_process
 		self.external_links = external_links
 		self.is_linear = is_linear
@@ -125,14 +139,17 @@ class Epitope:
 		return {"epitope_id": self.id,
 		        "virus_taxid": self.virus_taxid,
 		        "protein_ncbi_id": self.protein_ncbi_id,
-		        "host_taxid": self.host_taxid,
+		        "host_iri": self.host_iri,
+		        "host_name": self.host_name,
+		        "host_ncbi_id": self.host_ncbi_id,
 		        "cell_type": self.cell_type,
-		        "hla_restriction": self.hla_restriction,
-		        "response_frequency": self.response_frequency,
+		        "mhc_class": self.mhc_class,
+		        "mhc_allele": self.mhc_allele,
+		        "response_frequency_positive": self.response_frequency_positive,
+		        "assay_types": self.assay_types,
 		        "region_seq": self.seq,
 		        "region_start": self.region_start,
 		        "region_stop": self.region_stop,
-		        "is_imported": self.is_imported,
 		        "external_links": self.external_links,
 		        "prediction_process": self.prediction_process,
 		        "fragments": self.epitope_fragments,
