@@ -1,10 +1,10 @@
-from code.epitopes.Protein import Protein
-from code.utils import is_fasta_file_extension
+from VirusGenoUtil.code.epitopes.Protein import Protein
+from VirusGenoUtil.code.utils import is_fasta_file_extension
 from os.path import join
 from os import scandir
 from pandas import read_csv, Series, unique
 import numpy as np
-import matplotlib.pyplot as plt
+import VirusGenoUtil.matplotlib.pyplot as plt
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 from math import isnan, sqrt

@@ -64,7 +64,7 @@ logger.remove()  # removes default logger to stderr with level DEBUG
 # on console print from level INFO on
 logger.add(sink=lambda msg: tqdm.write(msg, end=''),
            level='TRACE',
-           format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+           format="<green>{time:YYYY-MM-DD HH:mm:ss Z}</green> | "
                   "<level>{level: <8}</level> | "
                   "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
            colorize=True,
@@ -75,7 +75,7 @@ logger.add(sink=lambda msg: tqdm.write(msg, end=''),
 logger.add("./logs/log_"+log_file_keyword+"_{time}.log",
            level='TRACE',
            rotation='100 MB',
-           format="<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+           format="<green>{time:YYYY-MM-DD HH:mm:ss Z}</green> | "
                   "<level>{level: <8}</level> | "
                   "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
            colorize=False,
@@ -104,7 +104,11 @@ try:
         database_tom.disambiguate_chimera_sequences()
     elif 'epitope' in action:
         from epitopes import import_epitopes
-        import_epitopes(_epitope_target)
+        virus_import_parameters = prepared_parameters.get(_epitope_target)
+        if not virus_import_parameters:
+            raise Exception(f'{_epitope_target} is not recognised as an importable virus')
+        virus_txid = virus_import_parameters[1]
+        import_epitopes(virus_txid)
     elif 'import' in action:
         if source in ['coguk', 'cog-uk']:
             from data_sources.coguk_sars_cov_2.procedure import run as run_coguk

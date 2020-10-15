@@ -34,10 +34,9 @@ def download_ncbi_taxonomy_as_xml_from_name(containing_directory: str, taxon_nam
                 taxon_id = text_at_node(tree, '/eSearchResult/IdList/Id', mandatory=True)
 
             # download data for taxon_id
-            with Entrez.efetch(db="taxonomy", id=taxon_id, rettype=None, retmode="xml") as handle, \
-                    open(destination_file_path, 'w') as f:
-                for line in handle:
-                    f.write(line)
+            with Entrez.efetch(db="taxonomy", id=taxon_id, rettype=None, retmode="xml") as handle:
+                with open(destination_file_path, 'w') as f:
+                    f.write(handle.read())
         return destination_file_path
     return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
 
@@ -55,10 +54,9 @@ def download_ncbi_taxonomy_as_xml(containing_directory: str, taxon_id: int) -> s
         # download and write the taxonomy tree for the taxon id
         destination_file_path = f"{containing_directory}{os.path.sep}{taxon_id}.xml"
         if not os.path.exists(destination_file_path):
-            with Entrez.efetch(db="taxonomy", id=taxon_id, rettype=None, retmode="xml") as handle, \
-                    open(destination_file_path, 'w') as f:
-                for line in handle:
-                    f.write(line)
+            with Entrez.efetch(db="taxonomy", id=taxon_id, rettype=None, retmode="xml") as handle:
+                with open(destination_file_path, 'w') as f:
+                    f.write(handle.read())
         return destination_file_path
     return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
 
@@ -72,9 +70,22 @@ def download_or_get_ncbi_sample_as_xml(containing_directory: str, sample_accessi
     def do():
         local_file_path = f"{containing_directory}{os.path.sep}{sample_accession_id}.xml"
         if not os.path.exists(local_file_path):
-            with Entrez.efetch(db="nuccore", id=sample_accession_id, rettype="gbc", retmode="xml") as handle, open(local_file_path, 'w') as f:
-                for line in handle:
-                    f.write(line)
+            with Entrez.efetch(db="nuccore", id=sample_accession_id, rettype="gbc", retmode="xml") as handle:
+                a = handle.read()
+                try:
+                    with open(local_file_path, 'w') as f:
+                        f.write(a)
+                except TypeError:
+                    # sometimes the source handle returns bytes instead of chars, so let's try writing bytes
+                    try:
+                        with open(local_file_path, 'wb') as f:
+                            f.write(a)
+                    except Exception as e:
+                        if a:
+                            logger.error(f'Content of EntrezAPI was:\n{a[:50]}... (only 1st 50 chars displayed')
+                        else:
+                            logger.error(f'Content of EntrezAPI is probably empty.')
+                        raise e
         return local_file_path
     return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
 

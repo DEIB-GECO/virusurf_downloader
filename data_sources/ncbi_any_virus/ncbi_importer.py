@@ -511,14 +511,16 @@ def _alt_ids_of_selected_sequences(samples_query: str, log_with_name: str) -> Li
 def _download_as_sample_object(alternative_accession_ids, log_with_name: str, SampleWrapperClass=AnyNCBIVNucSample) -> Iterator:
     logger.trace(f'download and processing of sequences...')
     download_sample_dir_path = get_local_folder_for(source_name=log_with_name, _type=FileType.SequenceOrSampleData)
-    skipped_samples = 0
+    network_skipped_samples = 0
+    parser_skipped_samples = 0
+    other_reasons_skipped_samples = 0
     for sample_id in tqdm(alternative_accession_ids):
         try:
             sample_path = download_or_get_ncbi_sample_as_xml(download_sample_dir_path, sample_id)
         except urllib.error.URLError:
             logger.exception(
                 f"Network error while downloading sample {sample_id} can't be solved. This sample 'll be skipped.")
-            skipped_samples += 1
+            network_skipped_samples += 1
             #  downloaded file may be incomplete
             remove_file(file_path=f"{download_sample_dir_path}{os.path.sep}{sample_id}.xml")
             continue
@@ -526,9 +528,22 @@ def _download_as_sample_object(alternative_accession_ids, log_with_name: str, Sa
             #  downloaded file may be incomplete
             remove_file(file_path=f"{download_sample_dir_path}{os.path.sep}{sample_id}.xml")
             return
-        other_sample = SampleWrapperClass(sample_path, sample_id)
+        except TypeError:
+            logger.error(f"Error while writing the XML for sample {sample_id}. This sample 'll be skipped.")
+            other_reasons_skipped_samples += 1
+            remove_file(file_path=f"{download_sample_dir_path}{os.path.sep}{sample_id}.xml")
+            continue
+        try:
+            other_sample = SampleWrapperClass(sample_path, sample_id)
+        except lxml.etree.XMLSyntaxError:
+            logger.exception(f"Error while parsing the sample XML {sample_path}. The file is being deleted, and the sample skipped.")
+            remove_file(file_path=f"{download_sample_dir_path}{os.path.sep}{sample_id}.xml")
+            parser_skipped_samples += 1
+            continue
         yield other_sample
-    logger.info(f"{skipped_samples} 've been skipped due to network errors.")
+    logger.info(f"{network_skipped_samples} 've been skipped due to network errors.\n"
+                f"{parser_skipped_samples} 've been skipped due to XML parser errors.\n"
+                f"{other_reasons_skipped_samples} 've been skipped because of other errors.")
 
 
 # noinspection PyPep8Naming
@@ -860,8 +875,9 @@ def import_samples_into_vcm(
         # Child process should not raise themselves KeyboardInterrupt
         the_boss.discard_left_jobs()
         logger.info('Execution aborted by the user. Cancelling waiting tasks...')
-    except:
-        logger.exception("AN EXCEPTION CAUSED THE LOOP TO TERMINATE. Workers will be terminated.")
+    except Exception as e:
+        logger.error("AN EXCEPTION CAUSED THE LOOP TO TERMINATE. Workers will be terminated.")
+        raise e
     finally:
         the_boss.stop_workers()
 

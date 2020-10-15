@@ -1,8 +1,8 @@
-from code.utils import is_fasta_file_extension, create_dir
-from code.epitopes.Protein import Protein
-from code.epitopes.Epitope import Epitope
-from code.epitopes.EpitopeFragment import EpitopeFragment
-from os.path import join, splitext, isfile, exists, isdir
+from VirusGenoUtil.code.utils import is_fasta_file_extension, create_dir
+from VirusGenoUtil.code.epitopes.Protein import Protein
+from VirusGenoUtil.code.epitopes.Epitope import Epitope
+from VirusGenoUtil.code.epitopes.EpitopeFragment import EpitopeFragment
+from os.path import join, splitext, isfile, exists, isdir, abspath
 from pathlib import Path
 from os import scandir
 from pandas import read_csv, unique, concat
@@ -96,7 +96,8 @@ class IEDBEpitopes:
 		epi_fragments = []
 		for epi_fragment in self.current_virus_epi_fragments:
 			epi_frag_attributes = epi_fragment.get_all_attributes()
-			fragment = tuple([int(epi_frag_attributes["fragment_id"]), int(epi_frag_attributes["parent_epi_id"]),
+			fragment = tuple([int(epi_frag_attributes["fragment_id"]),
+							  int(epi_frag_attributes["parent_epi_id"]),
 			                  epi_frag_attributes["fragment_seq"],
 			                  int(epi_frag_attributes["fragment_start"]),
 			                  int(epi_frag_attributes["fragment_stop"])])
@@ -155,15 +156,23 @@ class IEDBEpitopes:
 			if not epi_attributes["mhc_allele"]:
 				epi_attributes["mhc_allele"] = ''
 
-			epitope = tuple([int(epi_attributes["epitope_id"]), int(epi_attributes["virus_taxid"]),
-			                 str(epi_attributes["host_iri"]), str(epi_attributes['host_name']), int(epi_attributes['host_ncbi_id']),
-			                 str(epi_attributes["protein_ncbi_id"]), str(epi_attributes["cell_type"]),
-			                 str(epi_attributes["mhc_class"]), str(epi_attributes["mhc_allele"]),
-			                 str(epi_attributes["response_frequency_positive"]),
-			                 str(epi_attributes["assay_types"]),
-			                 epi_seq, int(epi_attributes["region_start"]), int(epi_attributes["region_stop"]),
-			                 ",".join(epi_attributes["external_links"]),
-			                 epi_attributes["prediction_process"], epi_attributes["is_linear"]])
+			epitope = tuple([int(epi_attributes["epitope_id"]),
+							 int(epi_attributes["virus_taxid"]),
+							 parse_to_string_or_none(epi_attributes["host_iri"]),
+							 parse_to_string_or_none(epi_attributes['host_name']),
+							 parse_to_int_or_none(epi_attributes['host_ncbi_id']),
+							 parse_to_string_or_none(epi_attributes["protein_ncbi_id"]),
+							 parse_to_string_or_none(epi_attributes["cell_type"]),
+							 parse_to_string_or_none(epi_attributes["mhc_class"]),
+							 parse_to_string_or_none(epi_attributes["mhc_allele"]),
+							 parse_to_float_or_none(epi_attributes["response_frequency_positive"]),
+							 parse_to_string_or_none(epi_attributes["assay_types"]),
+							 parse_to_string_or_none(epi_seq),
+							 parse_to_int_or_none(epi_attributes["region_start"]),
+							 parse_to_int_or_none(epi_attributes["region_stop"]),
+							 ",".join(epi_attributes["external_links"]),
+							 parse_to_string_or_none(epi_attributes["prediction_process"]),
+							 epi_attributes["is_linear"]])
 			epitopes.append(epitope)
 		return epitopes
 
@@ -224,7 +233,7 @@ class IEDBEpitopes:
 		"""
 		assert isfile(join(self.cell_epitopes_path,
 		                   "tcell_full_v3.csv.gz")), "AssertionError: IEDB Tcell assays csv was not found in {}".format(
-			self.cell_epitopes_path)
+			abspath(self.cell_epitopes_path))
 		# tcell_text_file_reader = read_csv(join(self.cell_epitopes_path, "tcell_full_v3.csv.gz"), sep=",", header=1,
 		#                                   compression='gzip', iterator=True, chunksize=1000)
 		# self.tcell_iedb_assays = concat(tcell_text_file_reader,ignore_index=True)
@@ -232,7 +241,7 @@ class IEDBEpitopes:
 		                                  compression='gzip')
 		assert isfile(join(self.cell_epitopes_path,
 		                   "bcell_full_v3.csv.gz")), "AssertionError: IEDB Bcell assays csv was not found in {}".format(
-			self.cell_epitopes_path)
+			abspath(self.cell_epitopes_path))
 		# bcell_text_file_reader = read_csv(join(self.cell_epitopes_path, "bcell_full_v3.csv.gz"), sep=",", header=1,
 		#                                   compression='gzip', iterator=True, chunksize=1000)
 		# self.bcell_iedb_assays = concat(bcell_text_file_reader,ignore_index=True)
@@ -240,7 +249,7 @@ class IEDBEpitopes:
 		                                  compression='gzip')
 		assert isfile(join(self.cell_epitopes_path,
 		                   "mhc_ligand_full.csv.gz")), "AssertionError: IEDB MHC ligand assays csv was not found in {}".format(
-			self.cell_epitopes_path)
+			abspath(self.cell_epitopes_path))
 		# mhc_iedb_assays = read_csv(join(self.cell_epitopes_path, "mhc_ligand_full.csv.gz"), sep=",", header=1,
 		#                            compression='gzip', iterator=True, chunksize=10000)
 		# self.mhc_iedb_assays = concat(mhc_iedb_assays, ignore_index=True)
@@ -1254,3 +1263,24 @@ class IEDBEpitopes:
 				all_attributes = self.current_virus_epitopes[-1].get_all_attributes()
 				print(all_attributes)
 		print("====")
+
+
+def parse_to_string_or_none(input:str):
+	if not input or input.lower() == 'unknown':
+		return None
+	else:
+		return str(input)
+
+
+def parse_to_int_or_none(input):
+	if input is not None and input != '':
+		return int(input)
+	else:
+		return None
+
+
+def parse_to_float_or_none(input):
+	if input is not None and input != '':
+		return float(input)
+	else:
+		return None

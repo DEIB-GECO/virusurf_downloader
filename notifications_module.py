@@ -1,3 +1,5 @@
+import logging
+
 from loguru import logger
 from notifiers.logging import NotificationHandler
 import os
@@ -53,7 +55,13 @@ def setup_telegram_notifier():
                 "chat_id": config[2]
             }
         )
-        logger.add(notification_handler, level="ERROR")
+        notification_handler_wrapper = NotificationHandlerWrapper(notification_handler)
+        logger.add(sink=notification_handler_wrapper,
+                   level="ERROR",
+                   format="<green>{time:YYYY-MM-DD HH:mm:ss Z}</green> | "
+                          "<level>{level: <8}</level> | "
+                          "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
+                   )
 
 
 def setup_any_additional_error_notifiers():
@@ -61,3 +69,32 @@ def setup_any_additional_error_notifiers():
         setup_telegram_notifier()
     except:
         logger.warning("Telegram notifier not configured.")
+
+
+class NotificationHandlerWrapper(logging.Handler):
+    """
+    Wraps the original NotificationHandler from notifiers.logging and ensures that each message reaches at most the
+    size of 4096 chars. Messages above such threshold are split into chunks and sent as separate messages
+    """
+    MAX_MSG_LENGTH = 4096
+    MAX_MSG_LENGTH_WITH_TRAILING_ADDITION = 4096 -24
+
+    def __init__(self, true_notification_handler):
+        super().__init__()
+        self.handler = true_notification_handler
+
+    def emit(self, record: logging.LogRecord):
+        # send up to 4096 chars per notification
+        message: str = record.getMessage()
+        while len(message) > NotificationHandlerWrapper.MAX_MSG_LENGTH:
+            record.msg = f"{message[:NotificationHandlerWrapper.MAX_MSG_LENGTH_WITH_TRAILING_ADDITION]} -- CONTINUE IN NEXT MSG"
+            self.handler.emit(record)
+            message = message[NotificationHandlerWrapper.MAX_MSG_LENGTH_WITH_TRAILING_ADDITION:]
+        record.msg = message
+        self.handler.emit(record)
+
+    def handleError(self, record: logging.LogRecord):
+        self.handler.handleError(record)
+
+    def init_providers(self, provider, kwargs):
+        self.handler.init_providers(provider, kwargs)

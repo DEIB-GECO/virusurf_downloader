@@ -177,11 +177,9 @@ class COGUKSarsCov2:
 
             reference_seq_file_path = f"{get_local_folder_for(source_name=self.name, _type=FileType.SequenceOrSampleData)}reference_sample.xml"
             if not os.path.exists(reference_seq_file_path):
-                with Entrez.efetch(db="nuccore", id=reference_seq_id, rettype="gbc", retmode="xml") as handle, open(
-                        reference_seq_file_path, 'w') as f:
-                    for line in handle:
-                        f.write(line)
-
+                with Entrez.efetch(db="nuccore", id=reference_seq_id, rettype="gbc", retmode="xml") as handle:
+                    with open(reference_seq_file_path, 'w') as f:
+                        f.write(handle.read())
             self.reference_sample = AnyNCBIVNucSample(reference_seq_file_path, reference_seq_id)
         return self.reference_sample.nucleotide_sequence()
 
@@ -219,9 +217,9 @@ def download_or_get_virus_sample_as_xml(containing_directory: str, sample_access
     :return: the local file path of the download INSDSeq XML file.
     """
     local_file_path = f"{containing_directory}{os.path.sep}{sample_accession_id}.xml"
-    with Entrez.efetch(db="nuccore", id=sample_accession_id, rettype="gbc", retmode="xml") as handle, open(local_file_path, 'w') as f:
-        for line in handle:
-            f.write(line)
+    with Entrez.efetch(db="nuccore", id=sample_accession_id, rettype="gbc", retmode="xml") as handle:
+        with open(local_file_path, 'w') as f:
+            f.write(handle.read())
     return local_file_path
 
 
@@ -229,9 +227,8 @@ def download_virus_taxonomy_as_xml(containing_directory: str, taxon_id) -> etree
     # write taxonomy tree
     local_file_path = f"{containing_directory}{os.path.sep}{taxon_id}.xml"
     if not os.path.exists(local_file_path):
-        with Entrez.efetch(db="taxonomy", id=taxon_id, rettype=None, retmode="xml") as handle, \
-                open(local_file_path, 'w') as f:
-            for line in handle:
-                f.write(line)
+        with Entrez.efetch(db="taxonomy", id=taxon_id, rettype=None, retmode="xml") as handle:
+            with open(local_file_path, 'w') as f:
+                f.write(handle.read())
     tax_tree = etree.parse(local_file_path, parser=etree.XMLParser(remove_blank_text=True))
     return tax_tree

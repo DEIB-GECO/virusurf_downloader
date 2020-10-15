@@ -12,7 +12,7 @@ def host_taxon_id_from_ncbi_taxon_name(taxon_name: str) -> Optional[int]:
         return None
     else:
         global cached_taxon_id
-        taxon_id = cached_taxon_id.get(taxon_name)
+        taxon_id = cached_taxon_id.get(taxon_name.lower())
         if taxon_id == -1:  # -1 means the taxon_id for this taxon name was searched before
             return None
         elif taxon_id is None:
@@ -47,7 +47,7 @@ def host_taxon_name_from_ncbi_taxon_id(taxon_id: int) -> Optional[str]:
                     response = Entrez.read(taxon_handle)  # response is an array of taxons
                     if len(response) > 0:
                         taxon_name = str(response[0]['ScientificName'])  # parse from Bio.Entrez.Parser.StringElement
-                        cached_taxon_name[taxon_id] = taxon_name
+                        cached_taxon_name[taxon_id] = taxon_name.lower()
                     else:
                         logger.warning(f'can\'t find the taxon_name for taxon_id {taxon_id}')
                         cached_taxon_name[taxon_id] = -1  # save -1 in cache to distinguish from non cached taxon_ids

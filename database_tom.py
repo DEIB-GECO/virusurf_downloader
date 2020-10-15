@@ -291,18 +291,21 @@ class Epitope(_base):
 
     epitope_id = Column(Integer, primary_key=True, autoincrement=True)
     virus_id = Column(Integer, nullable=False)
-    host_id = Column(String, nullable=False)
+    host_id = Column(Integer, nullable=False)
+    source_host_name = Column(String)
+    source_host_iri = Column(String)
     protein_ncbi_id = Column(String)
-    epitope_type = Column(String)
-    hla_restriction = Column(String)
-    response_frequency = Column(REAL)
+    cell_type = Column(String)
+    mhc_class = Column(String)
+    mhc_allele = Column(String)
+    response_frequency_positive = Column(REAL)
     epitope_sequence = Column(String)
     epi_annotation_start = Column(Integer)
     epi_annotation_stop = Column(Integer)
-    is_imported = Column(Boolean)
     external_link = Column(String)
     prediction_process = Column(String)
     is_linear = Column(Boolean)
+    assay_type = Column(String)
 
 
 class EpitopeFragment(_base):

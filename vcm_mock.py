@@ -1,11 +1,11 @@
-from typing import List
+from typing import List, Tuple
 
 import sqlalchemy
 from sqlalchemy import cast
 
 from data_sources.virus_sample import VirusSample
 from database_tom import AminoAcidVariant, ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, \
-    NucleotideVariant, VariantImpact, Epitope, HostSpecie
+    NucleotideVariant, VariantImpact, Epitope, HostSpecie, EpitopeFragment
 from xml_helper import *
 import string
 import random
@@ -82,6 +82,11 @@ def create_or_get_host_specie(session, sample: VirusSample) -> int:
     host_specie = HostSpecie(host_taxon_id=host_taxon_id,
                              host_taxon_name=host_taxon_name)
     return 1
+
+
+def create_or_get_host_specie_alt(session, organism_name: str, organism_ncbi_id: int):
+    return 1
+
 
 def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int) -> int:
     gender = sample.gender()
@@ -293,11 +298,46 @@ def create_nuc_variants_and_impacts(session, sequence_id, args):
     #                                       impact_gene_name=impact_gene_name)
     pass
 
+def create_epitope(session, epitope: Tuple):
+    db_virus_id, host_specie_db_id, host_name, host_iri, protein_ncbi_id, cell_type, \
+    mhc_class, mhc_allele, response_frequency_positive, assay_type, seq, start, stop, ext_links, \
+    prediction_process, is_linear = epitope
+
+    epitope = Epitope(virus_id=db_virus_id,
+                      host_id=host_specie_db_id,
+                      source_host_name=host_name,
+                      source_host_iri=host_iri,
+                      protein_ncbi_id=protein_ncbi_id,
+                      cell_type=cell_type,
+                      mhc_class=mhc_class,
+                      mhc_allele=mhc_allele,
+                      response_frequency_positive=response_frequency_positive,
+                      epitope_sequence=seq,
+                      epi_annotation_start=start,
+                      epi_annotation_stop=stop,
+                      external_link=ext_links,
+                      prediction_process=prediction_process,
+                      is_linear=is_linear,
+                      assay_type=assay_type
+                      )
+    return 1
+
+
+def create_epitope_fragment(session, epi_fragment: Tuple):
+    epitope_id, seq, start, stop = epi_fragment
+    fragment = EpitopeFragment(epitope_id=epitope_id,
+                               epi_fragment_sequence=seq,
+                               epi_frag_annotation_start=start,
+                               epi_frag_annotation_stop=stop)
+
 
 def get_virus(session, a_virus) -> Optional[Virus]:
     # return session.query(Virus).filter(Virus.taxon_id == a_virus.taxon_id()).one_or_none()
     v = Virus(virus_id=1)
     return v
+
+def get_specie_id(session, organism_taxon_id:int):
+    return 1
 
 
 def get_reference_sequence_of_virus(session, a_virus: Virus) -> Optional[Sequence]:
@@ -344,3 +384,5 @@ def remove_sequence_and_meta(session, primary_sequence_accession_id: Optional[st
 def check_existence_epitopes(session, virus_id):
     one_epitope = session.query(Epitope).filter(Epitope.virus_id == virus_id).first()
     return one_epitope is not None
+
+

@@ -1,0 +1,22 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix kn: <https://knotation.org/kn/> .
+@prefix ONTIE: <https://ontology.iedb.org/ontology/ONTIE_> .
+
+ONTIE:0001854
+  rdfs:label "B6.ERAAP null" ;
+  rdf:type owl:Class ;
+  kn:applied-template """taxon class
+label: B6.ERAAP null
+parent taxon: Mus musculus C57BL/6""" ;
+  rdf:type owl:Class ;
+  rdfs:label "B6.ERAAP null" ;
+  rdfs:subClassOf ONTIE:0000062 ;
+  ONTIE:0003259 "taxon" ;
+  obo:IAO_0000118 "ERAAP-/-" ;
+  obo:IAO_0000118 "endoplasmic reticulum aminopeptidase associated with Ag processing null" ;
+  obo:IAO_0000118 "C57BL/6 ERAAP null" ;
+  obo:ncbitaxon#has_rank obo:NCBITaxon_subspecies .

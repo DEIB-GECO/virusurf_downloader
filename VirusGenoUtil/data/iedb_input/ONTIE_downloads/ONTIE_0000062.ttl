@@ -1,0 +1,22 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix kn: <https://knotation.org/kn/> .
+@prefix ONTIE: <https://ontology.iedb.org/ontology/ONTIE_> .
+
+ONTIE:0000062
+  rdfs:label "Mus musculus C57BL/6" ;
+  rdf:type owl:Class ;
+  kn:applied-template """taxon class
+label: Mus musculus C57BL/6
+parent taxon: Mus musculus""" ;
+  rdf:type owl:Class ;
+  rdfs:label "Mus musculus C57BL/6" ;
+  rdfs:subClassOf obo:NCBITaxon_10090 ;
+  ONTIE:0003259 "taxon" ;
+  obo:IAO_0000118 "c57" ;
+  obo:IAO_0000118 "black 6" ;
+  obo:IAO_0000118 "B6" ;
+  obo:ncbitaxon#has_rank obo:NCBITaxon_subspecies .

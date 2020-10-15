@@ -100,7 +100,7 @@ ONTIE downloads
  * re-use the already downloaded ONTIE .ttl files from ONTIE ["page"](https://ontology.iedb.org/ontology), through already executions of the code.
  
 Email for Entrez services
- * please add your email at the [email.txt](data/iedb_input/email.txt). It will be needed to run Entrez services through bio-python.
+ * please add your email at the [email.txt](data/iedb_input/cell_epitopes/email.txt). It will be needed to run Entrez services through bio-python.
  
 Extracting IEDB epitopes
 

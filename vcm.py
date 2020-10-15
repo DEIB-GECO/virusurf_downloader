@@ -120,7 +120,7 @@ def create_or_get_host_specie(session, sample: VirusSample) -> int:
         host_taxon_name = host_taxon_name.lower()
     host_taxon_id = sample.host_taxon_id()
 
-    host_specie_key = (host_taxon_id, host_taxon_name)
+    host_specie_key = host_taxon_id
     host_specie_id = cache_host_specie.get(host_specie_key)
     if not host_specie_id:
         host_specie = session.query(HostSpecie).filter(HostSpecie.host_taxon_id == host_taxon_id,
@@ -132,6 +132,23 @@ def create_or_get_host_specie(session, sample: VirusSample) -> int:
             session.flush()
         host_specie_id = host_specie.host_id
         cache_host_specie[host_specie_key] = host_specie_id
+    return host_specie_id
+
+
+def create_or_get_host_specie_alt(session, organism_name: str, organism_ncbi_id:int):
+    global cache_host_specie
+
+    host_specie_id = cache_host_specie.get(organism_ncbi_id)
+    if not host_specie_id:
+        host_specie = session.query(HostSpecie).filter(HostSpecie.host_taxon_id == organism_ncbi_id,
+                                                       HostSpecie.host_taxon_name == organism_name).one_or_none()
+        if not host_specie:
+            host_specie = HostSpecie(host_taxon_id=organism_ncbi_id,
+                                     host_taxon_name=organism_name)
+            session.add(host_specie)
+            session.flush()
+        host_specie_id = host_specie.host_id
+        cache_host_specie[organism_ncbi_id] = host_specie_id
     return host_specie_id
 
 
@@ -359,6 +376,42 @@ def create_epitopes(session, epitopes: List[Tuple], virus_id, _host_specie_id):
         epitope_id_mappings[pseudo_epi_id] = epitope.epitope_id
 
 
+def create_epitope(session, epitope: Tuple):
+    db_virus_id, host_specie_db_id, host_name, host_iri, protein_ncbi_id, cell_type, \
+    mhc_class, mhc_allele, response_frequency_positive, assay_type, seq, start, stop, ext_links, \
+    prediction_process, is_linear = epitope
+
+    epitope = Epitope(virus_id=db_virus_id,
+                      host_id=host_specie_db_id,
+                      source_host_name=host_name,
+                      source_host_iri=host_iri,
+                      protein_ncbi_id=protein_ncbi_id,
+                      cell_type=cell_type,
+                      mhc_class=mhc_class,
+                      mhc_allele=mhc_allele,
+                      response_frequency_positive=response_frequency_positive,
+                      epitope_sequence=seq,
+                      epi_annotation_start=start,
+                      epi_annotation_stop=stop,
+                      external_link=ext_links,
+                      prediction_process=prediction_process,
+                      is_linear=is_linear,
+                      assay_type=assay_type
+                      )
+    session.add(epitope)
+    session.flush()
+    return epitope.epitope_id
+
+
+def create_epitope_fragment(session, epi_fragment: Tuple):
+    epitope_id, seq, start, stop = epi_fragment
+    fragment = EpitopeFragment(epitope_id=epitope_id,
+                               epi_fragment_sequence=seq,
+                               epi_frag_annotation_start=start,
+                               epi_frag_annotation_stop=stop)
+    session.add(fragment)
+
+
 def create_epitopes_fragments(session, epi_fragments: List[Tuple]):
     global epitope_id_mappings
     if not epitope_id_mappings or len(epitope_id_mappings.keys()) == 0:
@@ -380,6 +433,18 @@ def create_epitopes_fragments(session, epi_fragments: List[Tuple]):
 
 def get_virus(session, a_virus) -> Optional[Virus]:
     return session.query(Virus).filter(Virus.taxon_id == a_virus.taxon_id()).one_or_none()
+
+
+def get_specie_id(session, organism_taxon_id:int):
+    global cache_host_specie
+
+    host_specie_id = cache_host_specie.get(organism_taxon_id)
+    if not host_specie_id:
+        host_specie = session.query(HostSpecie).filter(HostSpecie.host_taxon_id == organism_taxon_id).one_or_none()
+        if host_specie:
+            host_specie_id = host_specie.host_id
+            cache_host_specie[organism_taxon_id] = host_specie_id
+    return host_specie_id
 
 
 def get_reference_sequence_of_virus(session, virus_id) -> Optional[Sequence]:

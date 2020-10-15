@@ -405,10 +405,9 @@ def reference_sequence(nuccore_query) -> str:
 
     reference_seq_file_path = f"{get_local_folder_for(source_name='NMDC', _type=FileType.SequenceOrSampleData)}reference_sample.xml"
     if not os.path.exists(reference_seq_file_path):
-        with Entrez.efetch(db="nuccore", id=reference_seq_id, rettype="gbc", retmode="xml") as handle, open(
-                reference_seq_file_path, 'w') as f:
-            for line in handle:
-                f.write(line)
+        with Entrez.efetch(db="nuccore", id=reference_seq_id, rettype="gbc", retmode="xml") as handle:
+            with open(reference_seq_file_path, 'w') as f:
+                f.write(handle.read())
 
     reference_sample = AnyNCBIVNucSample(reference_seq_file_path, reference_seq_id)
     return reference_sample.nucleotide_sequence()

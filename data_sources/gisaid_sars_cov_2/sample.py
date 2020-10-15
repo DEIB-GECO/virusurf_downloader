@@ -7,34 +7,44 @@ from Bio import Entrez
 from dateutil.parser import parse
 from loguru import logger
 
+import cleaning_module
+from data_sources.common_methods_host_sample import host_taxon_id_from_ncbi_taxon_name
 from data_sources.virus_sample import VirusSample
 
-protein_name_replacements = {
-    'E': 'E (envelope protein)',
-    'M': 'M (membrane glycoprotein)',
-    'N': 'N (nucleocapsid phosphoprotein)',
-    'NSP16': "NSP16 (2'-O-ribose methyltransferase)",
-    'NSP5': "NSP5 (3C-like proteinase)",
-    'NSP14': "NSP14 (3'-to-5' exonuclease)",
-    'NSP15': 'NSP15 (endoRNAse)',
-    'NSP13': 'NSP13 (helicase)',
-    'NSP1': 'NSP1 (leader protein)',
-    'NSP12': 'NSP12 (RNA-dependent RNA polymerase)',
-    'NS3': 'NS3 (ORF3a protein)',
-    'NS6': 'NS6 (ORF6 protein)',
-    'NS7a': 'NS7a (ORF7a protein)',
-    'NS7b': 'NS7b (ORF7b)',
-    'NS8': 'NS8 (ORF8 protein)',
-    'Spike': 'Spike (surface glycoprotein)'
+gene_protein_name_replacements = {
+    "E": ("E", "E (envelope protein)"),
+    "M": ("M", "M (membrane glycoprotein)"),
+    "N": ("N", "N (nucleocapsid phosphoprotein)"),
+    "NSP16": ("ORF1ab", "NSP16 (2'-O-ribose methyltransferase)"),
+    "NSP5": ("ORF1ab", "NSP5 (3C-like proteinase)"),
+    "NSP14": ("ORF1ab", "NSP14 (3'-to-5' exonuclease)"),
+    "NSP15": ("ORF1ab", "NSP15 (endoRNAse)"),
+    "NSP13": ("ORF1ab", "NSP13 (helicase)"),
+    "NSP1": ("ORF1ab", "NSP1 (leader protein)"),
+    "NSP10": ("ORF1ab", "NSP10"),
+    "NSP11": ("ORF1ab", "NSP11"),
+    "NSP2": ("ORF1ab", "NSP2"),
+    "NSP3": ("ORF1ab", "NSP3"),
+    "NSP4": ("ORF1ab", "NSP4"),
+    "NSP6": ("ORF1ab", "NSP6"),
+    "NSP7": ("ORF1ab", "NSP7"),
+    "NSP8": ("ORF1ab", "NSP8"),
+    "NSP9": ("ORF1ab", "NSP9"),
+    "NSP12": ("ORF1ab", "NSP12 (RNA-dependent RNA polymerase)"),
+    "NS3": ("ORF3a", "NS3 (ORF3a protein)"),
+    "NS6": ("ORF6", "NS6 (ORF6 protein)"),
+    "NS7a": ("ORF7a", "NS7a (ORF7a protein)"),
+    "NS7b": ("ORF7b", "NS7b (ORF7b)"),
+    "NS8": ("ORF8", "NS8 (ORF8 protein)"),
+    "Spike": ("S", "Spike (surface glycoprotein)")
 }
 
 
-def uniform_protein_name(protein_name):
-    return protein_name_replacements.get(protein_name, protein_name)
+def replace_gene_and_protein_name(protein_name):
+    return gene_protein_name_replacements.get(protein_name, (None, protein_name))
 
 
 class GISAIDSarsCov2Sample(VirusSample):
-    cached_taxon_id = {}
     default_datetime = datetime(2020, 1, 1, 0, 0, 0, 0, None)
     aa_variant_regex = re.compile(r'(\D+)(\d+)(\D+)')
 
@@ -166,36 +176,13 @@ class GISAIDSarsCov2Sample(VirusSample):
 
     def host_taxon_name(self) -> Optional[str]:
         taxon_name = self.sequence_dict.get('covv_host')
-        return strip_or_none(taxon_name)
+        if taxon_name is not None:
+            taxon_name = taxon_name.strip()
+            taxon_name = cleaning_module.correct_typos(taxon_name)
+        return taxon_name
 
     def host_taxon_id(self) -> Optional[int]:
-        taxon_name = self.host_taxon_name()
-        if not taxon_name:
-            return None
-        taxon_name = taxon_name.lower()
-        if 'homo' in taxon_name or 'human' in taxon_name:
-            return 9606
-        else:
-            taxon_id = GISAIDSarsCov2Sample.cached_taxon_id.get(taxon_name)
-            if taxon_id == -1:  # -1 means the cached taxon_id for this taxon name was searched before
-                return None
-            elif taxon_id is None:
-                try:
-                    with Entrez.esearch(db="taxonomy", term=taxon_name, rettype=None,
-                                        retmode="xml") as handle:
-                        response = Entrez.read(handle)
-                        if response['Count'] == '1':
-                            taxon_id = int(response['IdList'][0])
-                            GISAIDSarsCov2Sample.cached_taxon_id[taxon_name] = taxon_id
-                        else:
-                            logger.warning(f'can\'t find the taxon id for taxon name {taxon_name}')
-                            GISAIDSarsCov2Sample.cached_taxon_id[
-                                taxon_name] = -1  # save -1 in cache to distinguish from non cached taxon_ids
-                            taxon_id = None
-                except:
-                    logger.exception(
-                        f'Exception occurred while fetching the taxon id of {taxon_name} in sample {self.internal_id()}')
-            return taxon_id
+        return host_taxon_id_from_ncbi_taxon_name(self.host_taxon_name())
 
     def gender(self) -> Optional[str]:
         return None
@@ -260,7 +247,7 @@ class GISAIDSarsCov2Sample(VirusSample):
                         already_present_mutations.append((original_aa, alternative_aa, start_pos, length, _type))
 
                 for product, _mutations in zip(annotations, parsed_mutations):
-                    product = uniform_protein_name(product)
+                    gene_name, product = replace_gene_and_protein_name(product)
                     yield start, stop, feature_type, gene_name, product, db_xref_merged, amino_acid_sequence, _mutations
         except KeyError:
             yield from ()   # empty generator

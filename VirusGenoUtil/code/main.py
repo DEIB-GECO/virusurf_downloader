@@ -1,4 +1,4 @@
-from code.variants.MFA2CSV import MFA2CSV
+from VirusGenoUtil.code.variants.MFA2CSV import MFA2CSV
 
 ### ### ### ### ### ### ### ### ### ### ### ####
 # virus reference + target genomes -> variants #

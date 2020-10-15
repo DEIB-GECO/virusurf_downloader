@@ -1,5 +1,5 @@
 import itertools
-from code.epitopes.EpitopeFragment import EpitopeFragment
+from VirusGenoUtil.code.epitopes.EpitopeFragment import EpitopeFragment
 
 
 class Epitope:
