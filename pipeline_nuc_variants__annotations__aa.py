@@ -161,7 +161,7 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
                         del_seq += ref_aligned_aa[i]
                     else:
                         if del_open:
-                            v = (gene, protein, protein_id, ins_pos, del_seq, "-" * del_len, "DEL")
+                            v = (gene, protein, protein_id, del_pos, del_seq, "-" * del_len, "DEL")
                             list_mutations.append(v)
 
                             del_open = False
@@ -171,7 +171,7 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
                             del_seq = ""
 
                 if del_open:
-                    v = (gene, protein, protein_id, ins_pos, del_seq, "-" * del_len, "DEL")
+                    v = (gene, protein, protein_id, del_pos, del_seq, "-" * del_len, "DEL")
                     list_mutations.append(v)
 
                 mut_open = False
