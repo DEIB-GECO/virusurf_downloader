@@ -836,6 +836,9 @@ def import_samples_into_vcm(
 
     logger.info(f'importing the samples identified by the query provided as bound to organism txid{bind_to_organism_taxon_id}')
 
+    # update last import date
+    database_tom.try_py_function(vcm.update_db_metadata, virus_id)
+
     # find outdated and new samples from source
     id_all_current_sequences = set(_alt_ids_of_selected_sequences(samples_query, log_with_name))
     _, id_outdated_sequences, id_new_sequences = _deltas(virus_id, id_all_current_sequences)

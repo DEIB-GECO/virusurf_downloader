@@ -318,6 +318,14 @@ class EpitopeFragment(_base):
     epi_frag_annotation_stop = Column(Integer)
 
 
+class DBMeta(_base):
+    __tablename__ = 'db_meta'
+
+    virus_id = Column(Integer, primary_key=True)
+    date_of_import = Column(String)
+
+
+
 #   ###################################     VIEWS       ##################################
 class View:
     """

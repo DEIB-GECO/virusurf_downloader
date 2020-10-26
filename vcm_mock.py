@@ -386,3 +386,5 @@ def check_existence_epitopes(session, virus_id):
     return one_epitope is not None
 
 
+def update_db_metadata(session, virus_id):
+    pass

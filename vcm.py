@@ -10,11 +10,12 @@ from data_sources.virus import VirusSource
 from sqlalchemy.sql.expression import cast
 import sqlalchemy
 from database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
-    VariantImpact, AminoAcidVariant, Epitope, EpitopeFragment, HostSpecie
+    VariantImpact, AminoAcidVariant, Epitope, EpitopeFragment, HostSpecie, DBMeta
 from locations import *
 from tqdm import tqdm
 from data_sources.virus_sample import VirusSample
 from xml_helper import *
+from datetime import datetime
 
 # Set of methods that create the corresponding rows in the Virus Conceptual Model database tables
 
@@ -535,3 +536,14 @@ def remove_sequence_and_meta(session, primary_sequence_accession_id: Optional[st
 def check_existence_epitopes(session, virus_id):
     one_epitope = session.query(Epitope).filter(Epitope.virus_id == virus_id).first()
     return one_epitope is not None
+
+
+def update_db_metadata(session, virus_id):
+    current_date = datetime.strftime(datetime.now(), '%Y%m%d-%H:%M:%S')
+    last_update = session.query(DBMeta).filter(DBMeta.virus_id == virus_id).one_or_none()
+    if not last_update:
+        meta = DBMeta(virus_id=virus_id, date_of_import=current_date)
+        session.add(meta)
+    else:
+        last_update.date_of_import = current_date
+        session.merge(last_update)

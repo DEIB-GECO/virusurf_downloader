@@ -1,3 +1,4 @@
+from typing import List, Tuple
 from Bio import Align, Seq, pairwise2
 from Bio.Data import CodonTable
 import numpy as np
@@ -86,11 +87,11 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
             dna_ref = ''
             for (start, stop) in annotation.ann_pos:
                 dna_ref += "".join([x[1] for x in zip(ref_positions, seq_aligned) if start <= x[0] and stop >= x[0]]).replace("-", "")
-                            
+
             if len(dna_ref)%3 == 0 and len(dna_ref) > 0:
                 aa_seq = Seq._translate_str(dna_ref, table, cds=False).replace("*", "")
 
-                alignment_aa = pairwise2.align.globalms(annotation.aa_seq, aa_seq, 2, -1, -1, -.5)
+                alignment_aa = pairwise2.align.globalms(annotation.aa_seq, aa_seq, 3, -1, -3, -1)
 
                 try:
                     ref_aligned_aa = alignment_aa[0][0]
@@ -138,7 +139,7 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
                         if ins_open:
                             v = (gene, protein, protein_id, ins_pos, "-" * ins_len, ins_seq, "INS")
                             list_mutations.append(v)
-            
+
                             ins_open = False
                             ins_len = 0
                             ins_pos = None
@@ -372,6 +373,85 @@ def call_nucleotide_variants(sequence_id, reference, sequence, ref_aligned, seq_
     return parse_annotated_variants(annotated_variants)
 
 
+def filter_ann_and_variants(annotations_w_aa_variants) -> List[Tuple]:
+    """
+    Transforms SUBs and DELs so that they're all of length 1
+    Removes
+    - substitutions whose alternative sequence is X (aligner error)
+    - annotations and variants located in proteins ORF1a/ORF1ab
+    """
+    new_annotations_w_aa_variants = []
+    for gene_name, product, protein_id, feature_type, start, stop, nuc_seq, amino_acid_seq, aa_variants in annotations_w_aa_variants:
+        # remove annotations and variants on proteins ORf1a/ab
+        if not product.startswith('ORF1a'):
+            # filter variants
+            new_aa_variants = []
+            for gene, protein_name, protein_code, mutpos, ref, alt, mut_type in aa_variants:
+                # transform variants
+                if mut_type == 'DEL':
+                    for i in range(len(ref)):
+                        new_mutpos = mutpos + i if mutpos is not None else None
+                        new_aa_variants.append(
+                            (gene, protein_name, protein_code, new_mutpos, ref[i], '-', mut_type))
+                elif mut_type == 'SUB':
+                    for i in range(len(ref)):
+                        if alt[i] == 'X':
+                            continue
+                        else:
+                            new_mutpos = mutpos + i if mutpos is not None else None
+                            new_aa_variants.append(
+                                (gene, protein_name, protein_code, new_mutpos, ref[i], alt[i], mut_type))
+                else:
+                    new_aa_variants.append((gene, protein_name, protein_code, mutpos, ref, alt, mut_type))
+            # output only annotations with at least one variant
+            if len(new_aa_variants) > 0:
+                new_annotations_w_aa_variants.append((
+                    gene_name, product, protein_id, feature_type, start, stop, nuc_seq, amino_acid_seq,
+                    new_aa_variants
+                ))
+    return new_annotations_w_aa_variants
+
+
+def filter_nuc_variants(nuc_variants) -> List[Tuple]:
+    """
+    Transforms nucleotide variants of type DELs and SUBs longer than 1 in multiple variants of length 1
+    """
+    new_nuc_variants = []
+    for n in nuc_variants:
+        seq_original = n['sequence_original']
+        seq_alternative = n['sequence_alternative']
+        start_original = int(n['start_original'])
+        start_alternative = int(n['start_alternative'])
+        variant_length = int(n['variant_length'])
+        variant_type = n['variant_type']
+        impacts = n['annotations']
+        if variant_type == 'DEL' and variant_length > 1:
+            for i in range(variant_length):
+                new_nuc_variants.append({
+                    'sequence_original': seq_original[i],
+                    'sequence_alternative': '-',
+                    'start_original': start_original + i,
+                    'start_alternative': start_alternative + i,
+                    'variant_length': 1,
+                    'variant_type': variant_type,
+                    'annotations': impacts
+                })
+        elif variant_type == 'SUB' and variant_length > 1:
+            for i in range(variant_length):
+                new_nuc_variants.append({
+                    'sequence_original': seq_original[i],
+                    'sequence_alternative': seq_alternative[i],
+                    'start_original': start_original + i,
+                    'start_alternative': start_alternative + i,
+                    'variant_length': 1,
+                    'variant_type': variant_type,
+                    'annotations': impacts
+                })
+        else:
+            new_nuc_variants.append(n)
+    return new_nuc_variants
+
+
 def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file, snpeff_database_name):
     aligner = Align.PairwiseAligner()
     aligner.match_score = 3.0  # the documentation states we can pass the scores in the constructor of PairwiseAligner but it doesn't work
@@ -400,11 +480,9 @@ def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file
 
     annotated_variants = call_nucleotide_variants(sequence_id, reference, sequence, ref_aligned, seq_aligned,
                                                   ref_positions, seq_positions, chr_name, snpeff_database_name)
+    annotated_variants = filter_nuc_variants(annotated_variants)
 
     annotations = call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_positions, seq_positions, sequence_id)
+    annotations = filter_ann_and_variants(annotations)
 
     return annotations, annotated_variants
-
-
-
-

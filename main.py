@@ -104,9 +104,11 @@ try:
         database_tom.disambiguate_chimera_sequences()
     elif 'epitope' in action:
         from epitopes import import_epitopes
+        if 'bombali' in _epitope_target or 'reston' in _epitope_target or 'forest' in _epitope_target:
+            raise ValueError(f'No epitopes available for virus {_epitope_target}.')
         virus_import_parameters = prepared_parameters.get(_epitope_target)
         if not virus_import_parameters:
-            raise Exception(f'{_epitope_target} is not recognised as an importable virus')
+            raise ValueError(f'{_epitope_target} is not recognised as an importable virus')
         virus_txid = virus_import_parameters[1]
         import_epitopes(virus_txid)
     elif 'import' in action:
