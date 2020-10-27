@@ -538,11 +538,11 @@ def check_existence_epitopes(session, virus_id):
     return one_epitope is not None
 
 
-def update_db_metadata(session, virus_id):
+def update_db_metadata(session, virus_db_id: int, database_source: str):
     current_date = datetime.strftime(datetime.now(), '%Y%m%d-%H:%M:%S')
-    last_update = session.query(DBMeta).filter(DBMeta.virus_id == virus_id).one_or_none()
+    last_update = session.query(DBMeta).filter(DBMeta.virus_id == virus_db_id, DBMeta.source == database_source).one_or_none()
     if not last_update:
-        meta = DBMeta(virus_id=virus_id, date_of_import=current_date)
+        meta = DBMeta(virus_id=virus_db_id, date_of_import=current_date, source=database_source)
         session.add(meta)
     else:
         last_update.date_of_import = current_date

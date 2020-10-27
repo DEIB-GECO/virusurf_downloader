@@ -12,6 +12,7 @@ class FileType(Enum):
     NucleotideVariants = 'nuc_variants'
     Logs = 'logs'
     Annotations = 'annotations'
+    Fasta = 'fasta'
 
 
 def get_local_folder_for(source_name: str, _type: FileType) -> str:

@@ -144,6 +144,7 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     # IMPORT VIRUS TAXON DATA
     virus = GISAIDSarsCov2()
     virus_id = database_tom.try_py_function(import_virus, virus)
+    database_tom.try_py_function(vcm.update_db_metadata, virus_id, 'GISAID')
 
     # # IMPORT VIRUS SEQUENCES
     logger.info(f'importing virus sequences and related tables')

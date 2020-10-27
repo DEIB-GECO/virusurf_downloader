@@ -53,6 +53,9 @@ try:
     elif 'epitope' in action:
         _epitope_target = sys.argv[7]
         log_file_keyword = f"epi_{_epitope_target}"
+    elif 'fasta' in action:
+        _fasta_target = sys.argv[7]
+        log_file_keyword = f"fasta_{_fasta_target}"
     else:
         log_file_keyword = action
 except Exception:
@@ -124,6 +127,14 @@ try:
             nmdc.import_samples_into_vcm()
         else:
             logger.error(f'the argument {source} is not recognised.\n'+wrong_arguments_message)
+    elif 'fasta' in action:
+        from generate_fasta import generate_fasta
+        virus_import_parameters = prepared_parameters.get(_fasta_target)
+        if not virus_import_parameters:
+            raise ValueError(f'{_fasta_target} is not recognised as an importable virus')
+        virus_txid = virus_import_parameters[1]
+        virus_folder = virus_import_parameters[2]
+        generate_fasta(virus_txid, virus_folder, f'{_fasta_target}.fasta')
     else:
         logger.error(f'the argument {action} is not recognised.\n' + wrong_arguments_message)
 except:

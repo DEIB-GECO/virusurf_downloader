@@ -426,9 +426,12 @@ refseq_sc2_len = 0
 refseq_sc1 = None
 refseq_sc1_len = 0
 
+imported_viruses = set()
+
 
 def import_samples_into_vcm():
-    global fasta_list, refseq_sc1, refseq_sc2, refseq_sc1_len, refseq_sc2_len, cached_taxonomy, fasta_folder, taxonomy_folder
+    global fasta_list, refseq_sc1, refseq_sc2, refseq_sc1_len, refseq_sc2_len, cached_taxonomy, fasta_folder, \
+        taxonomy_folder, imported_viruses
     fasta_folder = get_local_folder_for('NMDC', FileType.SequenceOrSampleData)
     taxonomy_folder = get_local_folder_for('NMDC', FileType.TaxonomyData)
     fasta_list = get_fasta_list()
@@ -531,6 +534,9 @@ def import_samples_into_vcm():
 
             # virus id associated to this sample
             virus_id = database_tom.try_py_function(virus_taxonomy_pipeline, organism)
+            if virus_id not in imported_viruses:
+                imported_viruses.add(virus_id)
+                database_tom.try_py_function(vcm.update_db_metadata, virus_id, 'NMDC')
             if virus_id:
                 gisa_id = sample.gisa_id()
                 if gisa_id:

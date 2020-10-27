@@ -44,7 +44,8 @@ def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch
             _base.metadata.drop_all(_db_engine, tables=[ExperimentType.__table__, SequencingProject.__table__, Virus.__table__,
                                                         HostSample.__table__, Sequence.__table__, AminoAcidVariant.__table__,
                                                         Annotation.__table__, NucleotideVariant.__table__,
-                                                        VariantImpact.__table__])
+                                                        VariantImpact.__table__, Epitope.__table__, EpitopeFragment.__table__,
+                                                        DBMeta.__table__])
 
         # CREATE TABLES if not existing
         _base.metadata.create_all(_db_engine)   # throws sqlalchemy.exc.OperationalError if connection is not available
@@ -322,6 +323,7 @@ class DBMeta(_base):
     __tablename__ = 'db_meta'
 
     virus_id = Column(Integer, primary_key=True)
+    source = Column(String, primary_key=True)
     date_of_import = Column(String)
 
 

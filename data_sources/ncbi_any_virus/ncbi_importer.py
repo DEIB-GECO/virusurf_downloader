@@ -604,8 +604,9 @@ def _get_samples_accession_ids(all_samples_query: str) -> List[int]:
         # get pages
         accessions_ids = list()
         # noinspection PyPep8Naming
-        RECORDS_PER_PAGE = 1000
+        RECORDS_PER_PAGE = 5000
         page_number = 0
+        import time
         with tqdm(total=total_records) as progress_bar:
             while total_records > page_number * RECORDS_PER_PAGE:
                 with Entrez.esearch(db="nuccore",
@@ -615,6 +616,7 @@ def _get_samples_accession_ids(all_samples_query: str) -> List[int]:
                 for x in response['IdList']:
                     accessions_ids.append(int(x))
                 page_number += 1
+                time.sleep(2)
                 progress_bar.update(
                     RECORDS_PER_PAGE if page_number * RECORDS_PER_PAGE < total_records else total_records - (
                                 (page_number - 1) * RECORDS_PER_PAGE))
@@ -837,7 +839,7 @@ def import_samples_into_vcm(
     logger.info(f'importing the samples identified by the query provided as bound to organism txid{bind_to_organism_taxon_id}')
 
     # update last import date
-    database_tom.try_py_function(vcm.update_db_metadata, virus_id)
+    database_tom.try_py_function(vcm.update_db_metadata, virus_id, 'GenBank')
 
     # find outdated and new samples from source
     id_all_current_sequences = set(_alt_ids_of_selected_sequences(samples_query, log_with_name))
