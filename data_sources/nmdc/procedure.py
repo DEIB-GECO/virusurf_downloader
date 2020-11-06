@@ -302,7 +302,11 @@ class NMDCVirusSample:
         return self.metadata.get('dept')
 
     def host_taxon_name(self) -> Optional[str]:
-        return self.metadata.get('host')
+        name = self.metadata.get('host')
+        if name is not None and name.strip().lower() == 'human':
+            return 'homo sapiens'
+        else:
+            return name
 
     def host_taxon_id(self) -> Optional[int]:
         try:

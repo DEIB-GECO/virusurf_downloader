@@ -1,10 +1,16 @@
+import os
 from typing import Optional
 
 from Bio import Entrez
 from loguru import logger
 
+from data_sources.common_methods_virus import _try_n_times
+
 cached_taxon_id = {}
 cached_taxon_name = {}
+
+DOWNLOAD_ATTEMPTS = 3
+DOWNLOAD_FAILED_PAUSE_SECONDS = 30
 
 
 def host_taxon_id_from_ncbi_taxon_name(taxon_name: str) -> Optional[int]:
@@ -55,3 +61,46 @@ def host_taxon_name_from_ncbi_taxon_id(taxon_id: int) -> Optional[str]:
             except:
                 logger.exception(f'Exception occurred while fetching the taxon_name corresponding to id {taxon_id}.')
         return taxon_name
+
+
+def download_or_get_ncbi_host_sample_as_xml(containing_directory: str, host_sample_id: str) -> str:
+    """
+    :param containing_directory: directory where the file will be downloaded and cached
+    :param host_sample_id: sequence accession id ( == numeric part of a GI id, e.g. '1798174254' of 'gi|1798174254')
+    :return: the local file path of the download INSDSeq XML file.
+    """
+
+    """Seems ridiculous, but if you use Efetch on biosample database with the host_sample_id, 
+    you download the XML of another host. The only solution I found is to obtain the numerical id
+    associated to this host_id, and then use Efetch with that numerical ID.
+    See also https://github.com/NCBI-Hackathons/EDirectCookbook/issues/45."""
+    def do1():
+        with Entrez.esearch(db="biosample", term={host_sample_id}) as handle:
+            response = Entrez.read(handle)
+        if response['Count'] == '1':
+            return int(response['IdList'][0])
+        else:
+            raise ValueError(f"can't find the biosample numeric id for biosample {host_sample_id}")
+
+    def do2():
+        local_file_path = f"{containing_directory}{os.path.sep}{host_sample_id}.xml"
+        if not os.path.exists(local_file_path):
+            with Entrez.efetch(db="biosample", id=numeric_host_id, retmode="xml") as handle:
+                a = handle.read()
+                try:
+                    with open(local_file_path, 'w') as f:
+                        f.write(a)
+                except TypeError:
+                    # sometimes the source handle returns bytes instead of chars, so let's try writing bytes
+                    try:
+                        with open(local_file_path, 'wb') as f:
+                            f.write(a)
+                    except Exception as e:
+                        if a:
+                            logger.error(f'Content of EntrezAPI was:\n{a[:50]}... (only 1st 50 chars displayed')
+                        else:
+                            logger.error(f'Content of EntrezAPI is probably empty.')
+                        raise e
+        return local_file_path
+    numeric_host_id = _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do1)
+    return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do2)

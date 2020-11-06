@@ -1,3 +1,4 @@
+import urllib
 from VirusGenoUtil.code.utils import is_fasta_file_extension, create_dir
 from VirusGenoUtil.code.epitopes.Protein import Protein
 from VirusGenoUtil.code.epitopes.Epitope import Epitope
@@ -666,7 +667,23 @@ class IEDBEpitopes:
 			species_name = "+".join([name_split[0], name_split[1]]).strip()
 		else:
 			species_name = name_split[0]
-		search = Entrez.esearch(term=species_name, db="taxonomy", retmode="xml")
+
+		def do():
+			return Entrez.esearch(term=species_name, db="taxonomy", retmode="xml")
+
+		attempts, success = 3, False
+		while not success and attempts > 0:
+			try:
+				search = do()
+				success = True
+			except urllib.error.HTTPError as e:
+				attempts -= 1
+				if attempts == 0:
+					raise e
+				else:
+					print('Entrez API not available. Retrying in 30s.')
+					time.sleep(30)
+
 		record = Entrez.read(search)
 		if len(record['IdList']) > 0:
 			return record['IdList'][0]

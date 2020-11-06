@@ -1,23 +1,14 @@
-from collections import OrderedDict
 from typing import List, Tuple
-# noinspection PyPackageRequirements
-from Bio import Entrez
-from loguru import logger
-from lxml import etree
-from sqlalchemy.orm import joinedload
-
-from data_sources.virus import VirusSource
-from sqlalchemy.sql.expression import cast
-import sqlalchemy
 from database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
     VariantImpact, AminoAcidVariant, Epitope, EpitopeFragment, HostSpecie, DBMeta
 from locations import *
-from tqdm import tqdm
 from data_sources.virus_sample import VirusSample
 from xml_helper import *
 from datetime import datetime
 
-# Set of methods that create the corresponding rows in the Virus Conceptual Model database tables
+"""
+Set of methods that create the corresponding rows in the Virus Conceptual Model database tables
+"""
 
 cache_host_specie = dict()
 cache_host_sample = dict()
@@ -156,12 +147,12 @@ def create_or_get_host_specie_alt(session, organism_name: str, organism_ncbi_id:
 def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int) -> int:
     global cache_host_sample
 
-    gender = sample.gender()
-    age = sample.age()
-
     originating_lab = sample.originating_lab()
     collection_date = sample.collection_date()
     isolation_source = sample.isolation_source()
+
+    gender = sample.gender()
+    age = sample.age()
 
     country, region, geo_group = sample.country__region__geo_group()
 
@@ -198,6 +189,18 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
         host_sample_id = host_sample.host_sample_id
         cache_host_sample[host_sample_key] = host_sample_id
     return host_sample_id
+
+
+def get_sequence(session, virus_sample: VirusSample, virus_id) -> Sequence:
+    # data from sample
+    accession_id = virus_sample.primary_accession_number()
+    alternative_accession_id = virus_sample.alternative_accession_number()
+
+    sequence = session.query(Sequence).filter(Sequence.alternative_accession_id == alternative_accession_id,
+                                              Sequence.accession_id == accession_id,
+                                              Sequence.virus_id == virus_id
+                                              ).one_or_none()
+    return sequence
 
 
 def create_and_get_sequence(session, virus_sample: VirusSample, virus_id, experiment_id, host_sample_id, sequencing_project_id):
@@ -539,7 +542,7 @@ def check_existence_epitopes(session, virus_id):
 
 
 def update_db_metadata(session, virus_db_id: int, database_source: str):
-    current_date = datetime.strftime(datetime.now(), '%Y%m%d-%H:%M:%S')
+    current_date = datetime.date(datetime.now())
     last_update = session.query(DBMeta).filter(DBMeta.virus_id == virus_db_id, DBMeta.source == database_source).one_or_none()
     if not last_update:
         meta = DBMeta(virus_id=virus_db_id, date_of_import=current_date, source=database_source)

@@ -1,5 +1,6 @@
 from os.path import sep
 from collections import Counter, OrderedDict
+from data_sources.ncbi_any_virus.host_sample import NCBIHostSample
 from pipeline_nuc_variants__annotations__aa import sequence_aligner
 import re
 import os
@@ -131,6 +132,7 @@ class AnyNCBIVNucSample:
         self._nuc_seq = None
         self._host_taxon_name = None
         self._host_taxon_id = None
+        self._external_host_data = None
 
     def __str__(self):
         return f'{self.internal_id()}.xml'
@@ -261,24 +263,28 @@ class AnyNCBIVNucSample:
     def coverage(self) -> Optional[int]:
         _input = self._structured_comment(self.sample_xml, 'Coverage')
         if not _input:
-            return None
-        info = self.re_anna_RuL3z.match(_input)
-        if not info:
-            logger.warning(f'coverage string in sample {self.internal_id()} is {_input} and cannot be parsed. '
-                           f'EXPERIMENT_TYPE.coverage set to NULL.\n'
-                           f'Full comment content is: {text_at_node(self.sample_xml, ".//INSDSeq_comment", False)}')
-            return None
+            info = None
         else:
-            o1 = info.group(1)  # integer part
-            o3 = info.group(3)  # decimal (optional)
-            # apply Anna's rules
-            output = int(o1)
-            if o3 and len(o3) < 3:
-                decimals = round(int(o3) / 10)
-                output += decimals
-            return output
+            info = self.re_anna_RuL3z.match(_input) # result of regular expression to extract the value may be None
+            if not info:
+                logger.warning(f'coverage string in sample {self.internal_id()} is {_input} and cannot be parsed. '
+                               f'EXPERIMENT_TYPE.coverage set to NULL.\n'
+                               f'Full comment content is: {text_at_node(self.sample_xml, ".//INSDSeq_comment", False)}')
+            else:
+                o1 = info.group(1)  # integer part
+                o3 = info.group(3)  # decimal (optional)
+                # apply Anna's rules
+                output = int(o1)
+                if o3 and len(o3) < 3:
+                    # then o3 is the decimal part and i moust be rounded to closest integer
+                    decimals = round(float(f'0.{o3}'))
+                    output += decimals
+                return output
+        # one last attempt
+        if not info and self.external_host_data() is not None:
+            return self.external_host_data().coverage()
 
-    def collection_date(self):
+    def collection_date(self) -> Optional[str]:
         collection_date = text_at_node(self.sample_xml,
                                        '..//INSDQualifier[./INSDQualifier_name/text() = "collection_date"]/INSDQualifier_value',
                                        mandatory=False)
@@ -287,18 +293,22 @@ class AnyNCBIVNucSample:
                 collection_date = dateparser.parse(collection_date, default=self.default_datetime).strftime('%Y-%m-%d')
             except dateparser._parser.ParserError as e:
                 if '/' in collection_date:
-                    fallback = dateparser.parse(collection_date.split('/')[0], default=self.default_datetime).strftime('%Y-%m-%d')
+                    collection_date = dateparser.parse(collection_date.split('/')[0], default=self.default_datetime).strftime('%Y-%m-%d')
                 else:
-                    fallback = None
-                logger.warning(f'collection date string"{collection_date}" was parsed as {fallback}')
-                return fallback
+                    collection_date = None
+                logger.warning(f'collection date string"{collection_date}" was parsed as {collection_date}')
+        if collection_date is None and self.external_host_data() is not None:
+            collection_date = self.external_host_data().collection_date()
         return collection_date
 
-    def submission_date(self):
+    def submission_date(self) -> Optional[datetime]:
         try:
             return datetime.strptime(self._init_and_get_journal()[0], '%d-%b-%Y')
         except TypeError:
-            return None
+            if self.external_host_data() is not None:
+                return self.external_host_data().submission_date()
+            else:
+                return None
 
     def isolation_source(self):
         source = text_at_node(self.sample_xml,
@@ -306,25 +316,30 @@ class AnyNCBIVNucSample:
                               mandatory=False)
         if source:
             source = source.lower()
+            # sometimes isolations source contains completely different data. In that case, the value is
+            # useless for the purpose of obtaining the isolation source so we return None
+            country = geo_groups.get(source.lower())
+
             # check if it contains gender info
             if 'female' in source:
                 self.gender_suggested_by_other_method = 'female'
                 if source == 'female':
-                    return None
+                    source = None
             elif 'male' in source:
                 self.gender_suggested_by_other_method = 'male'
                 if source == 'male':
-                    return None
+                    source = None
             elif 'sapiens' in source:
                 self.host_name_suggested_by_other_method = 'Homo sapiens'
-                return None
-            # check if it contains country info
-            country = geo_groups.get(source.lower())
-            if country:
+                source = None
+            elif country is not None:
                 self.country_suggested_by_other_method = country
-                return None
-
-        return source
+                source = None
+        # last chance
+        if source is None and self.external_host_data() is not None:
+            return self.external_host_data().isolation_source()
+        else:
+            return source
 
     def country__region__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
         country = None
@@ -339,6 +354,8 @@ class AnyNCBIVNucSample:
         else:
             country = self.country_suggested_by_other_method    # can be None
         geo_group = geo_groups.get(country.lower()) if country else None
+        if not country and not region and self.external_host_data() is not None:
+            country, region, geo_group = self.external_host_data().country__region__geo_group()
         return country, region, geo_group
 
     def _init_and_get_journal(self):
@@ -376,9 +393,11 @@ class AnyNCBIVNucSample:
                             break
         return self._journal
 
-    @staticmethod
-    def originating_lab() -> Optional[str]:
-        return None
+    def originating_lab(self) -> Optional[str]:
+        if self.external_host_data() is not None:
+            return self.external_host_data().originating_lab()
+        else:
+            return None
 
     def sequencing_lab(self) -> Optional[str]:
         try:
@@ -401,9 +420,10 @@ class AnyNCBIVNucSample:
         if not self._host_taxon_name:   # cached host_taxon_name
             if not self.host_name_suggested_by_other_method:
                 # then find in sample XML
-                host = self._init_and_get_host_values()
-                if host:
-                    host = host[0]
+                host_values = self._init_and_get_host_values()
+                host = None
+                if host_values:
+                    host = host_values[0]
                     try:    # remove stuff in parentheses
                         first_par = host.index('(')  # raises ValueError if ( is not found
                         after_second_par = host.index(')', first_par) + 1
@@ -413,6 +433,9 @@ class AnyNCBIVNucSample:
                         host = output
                     except ValueError:
                         pass
+                # if not foud in sequence XML, look into external host XML file
+                if not host and self.external_host_data() is not None:
+                    host = self.external_host_data().host_taxon_name()
             else:
                 host = self.host_name_suggested_by_other_method
             # correct typos
@@ -447,20 +470,24 @@ class AnyNCBIVNucSample:
                 elif 'f' in words:
                     gender = 'female'
                     break
-            return gender or self.gender_suggested_by_other_method      # can be None
+            gender = gender or self.gender_suggested_by_other_method      # can be None
         else:
-            return self.gender_suggested_by_other_method    # can be None
+            gender = self.gender_suggested_by_other_method    # can be None
+        if not gender and self.external_host_data() is not None:
+            gender = self.external_host_data().gender()
+        return gender
 
     def age(self) -> Optional[int]:
         host = self._init_and_get_host_values()
+        age = None
         if host:
             age = next(filter(lambda x: 'age' in x, host), None)
             if age:
                 age = int(''.join(filter(lambda x: x.isdigit(), age)))
                 # age = int(next(filter(lambda x: x.isdigit(), age.split()), None))
-            return age
-        else:
-            return None
+        if not age and self.external_host_data() is not None:
+            age = self.external_host_data().age()
+        return age
 
     def database_source(self) -> str:
         return 'RefSeq' if self.is_reference() else 'GenBank'
@@ -492,6 +519,37 @@ class AnyNCBIVNucSample:
     def on_before_multiprocessing(self):
         self.nucleotide_sequence()  # make sure nucleotide variants are cached in this sample
         self.sample_xml = None  # release xml reference to prevent errors with multiprocessing
+        self._external_host_data = None
+
+    def has_external_host_data(self):
+        nodes = self.sample_xml.xpath('.//INSDSeq_xrefs/INSDXref[./INSDXref_dbname/text() = "BioSample"]')
+        if len(nodes) == 1:
+            try:
+                host_id = text_at_node(nodes[0], './INSDXref_id', True)
+                return True
+            except AssertionError:
+                return False
+        else:
+            return False
+
+    def external_host_data(self):
+        # check cached value first
+        if self._external_host_data == -1:      # already initialized but it doesn't have external host data
+            return None
+        elif self._external_host_data is None:  # never initialized
+            # compute value
+            nodes = self.sample_xml.xpath('.//INSDSeq_xrefs/INSDXref[./INSDXref_dbname/text() = "BioSample"]')
+            if len(nodes) == 1:
+                try:
+                    host_id = text_at_node(nodes[0], './INSDXref_id', True)
+                    self._external_host_data = NCBIHostSample(host_id)
+                except AssertionError as e:
+                    logger.error('malforned XML file. BioSample attribute without ID')
+                    raise e
+            else:
+                self._external_host_data = -1
+                return None
+        return self._external_host_data
 
 
 def _alt_ids_of_selected_sequences(samples_query: str, log_with_name: str) -> List[int]:
@@ -535,7 +593,7 @@ def _download_as_sample_object(alternative_accession_ids, log_with_name: str, Sa
             continue
         try:
             other_sample = SampleWrapperClass(sample_path, sample_id)
-        except lxml.etree.XMLSyntaxError:
+        except (lxml.etree.XMLSyntaxError, AssertionError):
             logger.exception(f"Error while parsing the sample XML {sample_path}. The file is being deleted, and the sample skipped.")
             remove_file(file_path=f"{download_sample_dir_path}{os.path.sep}{sample_id}.xml")
             parser_skipped_samples += 1

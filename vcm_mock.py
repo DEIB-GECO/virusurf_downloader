@@ -81,6 +81,9 @@ def create_or_get_host_specie(session, sample: VirusSample) -> int:
     host_taxon_id = sample.host_taxon_id()
     host_specie = HostSpecie(host_taxon_id=host_taxon_id,
                              host_taxon_name=host_taxon_name)
+
+    logger.info(f'ACC.ID: {sample.primary_accession_number()} - {sample.alternative_accession_number()}')
+    logger.info(f'HOST_SPECIE: {host_taxon_name} - {host_taxon_id}')
     return 1
 
 
@@ -122,6 +125,7 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
                              gender=gender,
                              )
     host_sample.host_sample_id = 1
+    logger.info(f'HOST_SAMPLE: {collection_date} - {isolation_source} - {originating_lab} - {country} - {region} - {geo_group} - {age} - {gender}')
     return host_sample.host_sample_id
 
 

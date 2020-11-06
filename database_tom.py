@@ -1,6 +1,6 @@
 import sqlalchemy
 from sqlalchemy import Column, select, join, Index, column, REAL
-from sqlalchemy import String, Integer, Boolean, Float, Date
+from sqlalchemy import String, Integer, Boolean, Float, Date, BigInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.session import Session
@@ -266,7 +266,7 @@ class NucleotideVariant(_base):
 class VariantImpact(_base):
     __tablename__ = 'variant_impact'
 
-    variant_impact_id = Column(Integer, primary_key=True)
+    variant_impact_id = Column(BigInteger, primary_key=True)
     nucleotide_variant_id = Column(Integer, nullable=False)
 
     effect = Column(String)
@@ -324,7 +324,7 @@ class DBMeta(_base):
 
     virus_id = Column(Integer, primary_key=True)
     source = Column(String, primary_key=True)
-    date_of_import = Column(String)
+    date_of_import = Column(Date)
 
 
 

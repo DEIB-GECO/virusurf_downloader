@@ -13,6 +13,7 @@ class FileType(Enum):
     Logs = 'logs'
     Annotations = 'annotations'
     Fasta = 'fasta'
+    HostData = 'hosts'
 
 
 def get_local_folder_for(source_name: str, _type: FileType) -> str:
