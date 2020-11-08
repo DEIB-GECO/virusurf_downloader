@@ -275,7 +275,7 @@ def main():
                 s = line.strip().split("\t")
                 query_sid = s[0]
                 matching_sid = s[1]
-                blast_matching_sids.get(query_sid,set())
+                blast_matching_sids[query_sid] = blast_matching_sids.get(query_sid,set())
                 blast_matching_sids[query_sid].add(matching_sid)
     os.remove(blast_out_file)
     print("Done blasting sequences")
