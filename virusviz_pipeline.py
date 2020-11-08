@@ -298,12 +298,20 @@ def main():
                    "schema" : [],
                    "products" : [],
                    "nc" : []}
-    sequences_json = []
 
+    sequences_json = []
     for sid in sequences.keys():
+        json_muts_nc = []
+        for mut in annotated_variants[sid]:
+            json_mut_nc = [int(mut["start_original"]),
+                           mut['sequence_alternative'],
+                           mut['variant_type'],
+                           mut['annotations']]
+            json_muts_nc.append(json_mut_nc)
         sequence_json = {"id" : sid,
                          "meta" : metadata[sid],
                          "closestSequences" : list(blast_matching_sids[sid]),
+                         "variants": {"nc" : json_mut_nc},
                          "sequence" : str(sequences[sid])}
         sequences_json.append(sequence_json)
 
