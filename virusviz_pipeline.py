@@ -235,11 +235,6 @@ def main():
                                          'fasta').__next__().seq
 
     _,_,_,annotation_file_name,chr_name,snpeff_db_name = prepared_parameters[species]
-    #annotation_file_name = "./annotations/{}.tsv".format(species)
-    #print(prepared_parameters[species])
-    #chr_name = chr_names[species]
-    #snpeff_db_name = snpeff_db_names[species]
-
 
     ##read metadata
     metadata = {}
@@ -255,6 +250,9 @@ def main():
     # read sequences
     fasta_sequences = SeqIO.parse(open(fasta_file_name), 'fasta')
     sequences = {x.id: x.seq for x in fasta_sequences}
+
+    pangolin_output_file = fasta_file_name + ".pan"
+    os.system("bash pangolin_script.sh {} pangolin_tmp {}".format(fasta_file_name, pangolin_output_file))
 
     for sid, sequence in sequences.items():
         annotated_variants = sequence_aligner(sid, reference_sequence, sequence, chr_name, snpeff_db_name, annotation_file_name)
