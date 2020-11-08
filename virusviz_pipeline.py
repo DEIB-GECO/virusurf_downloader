@@ -214,8 +214,8 @@ def sequence_aligner(sequence_id, reference, sequence, chr_name, snpeff_database
                                 )
     )
 
-    return annotations
-    #return annotated_variants
+    return annotated_variants, annotations
+
 
 
 def main():
@@ -264,10 +264,26 @@ def main():
 
     print("Done with lineage assignment")
 
-    for sid, sequence in sequences.items():
-        annotated_variants = sequence_aligner(sid, reference_sequence, sequence, chr_name, snpeff_db_name, annotation_file_name)
+    blast_out_file = fasta_file_name.strip().split("/")[-1]+".blast"
+    os.system('blastn -query {}  -db blast_db/{} -num_alignments 20 -num_threads 5 -outfmt "7" -out {}'
+              .format(fasta_file_name, species, blast_out_file))
 
+    blast_matching_sids = {}
+    with open(blast_out_file) as f:
+        for line in f:
+            if not line.startswith("#"):
+                s = line.strip().split("\t")
+                query_sid = s[0]
+                matching_sid = s[1]
+                blast_matching_sids.get(query_sid,set())
+                blast_matching_sids[query_sid].add(matching_sid)
+    os.remove(blast_out_file)
+    print("Done blasting sequences")
+    print(blast_matching_sids)
+
+    for sid, sequence in sequences.items():
         print("Analizing sequence: {}".format(sid))
+        #annotated_variants, annotations = sequence_aligner(sid, reference_sequence, sequence, chr_name, snpeff_db_name, annotation_file_name)
 
 
 
