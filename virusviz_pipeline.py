@@ -294,7 +294,7 @@ def main():
 
 
     result_json = {"sequencesCount" : len(sequences.keys()),
-                   "referenceSequence" : reference_sequence,
+                   "referenceSequence" : str(reference_sequence),
                    "schema" : [],
                    "products" : [],
                    "nc" : []}
@@ -304,7 +304,7 @@ def main():
         sequence_json = {"id" : sid,
                          "meta" : metadata[sid],
                          "closestSequences" : list(blast_matching_sids[sid]),
-                         "sequence" : sequences[sid]}
+                         "sequence" : str(sequences[sid])}
         sequences_json.append(sequence_json)
 
     output_json = {"result" : result_json, "sequences" : sequences_json}
