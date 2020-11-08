@@ -279,14 +279,41 @@ def main():
                 blast_matching_sids[query_sid].add(matching_sid)
     os.remove(blast_out_file)
     print("Done blasting sequences")
-    print(blast_matching_sids)
+
+    annotated_variants = {}
+    annotations = {}
 
     for sid, sequence in sequences.items():
         print("Analizing sequence: {}".format(sid))
-        #annotated_variants, annotations = sequence_aligner(sid, reference_sequence, sequence, chr_name, snpeff_db_name, annotation_file_name)
+        annotated_variants[sid], annotations[sid] = sequence_aligner(sid,
+                                                                     reference_sequence,
+                                                                     sequence,
+                                                                     chr_name,
+                                                                     snpeff_db_name,
+                                                                     annotation_file_name)
 
 
+    result_json = {"sequencesCount" : len(sequences.keys()),
+                   "referenceSequence" : reference_sequence,
+                   "schema" : [],
+                   "products" : [],
+                   "nc" : []}
+    sequences_json = []
 
+    for sid in sequences.keys():
+        sequence_json = {"id" : sid,
+                         "meta" : metadata[sid],
+                         "closestSequences" : list(blast_matching_sids[sid]),
+                         "sequence" : sequences[sid]}
+        sequences_json.append(sequence_json)
+
+    output_json = {"result" : result_json, "sequences" : sequences_json}
+
+    print(output_json)
+    print("\n\n\n")
+    for sid in annotated_variants.keys():
+        print(annotated_variants[sid])
+        print(annotations[sid])
 
     ##todo: check that ids are same in both metadata and sequences
 
