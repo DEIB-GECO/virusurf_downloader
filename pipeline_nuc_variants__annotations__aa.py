@@ -37,7 +37,7 @@ def parse_annotated_variants(annotated_variants):
     return result
 
 
-def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_positions, seq_positions, sequence_id):
+def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_positions, seq_positions, sequence_id = 666):
     table = CodonTable.ambiguous_dna_by_id[1]
 
     list_annotations = []
