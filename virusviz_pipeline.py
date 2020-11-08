@@ -253,11 +253,23 @@ def main():
 
     pangolin_output_file = fasta_file_name + ".pan"
     os.system("bash pangolin_script.sh {} pangolin_tmp {}".format(fasta_file_name, pangolin_output_file))
+    with open("pangolin_tmp/"+pangolin_output_file) as f:
+        f.readline()
+        for line in f:
+            sid, lineage, _, _, status, _ = tuple(line.strip().split(","))
+            if status != "passed_qc":
+                lineage = "unknown"
+            metadata[sid]['lineage'] = lineage
+    os.remove("pangolin_tmp/"+pangolin_output_file)
+
+    print("Done with lineage assignment")
 
     for sid, sequence in sequences.items():
         annotated_variants = sequence_aligner(sid, reference_sequence, sequence, chr_name, snpeff_db_name, annotation_file_name)
 
-        print(sid)
+        print("Analizing sequence: {}".format(sid))
+
+
 
 
     ##todo: check that ids are same in both metadata and sequences
