@@ -286,7 +286,7 @@ def main():
     os.remove(blast_out_file)
 
     ## load blast metadata
-    blast_meta_file = "blast_tmp/{}.meta".format(species)
+    blast_meta_file = "blast_db/{}.meta".format(species)
     blast_meta_dict = {}
     with open(blast_meta_file) as f:
         header = f.readline().strip().split("\t")
