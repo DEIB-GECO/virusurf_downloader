@@ -9,6 +9,7 @@ from pipeline_nuc_variants__annotations__aa import \
     call_annotation_variant, \
     filter_ann_and_variants
 from data_sources.ncbi_any_virus.ncbi_importer import prepared_parameters
+import json
 
 def add_variant_factory(chr_name):
     def add_variant(pos_ref, pos_seq, length, original, mutated, variant_type, reference, sequence):
@@ -216,7 +217,12 @@ def sequence_aligner(sequence_id, reference, sequence, chr_name, snpeff_database
 
     return annotated_variants, annotations
 
-
+def extract_nuc_mut_for_json(mut):
+    return [mut["start_original"],
+            mut["sequence_original"],
+            mut['sequence_alternative'],
+            mut["variant_type"],
+            mut["annotations"]]
 
 def main():
     print("Usage: python virusviz_pipeline.py input.fasta input.csv [species (Default = new_sars_cov_2)]")
@@ -278,6 +284,15 @@ def main():
                 blast_matching_sids[query_sid] = blast_matching_sids.get(query_sid,set())
                 blast_matching_sids[query_sid].add(matching_sid)
     os.remove(blast_out_file)
+
+    ## load blast metadata
+    blast_meta_file = "blast_tmp/{}.meta".format(species)
+    blast_meta_dict = {}
+    with open(blast_meta_file) as f:
+        header = f.readline().strip().split("\t")
+        for line in f:
+            s = line.strip().split("\t")
+            blast_meta_dict[s[0]] = {a:v for a,v in zip(header[1:0], s[1:0])}
     print("Done blasting sequences")
 
     annotated_variants = {}
@@ -299,30 +314,38 @@ def main():
                    "products" : [],
                    "nc" : []}
 
-    sequences_json = []
+    sequences_json = {}
     for sid in sequences.keys():
         json_muts_nc = []
         for mut in annotated_variants[sid]:
-            json_mut_nc = [int(mut["start_original"]),
-                           mut['sequence_alternative'],
-                           mut['variant_type'],
-                           mut['annotations']]
+            json_mut_nc = extract_nuc_mut_for_json(mut)
             json_muts_nc.append(json_mut_nc)
+
+        json_anns = {}
+        for ann in annotations[sid]:
+            prot = ann[1]
+            aamut = [[x[3], x[4], x[5], x[6]] for x in ann[-1]]
+            json_anns[prot] = aamut
         sequence_json = {"id" : sid,
                          "meta" : metadata[sid],
-                         "closestSequences" : list(blast_matching_sids[sid]),
-                         "variants": {"nc" : json_mut_nc},
+                         "closestSequences" : [[mid, blast_meta_dict[mid]] for mid in list(blast_matching_sids[sid])],
+                         "variants": {"N" : {"shema": ["position",
+                                                       "from",
+                                                       "to",
+                                                       "type",
+                                                       ["effect", "putative_impact", "gene"]],
+                                             "variants" : json_muts_nc},
+                                      "A" : {"schema": ["position", "from", "to", "type"],
+                                             "variants" : json_anns}
+                                      },
                          "sequence" : str(sequences[sid])}
-        sequences_json.append(sequence_json)
+
+        sequences_json[sid] = sequence_json
 
     output_json = {"result" : result_json, "sequences" : sequences_json}
 
-    print(output_json)
-    print("\n\n\n")
-    for sid in annotated_variants.keys():
-        print(annotated_variants[sid])
-        print(annotations[sid])
-
+    with open('test_file_virusviz.json', 'w') as file:
+        json.dump(output_json, file)
     ##todo: check that ids are same in both metadata and sequences
 
 if __name__ == "__main__":
