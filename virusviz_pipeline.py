@@ -11,6 +11,18 @@ from pipeline_nuc_variants__annotations__aa import \
 from data_sources.ncbi_any_virus.ncbi_importer import prepared_parameters
 import json
 
+
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        else:
+            return super(NpEncoder, self).default(obj)
+
 def add_variant_factory(chr_name):
     def add_variant(pos_ref, pos_seq, length, original, mutated, variant_type, reference, sequence):
         # return [sequence_id, pos_ref, pos_seq, length, original,  mutated, variant_type]
@@ -345,7 +357,7 @@ def main():
     output_json = {"result" : result_json, "sequences" : sequences_json}
 
     with open('test_file_virusviz.json', 'w') as file:
-        json.dump(output_json, file)
+        json.dump(output_json, file, cls=NpEncoder)
     ##todo: check that ids are same in both metadata and sequences
 
 if __name__ == "__main__":
