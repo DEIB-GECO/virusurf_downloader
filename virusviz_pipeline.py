@@ -242,10 +242,11 @@ def main():
     ##parameters
     fasta_file_name = sys.argv[1]
     meta_file_name = sys.argv[2]
+    output_file_name = sys.argv[3]
 
 
     try:
-        species = sys.argv[3]
+        species = sys.argv[4]
     except:
         species = "new_ncbi_sars_cov_2"
     reference_fasta_file_name = "./annotations/{}.fa".format(species)
@@ -356,7 +357,7 @@ def main():
 
     output_json = {"result" : result_json, "sequences" : sequences_json}
 
-    with open('test_file_virusviz.json', 'w') as file:
+    with open(output_file_name, 'w') as file:
         json.dump(output_json, file, cls=NpEncoder)
     ##todo: check that ids are same in both metadata and sequences
 
