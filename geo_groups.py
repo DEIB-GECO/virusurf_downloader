@@ -170,6 +170,8 @@ geo_groups = {
     'romania': 'Europe',
     'russian federation': 'Europe, Asia',  # It's a transcontinental country
     'russia': 'Europe, Asia',
+    'serbia': 'Europe',
+    'republic of serbia': 'Europe',
     'sweden': 'Europe',
     'slovenia': 'Europe',
     'svalbard and jan mayen islands': 'Europe',
@@ -226,7 +228,7 @@ geo_groups = {
     'cook islands': 'Oceania',
     'fiji': 'Oceania',
     'micronesia, federated states of': 'Oceania',
-    'mirconesia': 'Oceania',
+    'micronesia': 'Oceania',
     'guam': 'Oceania',
     'kiribati': 'Oceania',
     'marshall islands': 'Oceania',

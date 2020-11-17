@@ -55,22 +55,23 @@ class NCBIHostSample:
         return source
 
     def country__region__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-        country = _find_in_attributes(self.attributes, 'country')[1]
-        region = _find_in_attributes(self.attributes, 'region')[1]
+        country: Optional[str] = _find_in_attributes(self.attributes, 'country')[1]
+        region: Optional[str] = _find_in_attributes(self.attributes, 'region')[1]
         if country is not None:
             if 'not' in country: # like 'not collected'
                 country = None
                 geo_group = None
             else:
+                country = country.strip()
+                geo_group = geo_groups.get(country) # up to here country is lowercase
                 country = country.capitalize()
-                geo_group = geo_groups.get(country)
         else:
             geo_group = None
         if region is not None:
             if 'not' in region: # like 'not collected'
                 region = None
             else:
-                region = region.capitalize()
+                region = region.strip().capitalize()
         return country, region, geo_group
 
     def coverage(self) -> Optional[int]:

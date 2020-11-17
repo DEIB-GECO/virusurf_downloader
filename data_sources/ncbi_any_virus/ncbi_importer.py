@@ -114,6 +114,7 @@ class AnyNCBIVNucSample:
     gender_suggested_by_other_method: Optional[str] = None
     country_suggested_by_other_method: Optional[str] = None
     host_name_suggested_by_other_method:Optional[str] = None
+    isolation_source_suggested_by_other_method: Optional[str] = None
 
     def __init__(self, virus_sample_file_path: str, internal_accession_id):
         """
@@ -159,6 +160,8 @@ class AnyNCBIVNucSample:
                               './/INSDQualifier[./INSDQualifier_name/text() = "strain"]/INSDQualifier_value', False)
         if not strain:
             # try to get the strain from the filed FEATURES -> SOURCE -> /isolate
+            # Note: isolate is synonymous of strain and completely different from isolation_source. If it happens
+            # to find isolations_source values in this field, then it's an error of the data source.
             try:
                 strain = text_at_node(self.sample_xml,
                                       './/INSDQualifier[./INSDQualifier_name/text() = "isolate"]/INSDQualifier_value',
@@ -169,6 +172,9 @@ class AnyNCBIVNucSample:
                 fallback = text_at_node(isolates[0], '.', mandatory=True)
                 logger.warning(f'Isolate strings are {isolates}. Only {fallback} was retained as strain')
                 return fallback
+            if strain == 'nasopharyngeal':
+                strain = None
+                isolation_source_suggested_by_other_method = 'nasopharyngeal'
         return strain
 
     def is_reference(self):
@@ -314,9 +320,11 @@ class AnyNCBIVNucSample:
         source = text_at_node(self.sample_xml,
                               '..//INSDQualifier[./INSDQualifier_name/text() = "isolation_source"]/INSDQualifier_value',
                               mandatory=False)
+        if not source:
+            source = self.isolation_source_suggested_by_other_method
         if source:
             source = source.lower()
-            # sometimes isolations source contains completely different data. In that case, the value is
+            # sometimes isolation_source contains completely different data. In that case, the value is
             # useless for the purpose of obtaining the isolation source so we return None
             country = geo_groups.get(source.lower())
 
@@ -342,7 +350,6 @@ class AnyNCBIVNucSample:
             return source
 
     def country__region__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-        country = None
         region = None
         node = text_at_node(self.sample_xml,
                             '..//INSDQualifier[./INSDQualifier_name/text() = "country"]/INSDQualifier_value',

@@ -425,6 +425,7 @@ def filter_nuc_variants(nuc_variants) -> List[Tuple]:
         variant_length = int(n['variant_length'])
         variant_type = n['variant_type']
         impacts = n['annotations']
+        impacts_set = set(tuple(values) for values in impacts)
         if variant_type == 'DEL' and variant_length > 1:
             for i in range(variant_length):
                 new_nuc_variants.append({
@@ -434,7 +435,7 @@ def filter_nuc_variants(nuc_variants) -> List[Tuple]:
                     'start_alternative': start_alternative + i,
                     'variant_length': 1,
                     'variant_type': variant_type,
-                    'annotations': impacts
+                    'annotations': impacts_set
                 })
         elif variant_type == 'SUB' and variant_length > 1:
             for i in range(variant_length):
@@ -445,9 +446,10 @@ def filter_nuc_variants(nuc_variants) -> List[Tuple]:
                     'start_alternative': start_alternative + i,
                     'variant_length': 1,
                     'variant_type': variant_type,
-                    'annotations': impacts
+                    'annotations': impacts_set
                 })
         else:
+            n['annotations'] = impacts_set
             new_nuc_variants.append(n)
     return new_nuc_variants
 

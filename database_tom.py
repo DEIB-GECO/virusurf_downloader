@@ -32,6 +32,9 @@ def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch
             logger.warning(
                 'Removal of all table records in 10 seconds. Stop the execution if that\'s not the desired behaviour, and '
                 'rerun by setting "recreate_db_from_scratch" to False in module main.py.')
+            logger.warning(
+                'Also, check if cache of annotations should be deleted!'
+            )
             sleep(10)
             logger.info('removal of all table records in progress...')
             delete_indexes()
@@ -429,8 +432,8 @@ class ViewNucleotideVariantAnnotation(MaterializedView):
         Annotation.gene_name.label('n_gene_name'),
         Annotation.product.label('n_product')
     ]).select_from(join(Annotation, NucleotideVariant,
-                        (NucleotideVariant.start_alternative >= Annotation.start) &
-                        (NucleotideVariant.start_alternative <= Annotation.stop) &
+                        (NucleotideVariant.start_original >= Annotation.start) &
+                        (NucleotideVariant.start_original <= Annotation.stop) &
                         (NucleotideVariant.sequence_id == Annotation.sequence_id)))
 
     @staticmethod
@@ -461,7 +464,21 @@ class ViewNucleotideVariantLimited(View):
         ViewNucleotideVariantLimited._drop_view('nucleotide_variant_limited')
 
 
-views = [ViewAnnotationCDS, ViewNucleotideVariantAnnotation, ViewNucleotideVariantLimited, ViewAnnotation]
+class HostSampleView(View):
+    stmt = select([
+        HostSample, HostSpecie
+    ]).select_from(join(HostSpecie, HostSpecie, HostSample.host_id == HostSpecie.host_id))
+
+    @staticmethod
+    def create():
+        HostSampleView._create_view('host_sample_view', HostSampleView.stmt)
+
+    @staticmethod
+    def drop():
+        HostSampleView._drop_view('host_sample_view')
+
+
+views = [ViewAnnotationCDS, ViewNucleotideVariantAnnotation, ViewNucleotideVariantLimited, ViewAnnotation, HostSampleView]
 
 
 def create_views():
@@ -493,40 +510,45 @@ def create_indexes():
     def column_name(column_obj):
         return str(column_obj).split('.', maxsplit=1)[1]
 
+    # one of the indexes depends on a materialized view. Check its existence before continuing
+    nuc_var_matview_exists = _db_engine.execute(
+        f"SELECT EXISTS ( SELECT FROM pg_catalog.pg_matviews WHERE matviewname = 'nucleotide_variant_annotation' )"
+        ).first().values()[0] is True
+    if not nuc_var_matview_exists:
+        raise RuntimeError('One of the indexes is based on a materialized view. First create the views, then indexes.\n'
+                           'Creation of indexes aborted. The database has not been changed.')
+
     logger.info('Deleting previous version of indexes (if present)')
     delete_indexes()
     logger.info('Generating indexes...')
 
-    _db_engine.execute(f'CREATE INDEX aa__ann_id ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.annotation_id)})')
-    _db_engine.execute(f'CREATE INDEX aa__var_type_lower ON {AminoAcidVariant.__table__}(lower({column_name(AminoAcidVariant.variant_aa_type)}))')
-    _db_engine.execute(f'CREATE INDEX aa__start_original ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.start_aa_original)})')
-    _db_engine.execute(f'CREATE INDEX aa__var_type_normal ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.variant_aa_type)})')
+    _db_engine.execute(f'CREATE INDEX aa__ann_id ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.annotation_id)}) TABLESPACE default_ts;')
+    _db_engine.execute(f'CREATE INDEX aa__var_type_lower ON {AminoAcidVariant.__table__}(lower({column_name(AminoAcidVariant.variant_aa_type)})) TABLESPACE default_ts;')
+    _db_engine.execute(f'CREATE INDEX aa__start_original ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.start_aa_original)}) TABLESPACE default_ts;')
+    _db_engine.execute(f'CREATE INDEX aa__var_type_normal ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.variant_aa_type)}) TABLESPACE default_ts;')
 
-    _db_engine.execute(f'CREATE INDEX ann__seq_id ON {Annotation.__table__}({column_name(Annotation.sequence_id)})')
-    _db_engine.execute(f'CREATE INDEX ann__start ON {Annotation.__table__}({column_name(Annotation.start)})')
-    _db_engine.execute(f'CREATE INDEX ann__stop ON {Annotation.__table__}({column_name(Annotation.stop)})')
+    _db_engine.execute(f'CREATE INDEX ann__seq_id ON {Annotation.__table__}({column_name(Annotation.sequence_id)}) TABLESPACE default_ts;')
+    _db_engine.execute(f'CREATE INDEX ann__start ON {Annotation.__table__}({column_name(Annotation.start)}) TABLESPACE default_ts;')
+    _db_engine.execute(f'CREATE INDEX ann__stop ON {Annotation.__table__}({column_name(Annotation.stop)}) TABLESPACE default_ts;')
 
     #            for now we'll keep the following index disabled
     # _db_engine.execute(f'CREATE INDEX nuc_var__alt ON {NucleotideVariant.__table__}(lower({column_name(NucleotideVariant.sequence_alternative)}))')
-    _db_engine.execute(f'CREATE INDEX nuc_var__seq_id ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.sequence_id)})')    # primary key
-    _db_engine.execute(f'CREATE INDEX nuc_var__start_alt ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.start_alternative)})')
-    _db_engine.execute(f'CREATE INDEX nuc_var__start_orig ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.start_original)})')
-    _db_engine.execute(f'CREATE INDEX nuc_var__length ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.variant_length)})')
+    _db_engine.execute(f'CREATE INDEX nuc_var__seq_id ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.sequence_id)}) TABLESPACE default_ts;')    # primary key
+    _db_engine.execute(f'CREATE INDEX nuc_var__start_alt ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.start_alternative)}) TABLESPACE default_ts;')
+    _db_engine.execute(f'CREATE INDEX nuc_var__start_orig ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.start_original)}) TABLESPACE default_ts;')
+    _db_engine.execute(f'CREATE INDEX nuc_var__length ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.variant_length)}) TABLESPACE default_ts;')
 
-    _db_engine.execute(f'CREATE INDEX seq__experiment_id ON {Sequence.__table__}({column_name(Sequence.experiment_type_id)})')
-    _db_engine.execute(f'CREATE INDEX seq__host_id ON {Sequence.__table__}({column_name(Sequence.host_sample_id)})')
-    _db_engine.execute(f'CREATE INDEX seq__seq_proj_id ON {Sequence.__table__}({column_name(Sequence.sequencing_project_id)})')
-    _db_engine.execute(f'CREATE INDEX seq__virus_id ON {Sequence.__table__}({column_name(Sequence.virus_id)})')
+    _db_engine.execute(f'CREATE INDEX seq__experiment_id ON {Sequence.__table__}({column_name(Sequence.experiment_type_id)}) TABLESPACE default_ts;')
+    _db_engine.execute(f'CREATE INDEX seq__host_id ON {Sequence.__table__}({column_name(Sequence.host_sample_id)}) TABLESPACE default_ts;')
+    _db_engine.execute(f'CREATE INDEX seq__seq_proj_id ON {Sequence.__table__}({column_name(Sequence.sequencing_project_id)}) TABLESPACE default_ts;')
+    _db_engine.execute(f'CREATE INDEX seq__virus_id ON {Sequence.__table__}({column_name(Sequence.virus_id)}) TABLESPACE default_ts;')
+    _db_engine.execute(f'CREATE UNIQUE INDEX seq__accession_id ON {Sequence.__table__}(lower({column_name(Sequence.accession_id)})) TABLESPACE default_ts;')
+    _db_engine.execute(f'CREATE UNIQUE INDEX seq__alternative_accession_id ON {Sequence.__table__}(lower({column_name(Sequence.alternative_accession_id)})) TABLESPACE default_ts;')
 
-    _db_engine.execute(f'CREATE INDEX impact__var_id ON {VariantImpact.__table__}({column_name(VariantImpact.nucleotide_variant_id)})')
+    _db_engine.execute(f'CREATE INDEX impact__var_id ON {VariantImpact.__table__}({column_name(VariantImpact.nucleotide_variant_id)}) TABLESPACE default_ts;')
 
-    # next index is built on top of a materialized view (check if it exists first)
-    nuc_var_matview_exists = _db_engine\
-        .execute(f"SELECT EXISTS ( SELECT FROM pg_catalog.pg_matviews WHERE matviewname = 'nucleotide_variant_annotation' )")\
-        .first().values()[0] is True
-    if nuc_var_matview_exists:
-        _db_engine\
-            .execute(f'CREATE INDEX nuc_var_ann__var_id ON nucleotide_variant_annotation(nucleotide_variant_id)')
+    _db_engine\
+        .execute(f'CREATE INDEX nuc_var_ann__var_id ON nucleotide_variant_annotation USING btree (nucleotide_variant_id) TABLESPACE default_ts;')
 
 
 #                   ##############################      CHIMERA SEQUENCES       ######################
