@@ -2,10 +2,8 @@
 Created by tomalf2 on ott, 2020.
 """
 from typing import Generator, Tuple
-
 from sqlalchemy import func
 from tqdm import tqdm
-
 import database_tom
 from locations import get_local_folder_for, FileType
 from epitopes import virus_database_id

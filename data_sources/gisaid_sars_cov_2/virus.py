@@ -2,13 +2,14 @@ import json
 import os
 
 from json import JSONDecodeError
-from typing import Optional
+from typing import Optional, Generator
 
 from loguru import logger
 from tqdm import tqdm
 
 from data_sources.gisaid_sars_cov_2.sample import GISAIDSarsCov2Sample
 from data_sources.virus import VirusSource
+from database_tom import try_py_function, Sequence
 import stats_module
 
 
@@ -55,25 +56,96 @@ class GISAIDSarsCov2(VirusSource):
     def is_positive_stranded(self):
         return True
 
-    def virus_samples(self, virus_id: int, from_sample: Optional[int] = None, to_sample: Optional[int] = None):
+    def count_sequences_in_file(self):
         with open(self.data_path, mode='r') as input_file:
             num_lines = sum(1 for line in input_file)
-            input_file.seek(0, 0)   # reset pointer
-            lines_read = 0
-            lines_to_read = num_lines if (from_sample is None or to_sample is None) else to_sample - from_sample
-            progress = tqdm(total=lines_to_read)
-            stats_module.schedule_samples(stats_module.StatsBasedOnTotals(lines_to_read, virus_id, ['GISAID']))
+        return num_lines
+
+    # def virus_samples(self, virus_id: int, from_sample: Optional[int] = None, to_sample: Optional[int] = None):
+    #     num_lines = self.count_sequences_in_file()
+    #     with open(self.data_path, mode='r') as input_file:
+    #         lines_read = 0
+    #         lines_to_read = num_lines if (from_sample is None or to_sample is None) else to_sample - from_sample
+    #         progress = tqdm(total=lines_to_read)
+    #         stats_module.schedule_samples(stats_module.StatsBasedOnTotals(lines_to_read, virus_id, ['GISAID']))
+    #         for line in input_file:
+    #             if from_sample is not None and to_sample is not None:
+    #                 if lines_read < from_sample:
+    #                     lines_read += 1
+    #                     continue    # read line without action
+    #                 elif lines_read >= to_sample:
+    #                     return      # terminate loop
+    #             try:
+    #                 lines_read += 1
+    #                 progress.update()
+    #                 yield GISAIDSarsCov2Sample(json.loads(line))
+    #             except JSONDecodeError:
+    #                 pass
+
+    def get_sequences_in_current_data(self) -> dict:
+        def do(session):
+            all_sequences = dict()
+            for source_seq in session.query(Sequence) \
+                                      .filter(Sequence.strain_name.isnot(None)) \
+                                      .yield_per(100):
+                all_sequences[source_seq.accession_id] = (source_seq.strain_name, source_seq.length)
+            return all_sequences
+
+        return try_py_function(do)
+
+    def get_sequences_of_updated_source(self) -> Generator[GISAIDSarsCov2Sample, None, None]:
+        with open(self.data_path, mode='r') as input_file:
             for line in input_file:
-                if from_sample is not None and to_sample is not None:
-                    if lines_read < from_sample:
-                        lines_read += 1
-                        continue    # read line without action
-                    elif lines_read >= to_sample:
-                        return      # terminate loop
                 try:
-                    lines_read += 1
-                    progress.update()
                     yield GISAIDSarsCov2Sample(json.loads(line))
                 except JSONDecodeError:
                     pass
+
+    def deltas(self):
+        """
+        Returns the set of Sequence.accession_id to remove from current database, and the set of Sequence.accession_id
+        that should be imported from the source. Note that because sequences in the current data may have been updated,
+        the two sets are not necessarily disjoint. So first remove the sequences to be removed and only then
+         insert the new ones.
+         """
+        acc_id_remote = set([x.primary_accession_number() for x in self.get_sequences_of_updated_source()])  # all the sequences from remote
+        logger.info('Collecting current sequences...')
+        current_data = self.get_sequences_in_current_data()
+        acc_id_current = set(current_data.keys())
+
+        acc_id_missing_in_remote = acc_id_current - acc_id_remote
+        acc_id_missing_in_current = acc_id_remote - acc_id_current
+
+        acc_id_present_in_current_and_remote = acc_id_current & acc_id_remote
+        acc_id_changed = []
+
+        # to compare sequences present in both, have to scan the file of remote sequences
+        logger.info('Comparing current data with updated source data')
+        for new_sequence in tqdm(self.get_sequences_of_updated_source()):
+            acc_id = new_sequence.primary_accession_number()
+            try:
+                current_sequence_data = current_data[acc_id]
+                if current_sequence_data[0] != new_sequence.strain() or current_sequence_data[1] != new_sequence.length():
+                    acc_id_changed.append(acc_id)
+            except KeyError:
+                pass  # the accession id is not present in current data. it's a new sequence
+
+        # compute additional sets
+        acc_id_changed = set(acc_id_changed)
+        acc_id_unchanged = acc_id_present_in_current_and_remote - acc_id_changed
+
+        acc_id_to_remove = acc_id_missing_in_remote | acc_id_changed
+        acc_id_to_import = acc_id_missing_in_current | acc_id_changed
+
+        logger.info(f'\n'
+                    f'# Sequences from remote source: {len(acc_id_remote)}. Of which\n'
+                    f'# {len(acc_id_unchanged)} present also locally and unchanged\n'
+                    f'# {len(acc_id_missing_in_current)} never seen before.\n'
+                    f'# {len(acc_id_changed)} have different attributes in the remote source\n'
+                    f'# Sequences from local source: {len(acc_id_current)}. Of which\n'
+                    f'# {len(acc_id_missing_in_remote)} outdated and must be removed from local.\n'
+                    f'# In conclusion: {len(acc_id_to_remove)} sequences will be removed because outdated or changed in remote\n'
+                    f'# and {len(acc_id_to_import)} sequences will be imported because novel or changed in remote.')
+
+        return acc_id_to_remove, acc_id_to_import
 

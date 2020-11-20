@@ -199,7 +199,7 @@ class GISAIDSarsCov2Sample(VirusSample):
     def nucleotide_variants_and_effects(self, aligner: Callable) -> Generator[Tuple, None, None]:
         yield from ()   # empty generator
 
-    def annotations_and_amino_acid_variants(self, reference_virus_sample) -> Generator[Tuple, None, None]:
+    def annotations_and_amino_acid_variants(self, reference_virus_sample=None) -> Generator[Tuple, None, None]:
         start, stop, feature_type, gene_name, db_xref_merged, amino_acid_sequence = None, None, 'CDS', None, None, None
         try:
             mutations = self.sequence_dict['covsurver_prot_mutations']

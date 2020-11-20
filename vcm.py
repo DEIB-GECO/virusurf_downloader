@@ -483,7 +483,7 @@ def sequence_primary_accession_ids(session, virus_id: int, sources: Optional[Lis
     return [_[0] for _ in result]
 
 
-def remove_sequence_and_meta(session, primary_sequence_accession_id: Optional[str], alternative_sequence_accession_id: Optional[str]):
+def remove_sequence_and_meta(session, primary_sequence_accession_id: Optional[str]=None, alternative_sequence_accession_id: Optional[str]=None):
     # get metadata ids
     query = session.query(Sequence.sequence_id, Sequence.experiment_type_id, Sequence.sequencing_project_id,
                           Sequence.host_sample_id)
@@ -501,13 +501,15 @@ def remove_sequence_and_meta(session, primary_sequence_accession_id: Optional[st
     # delete aa variants and annotations
     annotation_ids = session.query(Annotation.annotation_id).filter(Annotation.sequence_id == sequence_id).all()
     annotation_ids = [_[0] for _ in annotation_ids]
-    session.query(AminoAcidVariant).filter(AminoAcidVariant.annotation_id.in_(annotation_ids)).delete(synchronize_session=False)
+    if annotation_ids:
+        session.query(AminoAcidVariant).filter(AminoAcidVariant.annotation_id.in_(annotation_ids)).delete(synchronize_session=False)
     session.query(Annotation).filter(Annotation.sequence_id == sequence_id).delete(synchronize_session=False)
 
     # delete impacts and nuc variants
     nuc_variant_ids = session.query(NucleotideVariant.nucleotide_variant_id).filter(NucleotideVariant.sequence_id == sequence_id).all()
     nuc_variant_ids = [_[0] for _ in nuc_variant_ids]
-    session.query(VariantImpact).filter(VariantImpact.nucleotide_variant_id.in_(nuc_variant_ids)).delete(synchronize_session=False)
+    if nuc_variant_ids:
+        session.query(VariantImpact).filter(VariantImpact.nucleotide_variant_id.in_(nuc_variant_ids)).delete(synchronize_session=False)
     session.query(NucleotideVariant).filter(NucleotideVariant.sequence_id == sequence_id).delete(synchronize_session=False)
 
     # delete sequence

@@ -10,14 +10,14 @@ from database_tom import Session
 import vcm
 from data_sources.gisaid_sars_cov_2.virus import GISAIDSarsCov2
 from multiprocessing import JoinableQueue, cpu_count, Process
+from time import sleep
+from tqdm import tqdm
 
 
 class Sequential:
 
     def __init__(self, virus_id: int):
         self.virus_id = virus_id
-        self.aligner: Optional[Callable] = None
-        self.reference_sample: Optional[VirusSample] = None
 
     def import_virus_sample(self, session: Session, sample: VirusSample):
         experiment_id = vcm.create_or_get_experiment(session, sample)
@@ -26,8 +26,8 @@ class Sequential:
         sequencing_project_id = vcm.create_or_get_sequencing_project(session, sample)
         sequence = vcm.create_and_get_sequence(session, sample, self.virus_id, experiment_id, host_sample_id,
                                                sequencing_project_id)
-        vcm.create_annotation_and_aa_variants(session, sample, sequence, self.reference_sample)
-        stats_module.completed_sample()
+        vcm.create_annotation_and_aa_variants(session, sample, sequence, None)
+        stats_module.completed_sample(sample.primary_accession_number())
 
     def tear_down(self):
         pass
@@ -128,13 +128,18 @@ class Sequential:
 #         self.shared_session.close()
 
 
+def remove_outdated_sequences(session, accession_ids):
+    for ai in accession_ids:
+        vcm.remove_sequence_and_meta(session=session, primary_sequence_accession_id=ai)
+
+
 def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
 
     def import_virus(session: Session, virus: GISAIDSarsCov2):
         return vcm.create_or_get_virus(session, virus)
 
     def try_import_virus_sample(sample: VirusSample):
-        nonlocal successful_imports, import_method
+        nonlocal successful_imports, import_method, progress
         try:
             database_tom.try_py_function(import_method.import_virus_sample, sample)
             successful_imports += 1
@@ -146,14 +151,40 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     virus_id = database_tom.try_py_function(import_virus, virus)
     database_tom.try_py_function(vcm.update_db_metadata, virus_id, 'GISAID')
 
-    # # IMPORT VIRUS SEQUENCES
-    logger.info(f'importing virus sequences and related tables')
+    # COMPUTE DELTAS
+    acc_ids_sequences_to_remove, acc_id_sequences_to_import = virus.deltas()
+    logger.warning('Check deltas.. The program will resume in 30 seconds.')
+    sleep(30)
+
+    # MIND FROM_SAMPLE/TO_SAMPLE
+    if from_sample is not None and to_sample is not None:
+        count_el_to_import = abs(to_sample - from_sample)
+        count_el_to_import = min(count_el_to_import, len(acc_id_sequences_to_import))
+        count_el_to_ignore = len(acc_id_sequences_to_import) - count_el_to_import
+        try:
+            for i in range(count_el_to_ignore):
+                acc_id_sequences_to_import.pop()
+        except KeyError:
+            pass    # if pop on empty set
+
+    stats_module.schedule_samples(stats_module.StatsBasedOnIds(acc_id_sequences_to_import, True, virus_id, ['GISAID']))
+
+    logger.info('Removing outdated sequences...')
+    # REMOVE OUTDATED SEQUENCES
+    database_tom.try_py_function(
+        remove_outdated_sequences, acc_ids_sequences_to_remove
+    )
+    # IMPORT NEW/CHANGED SEQUENCES
+    logger.info(f'Importing virus sequences and related tables...')
     import_method = Sequential(virus_id)
     successful_imports = 0
 
-    for s in virus.virus_samples(virus_id, from_sample, to_sample):
-        try_import_virus_sample(s)
+    progress = tqdm(total=len(acc_id_sequences_to_import))
+    for sequence in virus.get_sequences_of_updated_source():
+        if sequence.primary_accession_number() in acc_id_sequences_to_import:
+            try_import_virus_sample(sequence)
+            progress.update()
 
     logger.info('main process completed')
     import_method.tear_down()
-    logger.info(f'successful imports: {successful_imports} (not reliable when parallel processing)')
+    logger.info(f'successfully imported sequences: {successful_imports}')

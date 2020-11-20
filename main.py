@@ -15,16 +15,17 @@ log_file_keyword = ""
 
 #   #################################       PROGRAM ARGUMENTS   ##########################
 wrong_arguments_message = 'The module main.py always expects at least these arguments: ' \
-                          'db_name, recreate_db?, db_user, db_password, db_port, action\n' \
+                          'db_name, recreate_db?, db_user, db_password, db_port, <action>\n' \
                           'Acceptable values for action are\n:' \
-                          '\timport\n' \
-                          '\tepitopes\n' \
+                          '\timport <name of the source> <optional range of sequences (e.g. 0 100) for ncbi and coguk>\n' \
+                          '\tepitopes <name of the source>\n' \
+                          '\toverlaps <source1>_<source2> <commit to the DB ?>\n' \
+                          '\tlineages <lineages TSV file path>' \
                           '\tindexes\n' \
                           '\tviews\n' \
                           '\tchimera_sequences\n' \
-                          'When action is "import" or "epitopes", it must be followed by the name of a source to be imported\n.' \
                           '\tAcceptable source names are:\n' \
-                          '\tcog-uk\n' \
+                          '\tcoguk\n' \
                           '\tgisaid\n'
 for p in prepared_parameters.keys():
     wrong_arguments_message += f'\t{p}\n'
@@ -53,9 +54,15 @@ try:
     elif 'epitope' in action:
         _epitope_target = sys.argv[7]
         log_file_keyword = f"epi_{_epitope_target}"
+    elif 'lineage' in action:
+        _lineages_tsv_file_path = sys.argv[7]
+        log_file_keyword = f"lineages"
     elif 'fasta' in action:
         _fasta_target = sys.argv[7]
         log_file_keyword = f"fasta_{_fasta_target}"
+    elif 'overlap' in action:
+        _overlap_target = sys.argv[7]
+        log_file_keyword = f"overlaps_{_overlap_target}"
     else:
         log_file_keyword = action
 except Exception:
@@ -95,7 +102,8 @@ logger.info(f"main.py {' '.join(sys.argv[1:])}")
 
 #   ###################################     FILL DB WITH VIRUS SEQUENCES    ###############
 # init database
-database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_db_from_scratch=db_recreate)
+if 'overlaps' not in action:
+    database_tom.config_db_engine(db_name, db_user, db_password, db_port, recreate_db_from_scratch=db_recreate)
 
 #   ###################################     MAIN OPERATION       ###############
 try:
@@ -114,6 +122,9 @@ try:
             raise ValueError(f'{_epitope_target} is not recognised as an importable virus')
         virus_txid = virus_import_parameters[1]
         import_epitopes(virus_txid)
+    elif 'lineage' in action:
+        from load_lineages import load
+        load(_lineages_tsv_file_path)
     elif 'import' in action:
         if source in ['coguk', 'cog-uk']:
             from data_sources.coguk_sars_cov_2.procedure import run as run_coguk
@@ -135,6 +146,9 @@ try:
         virus_txid = virus_import_parameters[1]
         virus_folder = virus_import_parameters[2]
         generate_fasta(virus_txid, virus_folder, f'{_fasta_target}.fasta')
+    elif 'overlap' in action:
+        from overlaps import overlaps_controller
+        overlaps_controller.run(db_user, db_password, db_port)
     else:
         logger.error(f'the argument {action} is not recognised.\n' + wrong_arguments_message)
 except:
