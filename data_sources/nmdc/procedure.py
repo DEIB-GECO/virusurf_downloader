@@ -6,6 +6,7 @@ from typing import Tuple, Optional
 from Bio import Entrez
 from tqdm import tqdm
 
+import cleaning_module
 import stats_module
 from pipeline_nuc_variants__annotations__aa import sequence_aligner
 from loguru import logger
@@ -303,10 +304,10 @@ class NMDCVirusSample:
 
     def host_taxon_name(self) -> Optional[str]:
         name = self.metadata.get('host')
-        if name is not None and name.strip().lower() == 'human':
-            return 'homo sapiens'
-        else:
-            return name
+        if name is not None:
+            name = name.strip()
+            name = cleaning_module.correct_typos(name)
+        return name
 
     def host_taxon_id(self) -> Optional[int]:
         try:

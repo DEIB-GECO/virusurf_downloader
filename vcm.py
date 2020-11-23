@@ -112,11 +112,10 @@ def create_or_get_host_specie(session, sample: VirusSample) -> int:
         host_taxon_name = host_taxon_name.lower()
     host_taxon_id = sample.host_taxon_id()
 
-    host_specie_key = host_taxon_id
+    host_specie_key = host_taxon_name
     host_specie_id = cache_host_specie.get(host_specie_key)
     if not host_specie_id:
-        host_specie = session.query(HostSpecie).filter(HostSpecie.host_taxon_id == host_taxon_id,
-                                                       HostSpecie.host_taxon_name == host_taxon_name).one_or_none()
+        host_specie = session.query(HostSpecie).filter(HostSpecie.host_taxon_name == host_taxon_name).one_or_none()
         if not host_specie:
             host_specie = HostSpecie(host_taxon_id=host_taxon_id,
                                      host_taxon_name=host_taxon_name)
@@ -130,17 +129,16 @@ def create_or_get_host_specie(session, sample: VirusSample) -> int:
 def create_or_get_host_specie_alt(session, organism_name: str, organism_ncbi_id:int):
     global cache_host_specie
 
-    host_specie_id = cache_host_specie.get(organism_ncbi_id)
+    host_specie_id = cache_host_specie.get(organism_name)
     if not host_specie_id:
-        host_specie = session.query(HostSpecie).filter(HostSpecie.host_taxon_id == organism_ncbi_id,
-                                                       HostSpecie.host_taxon_name == organism_name).one_or_none()
+        host_specie = session.query(HostSpecie).filter(HostSpecie.host_taxon_name == organism_name).one_or_none()
         if not host_specie:
             host_specie = HostSpecie(host_taxon_id=organism_ncbi_id,
                                      host_taxon_name=organism_name)
             session.add(host_specie)
             session.flush()
         host_specie_id = host_specie.host_id
-        cache_host_specie[organism_ncbi_id] = host_specie_id
+        cache_host_specie[organism_name] = host_specie_id
     return host_specie_id
 
 

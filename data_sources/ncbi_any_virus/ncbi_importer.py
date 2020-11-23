@@ -910,10 +910,6 @@ def import_samples_into_vcm(
     id_all_current_sequences = set(_alt_ids_of_selected_sequences(samples_query, log_with_name))
     _, id_outdated_sequences, id_new_sequences = _deltas(virus_id, id_all_current_sequences)
 
-    # remove outdated sequences
-    for alt_seq_acc_id in id_outdated_sequences:
-        database_tom.try_py_function(vcm.remove_sequence_and_meta, None, str(alt_seq_acc_id))
-
     # select range
     id_new_sequences = sorted(list(id_new_sequences))
     if from_sample is not None and to_sample is not None:
@@ -921,6 +917,10 @@ def import_samples_into_vcm(
 
     stats_module.schedule_samples(
         stats_module.StatsBasedOnIds([str(x) for x in id_new_sequences], False, virus_id, ['GenBank', 'RefSeq']))
+
+    # remove outdated sequences
+    for alt_seq_acc_id in id_outdated_sequences:
+        database_tom.try_py_function(vcm.remove_sequence_and_meta, None, str(alt_seq_acc_id))
 
     # prepare multiprocessing
     database_tom.dispose_db_engine()
@@ -937,6 +937,7 @@ def import_samples_into_vcm(
                 # carries out main_pipeline_3 with many processes
                 the_boss.assign_job(ImportAnnotationsAndNucVariants(sequence_id, sample))
                 logger.debug(f'new job queued. waiting jobs: {the_boss.number_of_waiting_jobs()}')
+                # ... or do it one by one
                 # database_tom.try_py_function(
                 #     main_pipeline_part_3, sample, sequence_id
                 # )
