@@ -848,11 +848,11 @@ def import_samples_into_vcm(
             logger.trace(f'organism txid {bind_to_organism_taxon_id} already in VIRUS table.')
             refseq_row: database_tom.Sequence = vcm.get_reference_sequence_of_virus(session, _virus_id)
             if refseq_row:
-                return _virus_id, refseq_row.nucleotide_sequence
+                return _virus_id, refseq_row.nucleotide_sequence, refseq_row.accession_id, True
             else:
                 logger.trace('caching the nucleotide sequence of the reference')
                 downloaded_ref_sample = _reference_sample_from_organism(samples_query, log_with_name, SampleWrapperClass)
-                return _virus_id, downloaded_ref_sample.nucleotide_sequence()
+                return _virus_id, downloaded_ref_sample.nucleotide_sequence(), downloaded_ref_sample.primary_accession_number(), False
 
         return database_tom.try_py_function(
             get_virus_id_and_nuc_reference_sequence
@@ -896,10 +896,19 @@ def import_samples_into_vcm(
     if log_with_name == 'New NCBI SARS-Cov-1':
         previous_samples_query = samples_query
         samples_query = 'txid694009[Organism] NOT txid2697049[Organism]'
-        virus_id, nucleotide_reference_sequence = main_pipeline_part_1()
+        virus_id, nucleotide_reference_sequence, ref_accession_id, already_imported = main_pipeline_part_1()
+        if not already_imported:
+            ref_sample = _reference_sample_from_organism(samples_query, log_with_name, SampleWrapperClass)
+            sequence_id = database_tom.try_py_function(
+                main_pipeline_part_2, ref_sample
+            )
+            database_tom.try_py_function(
+                main_pipeline_part_3, ref_sample, sequence_id
+            )
         samples_query = previous_samples_query
     else:
-        virus_id, nucleotide_reference_sequence = main_pipeline_part_1()  # id of the virus in the VCM.Virus table, to which imported sequences will be bound
+        # id of the virus in the VCM.Virus table, to which imported sequences will be bound
+        virus_id, nucleotide_reference_sequence, ref_acc_id, already_imported = main_pipeline_part_1()
 
     logger.info(f'importing the samples identified by the query provided as bound to organism txid{bind_to_organism_taxon_id}')
 
