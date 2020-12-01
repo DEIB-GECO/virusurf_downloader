@@ -6,7 +6,7 @@ import lxml
 from loguru import logger
 from lxml import etree
 from typing import Optional, Tuple, List, Collection
-from data_sources.common_methods_host_sample import download_or_get_ncbi_host_sample_as_xml
+from data_sources.ncbi_services import download_or_get_ncbi_host_sample_as_xml
 from locations import FileType, get_local_folder_for
 from geo_groups import geo_groups
 

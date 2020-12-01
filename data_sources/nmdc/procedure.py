@@ -19,8 +19,7 @@ from locations import get_local_folder_for, FileType
 import wget
 import os
 from os.path import sep
-from data_sources.common_methods_host_sample import host_taxon_id_from_ncbi_taxon_name
-from data_sources.common_methods_virus import download_ncbi_taxonomy_as_xml_from_name
+from data_sources.ncbi_services import host_taxon_id_from_ncbi_taxon_name, download_ncbi_taxonomy_as_xml_from_name
 from vcm import vcm
 import database_tom
 import dateutil.parser as dateparser

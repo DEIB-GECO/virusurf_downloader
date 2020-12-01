@@ -4,7 +4,7 @@ from loguru import logger
 import database_tom
 from vcm import vcm as vcm
 from VirusGenoUtil.code.integrate_iedb_epitopes import epitopes_for_virus_taxon
-from data_sources.common_methods_host_sample import host_taxon_name_from_ncbi_taxon_id
+from data_sources.ncbi_services import host_taxon_name_from_ncbi_taxon_id
 
 
 epitope_id_mappings = dict()

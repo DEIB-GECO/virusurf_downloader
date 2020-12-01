@@ -10,8 +10,8 @@ from queuable_tasks import Task, TaskManager, Worker
 from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional, Tuple, Iterator
-from data_sources.common_methods_virus import _try_n_times, download_ncbi_taxonomy_as_xml, download_or_get_ncbi_sample_as_xml
-from data_sources.common_methods_host_sample import host_taxon_id_from_ncbi_taxon_name, host_taxon_name_from_ncbi_taxon_id
+from data_sources.ncbi_services import host_taxon_id_from_ncbi_taxon_name, host_taxon_name_from_ncbi_taxon_id, \
+    _try_n_times, download_ncbi_taxonomy_as_xml, download_or_get_ncbi_sample_as_xml
 import dateutil.parser as dateparser
 import lxml
 from tqdm import tqdm

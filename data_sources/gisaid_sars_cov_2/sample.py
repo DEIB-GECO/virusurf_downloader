@@ -8,7 +8,7 @@ from dateutil.parser import parse
 from loguru import logger
 
 import cleaning_module
-from data_sources.common_methods_host_sample import host_taxon_id_from_ncbi_taxon_name
+from data_sources.ncbi_services import host_taxon_id_from_ncbi_taxon_name
 from data_sources.virus_sample import VirusSample
 
 gene_protein_name_replacements = {

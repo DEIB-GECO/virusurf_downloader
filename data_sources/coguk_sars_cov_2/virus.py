@@ -1,7 +1,7 @@
 import os
 from collections import OrderedDict
 from data_sources.ncbi_any_virus.ncbi_importer import AnyNCBIVNucSample
-from data_sources.common_methods_virus import download_ncbi_taxonomy_as_xml
+from data_sources.ncbi_services import download_ncbi_taxonomy_as_xml
 from lxml import etree
 import wget as wget
 from Bio import Entrez
