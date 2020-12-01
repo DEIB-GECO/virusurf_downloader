@@ -1,17 +1,17 @@
 import os
 from collections import OrderedDict
 from data_sources.ncbi_any_virus.ncbi_importer import AnyNCBIVNucSample
-
+from data_sources.common_methods_virus import download_ncbi_taxonomy_as_xml
 from lxml import etree
 import wget as wget
 from Bio import Entrez
 from tqdm import tqdm
-from typing import Generator, Callable, Optional
+from typing import Generator, Optional
 from loguru import logger
 from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
 from locations import get_local_folder_for, FileType
 import database_tom
-from vcm import sequence_primary_accession_ids, remove_sequence_and_meta
+from vcm.vcm import sequence_primary_accession_ids
 import stats_module
 from xml_helper import text_at_node
 
@@ -24,9 +24,11 @@ class COGUKSarsCov2:
 
     def __init__(self):
         logger.info(f'importing virus {self.name} using NCBI SC2 for taxonomy data')
-        self.tax_tree = download_virus_taxonomy_as_xml(
+
+        taxonomy_file_path = download_ncbi_taxonomy_as_xml(
             get_local_folder_for(source_name=self.name, _type=FileType.TaxonomyData),
             self.taxon_id())
+        self.tax_tree = etree.parse(taxonomy_file_path, parser=etree.XMLParser(remove_blank_text=True))
         download_dir = get_local_folder_for(source_name=self.name, _type=FileType.SequenceOrSampleData)
         self.sequence_file_path, self.metadata_file_path = download_or_get_sample_data(download_dir)
 
@@ -221,14 +223,3 @@ def download_or_get_virus_sample_as_xml(containing_directory: str, sample_access
         with open(local_file_path, 'w') as f:
             f.write(handle.read())
     return local_file_path
-
-
-def download_virus_taxonomy_as_xml(containing_directory: str, taxon_id) -> etree.ElementTree:
-    # write taxonomy tree
-    local_file_path = f"{containing_directory}{os.path.sep}{taxon_id}.xml"
-    if not os.path.exists(local_file_path):
-        with Entrez.efetch(db="taxonomy", id=taxon_id, rettype=None, retmode="xml") as handle:
-            with open(local_file_path, 'w') as f:
-                f.write(handle.read())
-    tax_tree = etree.parse(local_file_path, parser=etree.XMLParser(remove_blank_text=True))
-    return tax_tree

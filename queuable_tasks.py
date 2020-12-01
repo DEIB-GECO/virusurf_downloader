@@ -3,9 +3,10 @@ import os
 from queue import Empty
 from typing import List, Optional
 from loguru import logger
+from time import sleep
 
 
-class Job:
+class Task:
 
     def execute(self):
         """
@@ -22,9 +23,9 @@ class Worker(Process):
         self.jobs = jobs
         logger.info('worker started')
 
-    def get_a_job(self) -> Optional[Job]:
+    def pick_up_task(self) -> Optional[Task]:
         """
-        :return: a Job instance. None objects are reserved for use by the Boss.
+        :return: a Task instance. None objects are reserved for use by the TaskManager.
         """
         return self.jobs.get(block=True, timeout=None)
 
@@ -39,12 +40,15 @@ class Worker(Process):
         """
         while True:
             try:
-                job = self.get_a_job()
+                job = self.pick_up_task()
             except KeyboardInterrupt:
-                continue   # Ctrl+C arrived while waiting to receive a job
+                # Ctrl+C arrived while waiting to receive a job -> leave the user of consumer-producer model
+                # to handle KeyboardInterrupt (hint: user can call TaskManager.discard_waiting_tasks())
+                continue
             else:
                 if job is None:
                     self.jobs.task_done()
+                    # print(f"job is None. Left jobs: {self.jobs.qsize()}")
                     self.release_resources()
                     break
                 else:
@@ -54,7 +58,7 @@ class Worker(Process):
                     except KeyboardInterrupt:
                         self.jobs.task_done()
                         logger.info('KeyboardInterrupt caused a worker to interrupt a job before completing it. '
-                                    'You may want to handle this exception inside the Job definition instead.')
+                                    'You may want to handle this exception inside the Task definition instead.')
                     except Exception:
                         logger.exception('An exception reached the Worker loop. Worker is being disposed.')
                         self.jobs.task_done()
@@ -66,7 +70,7 @@ class Worker(Process):
         self.jobs = None
 
 
-class Boss:
+class TaskManager:
     # noinspection PyPep8Naming
     def __init__(self, jobs_queue_capacity: int, workers_num: int, WorkerClass: Worker.__class__ = Worker):
         # empty job queue
@@ -82,17 +86,30 @@ class Boss:
         for worker in self._workers:
             worker.start()
 
-    def assign_job(self, job: Job):
+    def assign_task(self, job: Task):
         self._queue.put(job)
 
     def stop_workers(self):
         logger.info('waiting all workers to finish')
+        # usual termination condition is to put None on the queue. Queues are FIFO but from Python 3.8 docs:
+        # https://docs.python.org/3.8/library/multiprocessing.html#pipes-and-queues
+        # "If multiple processes are enqueuing objects, it is possible for the objects to be received at the other
+        # end out-of-order. However, objects enqueued by the same process will always be in the expected order
+        # with respect to each other.". So, when there's a single producer, that's not an issue; when there are many
+        # producers it may happen that even if Nones are enqueued at the end of the queue, consumers pick 'em
+        # before other items in the queue (breaking the FIFO assumption). In this case the workers would leave
+        # before the queue is empty. To avid this, before sending Nones, it's better to wait for the queue to be
+        # consumed.
+
+        while not self._queue.empty():  # not bullet-proof as empty() and qsize() return approx. values, but it helps
+            print(f"jobs waiting to be completed: {self._queue.qsize()}")
+            sleep(1)
         for _ in self._workers:
             self._queue.put(None, block=True, timeout=None)
         self._queue.join()
         logger.info('all processes_finished')
 
-    def discard_left_jobs(self):
+    def discard_waiting_tasks(self):
         while not self._queue.empty():
             try:
                 self._queue.get(False)
@@ -100,7 +117,7 @@ class Boss:
                 continue
             self._queue.task_done()
 
-    def number_of_waiting_jobs(self):
+    def number_of_waiting_tasks(self):
         return self._queue.qsize()
 
 

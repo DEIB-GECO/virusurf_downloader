@@ -2,17 +2,17 @@ import os
 import pickle
 from os.path import sep
 from loguru import logger
-from typing import Callable, Optional, List, Union
-from queuable_jobs import max_number_of_workers
+from typing import Optional, List
+from queuable_tasks import max_number_of_workers
 import database_tom
-import vcm as vcm
+from vcm import vcm as vcm
 from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
 from data_sources.coguk_sars_cov_2.virus import COGUKSarsCov2
 from multiprocessing import JoinableQueue, cpu_count, Process
 from sqlalchemy.orm.session import Session
 from Bio import Entrez
 
-from locations import get_local_folder_for, FileType
+from locations import get_local_folder_for, FileType, remove_file
 from pipeline_nuc_variants__annotations__aa import sequence_aligner
 import stats_module
 Entrez.email = "Your.Name.Here@example.org"
@@ -47,9 +47,11 @@ def main_pipeline_part_3(session: database_tom.Session, sample, db_sequence_id):
         for nuc in nuc_variants:
             vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
         stats_module.completed_sample(sample.primary_accession_number())
-    except Exception:
-        logger.exception(f'exception occurred while working on annotations and nuc_variants of virus sample {sample.primary_accession_number()}. Rollback transaction.')
-        raise database_tom.Rollback()
+    except Exception as e:
+        logger.exception(f'exception occurred during pipeline_part_3 of sample {sample.primary_accession_number()}. '
+                         f'Doing rollback of insertion of variants and annotations + deletion of cache')
+        remove_file(file_path)
+        raise e
 
 
 class Sequential:
@@ -102,7 +104,7 @@ class Parallel:
         # schedule nucleotide variants to be called asynchronously
         sample.on_before_multiprocessing()
         self._queue.put([sample, sequence.sequence_id])
-        logger.debug(f'nuc_var for sequence {sample.primary_accession_number()} scheduled\tQueue size: {self._queue.qsize()}')
+        # logger.debug(f'nuc_var for sequence {sample.primary_accession_number()} scheduled\tQueue size: {self._queue.qsize()}')
 
     class Consumer(Process):
         def __init__(self, jobs: JoinableQueue, refseq: str, shared_session: Session):
@@ -125,12 +127,7 @@ class Parallel:
                         try:
                             main_pipeline_part_3(self.shared_session, sample, sequence_id)
                             self.shared_session.commit()
-                            logger.info(f'pipeline_part_3 of sequence with id {sequence_id} imported')
-                        except database_tom.Rollback:
-                            database_tom.rollback(self.shared_session)
                         except:
-                            logger.exception(
-                                f'unknown exception while running pipeline_part_3 of sequence with id {sequence_id}')
                             database_tom.rollback(self.shared_session)
                         finally:
                             self.jobs.task_done()
@@ -200,9 +197,9 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
             continue
         # if total_s > 0:
         #     total_s -= 1
-        try_import_virus_sample(s)
         # else:
         #     break
+        try_import_virus_sample(s)
 
     logger.info('main process completed')
     import_method.tear_down()

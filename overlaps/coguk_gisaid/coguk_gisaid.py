@@ -1,9 +1,9 @@
-from typing import Optional, List
-from overlaps.multi_database_manager import config_db_engine, Session, Sequence, SequencingProject, get_session, rollback, Virus, \
+from typing import Optional
+from overlaps.multi_database_manager import config_db_engine, Sequence, SequencingProject, get_session, rollback, \
     source_sequences, target_sequences, HostSample, user_asked_to_commit
 from loguru import logger
 from tqdm import tqdm
-from vcm import create_or_get_host_sample, create_or_get_sequencing_project
+from vcm.vcm import create_or_get_host_sample, create_or_get_sequencing_project
 from time import sleep
 from os.path import sep
 

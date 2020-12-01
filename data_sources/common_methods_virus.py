@@ -55,8 +55,12 @@ def download_ncbi_taxonomy_as_xml(containing_directory: str, taxon_id: int) -> s
         destination_file_path = f"{containing_directory}{os.path.sep}{taxon_id}.xml"
         if not os.path.exists(destination_file_path):
             with Entrez.efetch(db="taxonomy", id=taxon_id, rettype=None, retmode="xml") as handle:
-                with open(destination_file_path, 'w') as f:
-                    f.write(handle.read())
+                try:
+                    with open(destination_file_path, 'w') as f:
+                        f.write(handle.read())
+                except TypeError:
+                    with open(destination_file_path, 'wb') as f:
+                        f.write(handle.read())
         return destination_file_path
     return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
 

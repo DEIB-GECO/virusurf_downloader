@@ -1,11 +1,11 @@
 import sys
 from datetime import datetime
 from queue import Empty
-from typing import Collection, List, Optional, Set
+from typing import Collection, List, Optional
 from multiprocessing import Queue, Value
 from loguru import logger
 import database_tom
-import vcm
+from vcm import vcm
 from abc import ABC
 from collections import Counter
 

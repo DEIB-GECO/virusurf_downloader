@@ -138,3 +138,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# VirusGenoUtil
+epitopes.csv
+epitopes_fragments.csv

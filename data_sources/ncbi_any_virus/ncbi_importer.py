@@ -6,17 +6,17 @@ import re
 import os
 import urllib
 import stats_module
-from queuable_jobs import Job, Boss, Worker
+from queuable_tasks import Task, TaskManager, Worker
 from datetime import datetime
 from decimal import Decimal
-from typing import Callable, List, Optional, Tuple, Iterator
+from typing import List, Optional, Tuple, Iterator
 from data_sources.common_methods_virus import _try_n_times, download_ncbi_taxonomy_as_xml, download_or_get_ncbi_sample_as_xml
 from data_sources.common_methods_host_sample import host_taxon_id_from_ncbi_taxon_name, host_taxon_name_from_ncbi_taxon_id
 import dateutil.parser as dateparser
 import lxml
 from tqdm import tqdm
 import database_tom
-import vcm as vcm
+from vcm import vcm as vcm
 from geo_groups import geo_groups
 from xml_helper import text_at_node
 from loguru import logger
@@ -748,7 +748,7 @@ def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSampl
         raise database_tom.Rollback()
 
 
-class ImportAnnotationsAndNucVariants(Job):
+class ImportAnnotationsAndNucVariants(Task):
     def __init__(self, sequence_id, sample: AnyNCBIVNucSample):
         super(ImportAnnotationsAndNucVariants, self).__init__()
         self.sequence_id = sequence_id
@@ -771,16 +771,16 @@ class ImportAnnotationsAndNucVariants(Job):
 
 
 class TheWorker(Worker):
-    def __init__(self, jobs):
-        super(TheWorker, self).__init__(jobs)
+    def __init__(self, tasks):
+        super(TheWorker, self).__init__(tasks)
         self.worker_session = database_tom.get_session()
 
-    def get_a_job(self) -> Optional[Job]:
+    def pick_up_task(self) -> Optional[Task]:
         # noinspection PyTypeChecker
-        job: ImportAnnotationsAndNucVariants = super().get_a_job()
-        if job:
-            job.use_session(self.worker_session)
-        return job
+        task: ImportAnnotationsAndNucVariants = super().pick_up_task()
+        if task:
+            task.use_session(self.worker_session)
+        return task
 
     def release_resources(self):
         super().release_resources()
@@ -805,7 +805,7 @@ def import_samples_into_vcm(
     virus_sequence_chromosome_name = virus_chromosome_name
     snpeff_db_name = _snpeff_db_name
     log_with_name = _log_with_name
-    the_boss = Boss(70, 70, TheWorker)
+    task_manager = TaskManager(70, 70, TheWorker)
 
     def check_user_query():
         """
@@ -933,7 +933,7 @@ def import_samples_into_vcm(
 
     # prepare multiprocessing
     database_tom.dispose_db_engine()
-    the_boss.wake_up_workers()
+    task_manager.wake_up_workers()
     database_tom.re_config_db_engine(False)
 
     logger.info('begin importing new sequences')
@@ -944,8 +944,8 @@ def import_samples_into_vcm(
             )
             if sequence_id:
                 # carries out main_pipeline_3 with many processes
-                the_boss.assign_job(ImportAnnotationsAndNucVariants(sequence_id, sample))
-                logger.debug(f'new job queued. waiting jobs: {the_boss.number_of_waiting_jobs()}')
+                task_manager.assign_task(ImportAnnotationsAndNucVariants(sequence_id, sample))
+                # logger.debug(f'new job queued. waiting jobs: {task_manager.number_of_waiting_tasks()}')
                 # ... or do it one by one
                 # database_tom.try_py_function(
                 #     main_pipeline_part_3, sample, sequence_id
@@ -953,13 +953,13 @@ def import_samples_into_vcm(
     except KeyboardInterrupt:
         # When using multiprocessing, each process receives KeyboardInterrupt. Child process should take care of clean up.
         # Child process should not raise themselves KeyboardInterrupt
-        the_boss.discard_left_jobs()
+        task_manager.discard_waiting_tasks()
         logger.info('Execution aborted by the user. Cancelling waiting tasks...')
     except Exception as e:
         logger.error("AN EXCEPTION CAUSED THE LOOP TO TERMINATE. Workers will be terminated.")
         raise e
     finally:
-        the_boss.stop_workers()
+        task_manager.stop_workers()
 
 
 

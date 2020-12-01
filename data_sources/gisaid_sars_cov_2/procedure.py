@@ -1,5 +1,4 @@
-import os
-from typing import Optional, Callable, List
+from typing import Optional
 
 from loguru import logger
 
@@ -7,9 +6,8 @@ import database_tom
 import stats_module
 from data_sources.virus_sample import VirusSample
 from database_tom import Session
-import vcm
+from vcm import vcm
 from data_sources.gisaid_sars_cov_2.virus import GISAIDSarsCov2
-from multiprocessing import JoinableQueue, cpu_count, Process
 from time import sleep
 from tqdm import tqdm
 

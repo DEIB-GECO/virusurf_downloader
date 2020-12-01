@@ -13,8 +13,7 @@ from dateutil.parser import parse
 from tqdm import tqdm
 
 import database_tom
-import vcm
-import xml_helper
+from vcm import vcm
 from geo_groups import geo_groups
 from xml_helper import text_at_node
 

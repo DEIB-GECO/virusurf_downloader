@@ -425,7 +425,10 @@ def filter_nuc_variants(nuc_variants) -> List[Tuple]:
         variant_length = int(n['variant_length'])
         variant_type = n['variant_type']
         impacts = n['annotations']
-        impacts_set = set(tuple(values) for values in impacts)
+        impacts_set = set(tuple(values) for values in impacts if not values[0].startswith('GU280'))
+        # for imp in impacts_set:
+        #     if imp[0].startswith('GU280'):
+        #         logger.warning(f"found wrong impact: {imp[0]},{imp[1]},{imp[2]}")
         if variant_type == 'DEL' and variant_length > 1:
             for i in range(variant_length):
                 new_nuc_variants.append({
