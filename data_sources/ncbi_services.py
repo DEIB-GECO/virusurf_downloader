@@ -1,5 +1,5 @@
 from os.path import sep, exists, abspath
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 from Bio import Entrez
 from loguru import logger
 from lxml import etree
@@ -7,6 +7,8 @@ from xml_helper import text_at_node
 from time import sleep
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Callable
+from tqdm import tqdm
+Entrez.email = "example@mail.com"   # just to silence the warning. Then a correct email can be set later
 
 cached_taxon_id = dict()
 cached_taxon_name = dict()
@@ -17,33 +19,38 @@ DOWNLOAD_FAILED_PAUSE_SECONDS = 30
 
 
 def read_config_params():
+    """
+    :return: a tuple containing <tool name>, <email>, <api key>
+    """
     global _config_params
     if not _config_params:
         config_file_path = f".{sep}e-utils_api_config.csv"
         values = (None, 'example@email.com', None)  # defaults
+        configuration_found = False
         with open(config_file_path, mode='r') as config_file:
             line = config_file.readline()
-            while line is not None:
+            while line:
                 line = line.strip()
-                if line.startswith('#') or line == "":
-                    line = config_file.readline()
-                else:
+                if not (line.startswith('#') and line != ""):
                     values = line.split(',')
                     assert len(values) == 3, 'E-Utils configuration file contains errors.\n' \
                                              'Expected file contents: tool_name,email,api_key'
+                    configuration_found = True
                     break
-            else:
-                logger.warning(f"E-Utils configuration file is missing at path {abspath(config_file_path)}.\n"
-                               f"Expected file contents: tool_name,email,api_key\n"
-                               f"Press Ctrl+C to correct now or wait 10 seconds for using default parameters (rate-limited):\n"
-                               f"{values}")
-                try:
-                    sleep(10)
-                except KeyboardInterrupt:
-                    exit(0)
+                line = config_file.readline()
+        if not configuration_found:
+            logger.warning(f"E-Utils configuration file is missing at path {abspath(config_file_path)}.\n"
+                           f"Expected file contents: tool_name,email,api_key\n"
+                           f"Press Ctrl+C to correct now or wait 10 seconds for using default parameters (rate-limited):\n"
+                           f"{values}")
+            try:
+                sleep(10)
+            except KeyboardInterrupt:
+                exit(0)
+        Entrez.email = values[1]
         _config_params = values
-    return _config_params
 
+    return _config_params
 
 
 def _try_n_times(n_times: int, or_wait_secs: int, function: Callable, *args, **kwargs):
@@ -256,4 +263,41 @@ def download_or_get_ncbi_sample_as_xml(containing_directory: str, sample_accessi
                             logger.error(f'Content of EntrezAPI is probably empty.')
                         raise e
         return local_file_path
+    return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
+
+
+def get_samples_accession_ids(samples_query: str) -> List[int]:
+    logger.info(f'getting accession ids of samples...')
+
+    def do():
+        entrez_config = read_config_params()
+        # DO PAGINATION
+        # total number of sequences
+        with Entrez.esearch(db="nuccore", term=f"{samples_query}", rettype='count', tool=entrez_config[0],
+                            email=entrez_config[1], api_key=entrez_config[2]) as handle:
+            response = Entrez.read(handle)
+            total_records = int(response['Count'])
+        # get pages
+        accessions_ids = list()
+        # noinspection PyPep8Naming
+        RECORDS_PER_PAGE = 5000
+        page_number = 0
+        import time
+        with tqdm(total=total_records) as progress_bar:
+            while total_records > page_number * RECORDS_PER_PAGE:
+                with Entrez.esearch(db="nuccore",
+                                    term=f"{samples_query}",
+                                    retmax=RECORDS_PER_PAGE, retstart=page_number * RECORDS_PER_PAGE) as handle:
+                    response = Entrez.read(handle)
+                for x in response['IdList']:
+                    accessions_ids.append(int(x))
+                page_number += 1
+                time.sleep(2)
+                progress_bar.update(
+                    RECORDS_PER_PAGE if page_number * RECORDS_PER_PAGE < total_records else total_records - (
+                                (page_number - 1) * RECORDS_PER_PAGE))
+        if len(accessions_ids) != total_records:
+            raise IOError('Some of the accession ids were not correctly downloaded')
+        return accessions_ids
+
     return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)

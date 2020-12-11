@@ -4,7 +4,7 @@ Created by tomalf2 on ott, 2020.
 from typing import Generator, Tuple
 from sqlalchemy import func
 from tqdm import tqdm
-import database_tom
+from db_config import database_tom
 from locations import get_local_folder_for, FileType
 from epitopes import virus_database_id
 
@@ -21,7 +21,7 @@ def generate_fasta(virus_taxon_id: int, virus_folder_name:str, generated_file_na
                 database_tom.Sequence.accession_id,
                 database_tom.Sequence.nucleotide_sequence) \
             .filter(
-                database_tom.Sequence.virus_id == virus_db_id
+            database_tom.Sequence.virus_id == virus_db_id
             ) \
             .all()
         for pair in query_result:
@@ -31,7 +31,7 @@ def generate_fasta(virus_taxon_id: int, virus_folder_name:str, generated_file_na
         return session.query(
                 func.count(database_tom.Sequence.accession_id)) \
             .filter(
-                database_tom.Sequence.virus_id == virus_db_id
+            database_tom.Sequence.virus_id == virus_db_id
             ) \
             .first()[0]
 

@@ -5,8 +5,7 @@ from decimal import Decimal
 from typing import Tuple, Optional
 from Bio import Entrez
 from tqdm import tqdm
-
-import cleaning_module
+import data_cleaning_module
 import stats_module
 from pipeline_nuc_variants__annotations__aa import sequence_aligner
 from loguru import logger
@@ -21,9 +20,11 @@ import os
 from os.path import sep
 from data_sources.ncbi_services import host_taxon_id_from_ncbi_taxon_name, download_ncbi_taxonomy_as_xml_from_name
 from vcm import vcm
-import database_tom
 import dateutil.parser as dateparser
 from geo_groups import geo_groups
+from db_config import read_db_import_configuration as import_config, database_tom
+
+Entrez.email = "example@mail.com"   # just to silence the warning. Then a correct email can be set later
 
 
 cached_taxonomy = {}
@@ -305,7 +306,7 @@ class NMDCVirusSample:
         name = self.metadata.get('host')
         if name is not None:
             name = name.strip()
-            name = cleaning_module.correct_typos(name)
+            name = data_cleaning_module.correct_typos(name)
         return name
 
     def host_taxon_id(self) -> Optional[int]:
@@ -436,6 +437,8 @@ imported_viruses = set()
 def import_samples_into_vcm():
     global fasta_list, refseq_sc1, refseq_sc2, refseq_sc1_len, refseq_sc2_len, cached_taxonomy, fasta_folder, \
         taxonomy_folder, imported_viruses
+    db_params: dict = import_config.get_database_config_params()
+    database_tom.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
     fasta_folder = get_local_folder_for('NMDC', FileType.SequenceOrSampleData)
     taxonomy_folder = get_local_folder_for('NMDC', FileType.TaxonomyData)
     fasta_list = get_fasta_list()

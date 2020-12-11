@@ -34,6 +34,7 @@ AS SELECT nucleotide_variant.*
   WHERE nucleotide_variant.variant_length <= 20;
 
 
+DROP MATERIALIZED VIEW IF EXISTS public.nucleotide_variant_annotation;
 CREATE MATERIALIZED VIEW public.nucleotide_variant_annotation
 TABLESPACE default_ts
 AS SELECT nucleotide_variant.nucleotide_variant_id,
@@ -47,6 +48,7 @@ AS SELECT nucleotide_variant.nucleotide_variant_id,
 WITH DATA;
 
 
+DROP MATERIALIZED VIEW IF EXISTS nucleotide_variant_annotated;
 CREATE MATERIALIZED VIEW nucleotide_variant_annotated
 WITH (FILLFACTOR = 100)
 AS

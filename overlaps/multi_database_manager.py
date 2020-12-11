@@ -3,11 +3,11 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 from sqlalchemy.engine import Engine
 from loguru import logger
-from typing import Tuple, Optional, List
+from typing import Optional, List
 from sqlalchemy import or_, func
 from sqlalchemy import create_engine
-from database_tom import Rollback, RollbackAndRaise, CommitAndRaise, rollback, \
-    Sequence, SequencingProject, Virus, HostSample, HostSpecie, ExperimentType
+from db_config.database_tom import Rollback, RollbackAndRaise, CommitAndRaise, rollback, \
+    Sequence, SequencingProject, Virus
 
 _db_engine: Engine
 _base = declarative_base()

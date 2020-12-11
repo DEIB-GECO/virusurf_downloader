@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
+from db_config.database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
     VariantImpact, AminoAcidVariant, Epitope, EpitopeFragment, HostSpecie, DBMeta
 from locations import *
 from data_sources.virus_sample import VirusSample

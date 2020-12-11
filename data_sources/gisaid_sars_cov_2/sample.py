@@ -1,13 +1,8 @@
 import re
 from datetime import datetime
-
 from typing import Tuple, Callable, Generator, Optional
-
-from Bio import Entrez
 from dateutil.parser import parse
-from loguru import logger
-
-import cleaning_module
+import data_cleaning_module
 from data_sources.ncbi_services import host_taxon_id_from_ncbi_taxon_name
 from data_sources.virus_sample import VirusSample
 
@@ -178,7 +173,7 @@ class GISAIDSarsCov2Sample(VirusSample):
         taxon_name = self.sequence_dict.get('covv_host')
         if taxon_name is not None:
             taxon_name = taxon_name.strip()
-            taxon_name = cleaning_module.correct_typos(taxon_name)
+            taxon_name = data_cleaning_module.correct_typos(taxon_name)
         return taxon_name
 
     def host_taxon_id(self) -> Optional[int]:

@@ -1,0 +1,5 @@
+# Ignore JSON files
+*.json
+
+# Except the schema ones
+!*.schema.json

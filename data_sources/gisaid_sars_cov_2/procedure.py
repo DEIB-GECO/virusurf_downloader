@@ -1,15 +1,13 @@
 from typing import Optional
-
 from loguru import logger
-
-import database_tom
 import stats_module
 from data_sources.virus_sample import VirusSample
-from database_tom import Session
+from db_config.database_tom import Session
 from vcm import vcm
 from data_sources.gisaid_sars_cov_2.virus import GISAIDSarsCov2
 from time import sleep
 from tqdm import tqdm
+from db_config import read_db_import_configuration as import_config, database_tom
 
 
 class Sequential:
@@ -132,6 +130,8 @@ def remove_outdated_sequences(session, accession_ids):
 
 
 def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
+    db_params: dict = import_config.get_database_config_params()
+    database_tom.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
 
     def import_virus(session: Session, virus: GISAIDSarsCov2):
         return vcm.create_or_get_virus(session, virus)

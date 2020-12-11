@@ -27,3 +27,6 @@ ALTER TABLE variant_impact ADD CONSTRAINT variant_impact_nucleotide_variant_id_f
 
 --AMINO ACID VARIANT
 ALTER TABLE aminoacid_variant ADD CONSTRAINT aminoacid_variant_annotation_id_fkey FOREIGN KEY (annotation_id) REFERENCES annotation(annotation_id);
+
+-- DB META
+ALTER TABLE db_meta ADD CONSTRAINT db_meta_pkey PRIMARY KEY (virus_id, source);

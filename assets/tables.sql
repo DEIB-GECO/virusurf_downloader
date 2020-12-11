@@ -4,9 +4,10 @@
 
 -- DROP TABLE db_meta;
 
-CREATE TABLE db_meta (
-	virus_id serial primary key ,
-	date_of_import varchar NULL
+CREATE TABLE public.db_meta (
+	virus_id int4 NOT NULL,
+	"source" varchar NOT NULL,
+	date_of_import date NULL
 );
 
 

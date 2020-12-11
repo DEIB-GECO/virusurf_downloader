@@ -4,7 +4,7 @@ from queue import Empty
 from typing import Collection, List, Optional
 from multiprocessing import Queue, Value
 from loguru import logger
-import database_tom
+from db_config import database_tom
 from vcm import vcm
 from abc import ABC
 from collections import Counter

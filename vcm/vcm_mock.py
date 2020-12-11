@@ -4,8 +4,8 @@ import sqlalchemy
 from sqlalchemy import cast
 
 from data_sources.virus_sample import VirusSample
-from database_tom import AminoAcidVariant, ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, \
-    NucleotideVariant, VariantImpact, Epitope, HostSpecie, EpitopeFragment
+from db_config.database_tom import AminoAcidVariant, ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, \
+    Epitope, HostSpecie, EpitopeFragment
 from xml_helper import *
 import string
 import random

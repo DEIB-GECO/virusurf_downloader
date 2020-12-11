@@ -1,16 +1,21 @@
 from typing import Optional
 
 from loguru import logger
-import database_tom
 from vcm import vcm as vcm
 from VirusGenoUtil.code.integrate_iedb_epitopes import epitopes_for_virus_taxon
 from data_sources.ncbi_services import host_taxon_name_from_ncbi_taxon_id
-
+from db_config import read_db_import_configuration as import_config, database_tom
 
 epitope_id_mappings = dict()
 
 
 def import_epitopes(virus_taxon_id: int):
+    db_params:dict = import_config.get_database_config_params()
+    database_tom.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
+    if virus_taxon_id in [2010960, 186539]:     # == bombali or reston ebolavirus
+        logger.info(f'No epitopes available for virus {virus_taxon_id}.')
+        return
+
     virus_db_id = virus_database_id(virus_taxon_id)
 
     if virus_db_id is None:

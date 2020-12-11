@@ -3,6 +3,9 @@ import logging
 from loguru import logger
 from notifiers.logging import NotificationHandler
 import os
+from tqdm import tqdm
+import warnings
+import sys
 
 """
 Created by tomalf2 on Sep, 2020.
@@ -98,3 +101,37 @@ class NotificationHandlerWrapper(logging.Handler):
 
     def init_providers(self, provider, kwargs):
         self.handler.init_providers(provider, kwargs)
+
+
+def setup_logger(log_file_prefix: str):
+    logger.remove()  # removes default logger to stderr with level DEBUG
+    # on console print from level INFO on
+    logger.add(sink=lambda msg: tqdm.write(msg, end=''),
+               level='TRACE',
+               format="<green>{time:YYYY-MM-DD HH:mm:ss Z}</green> | "
+                      "<level>{level: <8}</level> | "
+                      "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+               colorize=True,
+               backtrace=True,
+               diagnose=True,
+               enqueue=True)
+    # log to file any message of any security level
+    logger.add("./logs/" + log_file_prefix + "_{time}.log",
+               level='TRACE',
+               rotation='100 MB',
+               format="<green>{time:YYYY-MM-DD HH:mm:ss Z}</green> | "
+                      "<level>{level: <8}</level> | "
+                      "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+               colorize=False,
+               backtrace=True,
+               diagnose=True,
+               enqueue=True)
+    setup_any_additional_error_notifiers()
+
+    # redirect warnings
+    def customwarn(message, category, filename, lineno, file=None, line=None):
+        logger.warning(warnings.formatwarning(message, category, filename, lineno))
+
+    warnings.showwarning = customwarn
+
+    logger.info(f"EXECUTING main.py {' '.join(sys.argv[1:])}")

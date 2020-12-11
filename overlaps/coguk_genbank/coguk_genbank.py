@@ -3,9 +3,10 @@ from overlaps.multi_database_manager import config_db_engine, get_session, rollb
 from loguru import logger
 from tqdm import tqdm
 from os.path import sep
+import db_config.read_db_overlaps_configuration as db_config
 
 # read only
-db_name = 'vcm_11_1'
+db_name = ''
 source_database_source = ['COG-UK']
 source_name = 'COGUK'
 target_database_source = ['GenBank', 'RefSeq']
@@ -74,9 +75,11 @@ def mark_overlaps():
             w.write(totals_string)
 
 
-def run(db_user, db_password, db_port):
-
-    config_db_engine(db_name, db_user, db_password, db_port)
+def run():
+    db = db_config.get_import_params_for("genbank")
+    global db_name
+    db_name = db["db_name"]
+    config_db_engine(db["db_name"], db["db_user"], db["db_psw"], db["db_port"])
     if not user_asked_to_commit:
         logger.warning('OPERATION WON\'T BE COMMITTED TO THE DB')
 

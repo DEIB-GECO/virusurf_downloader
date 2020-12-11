@@ -4,12 +4,13 @@ from sqlalchemy import func, or_
 from loguru import logger
 from tqdm import tqdm
 from os.path import sep
+import db_config.read_db_overlaps_configuration as db_config
 
 # read only values
-source_db_name = 'vcm_gisaid_12'
+source_db_name = ''
 source_name = 'GISAID'
 source_database_source = None
-target_db_name = 'vcm_11_1'
+target_db_name = ''
 target_name = 'NMDC'
 target_database_source = ['NMDC']
 
@@ -81,9 +82,14 @@ def mark_overlaps():
             w.write(totals_string)
 
 
-def run(db_user, db_password, db_port):
-    config_db_engine(source_db_name, db_user, db_password, db_port)
-    config_db_engine(target_db_name, db_user, db_password, db_port)
+def run():
+    source_db = db_config.get_import_params_for("gisaid")
+    target_db = db_config.get_import_params_for("nmdc")
+    global source_db_name, target_db_name
+    source_db_name = source_db["db_name"]
+    target_db_name = target_db["db_name"]
+    config_db_engine(source_db["db_name"], source_db["db_user"], source_db["db_psw"], source_db["db_port"])
+    config_db_engine(target_db["db_name"], target_db["db_user"], target_db["db_psw"], target_db["db_port"])
     if not user_asked_to_commit:
         logger.warning('OPERATION WON\'T BE COMMITTED TO THE DB')
     mark_overlaps()

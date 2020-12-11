@@ -1,16 +1,13 @@
 from typing import List, Tuple
-from database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
+from db_config.database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
     VariantImpact, AminoAcidVariant, Epitope, EpitopeFragment, HostSpecie, DBMeta, get_session
 from sqlalchemy import func
 from locations import *
 from data_sources.virus_sample import VirusSample
 from xml_helper import *
 from datetime import datetime
-from multiprocessing import SimpleQueue, Value
-from queuable_tasks import Task, Worker, TaskManager
-from time import sleep
-import os
-from os.path import realpath
+from multiprocessing import Value
+from queuable_tasks import Task, TaskManager
 
 """
 Set of methods that create the corresponding rows in the Virus Conceptual Model database tables.

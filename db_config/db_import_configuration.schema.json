@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "description": "Schema of the import_configuration.json.",
+  "required": [
+    "db_name",
+    "db_user",
+    "db_psw",
+    "db_port"
+  ],
+  "properties": {
+    "db_name": {
+      "$id": "#/properties/db_name",
+      "type": "string"
+    },
+    "db_user": {
+      "$id": "#/properties/db_user",
+      "type": "string"
+    },
+    "db_psw": {
+      "$id": "#/properties/db_psw",
+      "type": "string"
+    },
+    "db_port": {
+      "$id": "#/properties/db_psw",
+      "type": "integer"
+    }
+  },
+  "additionalProperties": true
+}

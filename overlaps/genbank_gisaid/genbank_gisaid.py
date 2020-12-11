@@ -5,12 +5,13 @@ from sqlalchemy import func, or_
 from loguru import logger
 from tqdm import tqdm
 from os.path import sep
+import db_config.read_db_overlaps_configuration as db_config
 
 # read only values
-source_db_name = 'vcm_11_1'
+source_db_name = ""
 source_database_source = ['GenBank', 'RefSeq']
 source_name = 'GenBank'
-target_db_name = 'vcm_gisaid_12'
+target_db_name = ""
 target_name = 'GISAID'
 
 
@@ -233,9 +234,14 @@ def filter_most_exact_strain_match(source_strain_name: str, target_rows) -> []:
     return result
 
 
-def run(db_user, db_password, db_port):
-    config_db_engine(source_db_name, db_user, db_password, db_port)
-    config_db_engine(target_db_name, db_user, db_password, db_port)
+def run():
+    genbank_db = db_config.get_import_params_for("genbank")
+    gisaid_db = db_config.get_import_params_for("gisaid")
+    global source_db_name, target_db_name
+    source_db_name = genbank_db["db_name"]
+    target_db_name = gisaid_db["db_name"]
+    config_db_engine(genbank_db["db_name"], genbank_db["db_user"], genbank_db["db_psw"], genbank_db["db_port"])
+    config_db_engine(gisaid_db["db_name"], gisaid_db["db_user"], gisaid_db["db_psw"], gisaid_db["db_port"])
     if not user_asked_to_commit:
         logger.warning('OPERATION WON\'T BE COMMITTED TO THE DB')
     mark_overlaps()

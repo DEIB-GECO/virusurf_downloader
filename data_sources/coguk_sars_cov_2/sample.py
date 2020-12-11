@@ -10,7 +10,7 @@ from locations import get_local_folder_for, FileType
 
 
 class COGUKSarsCov2Sample(VirusSample):
-    virus_name = 'COG-UK_sars_cov_2'
+    virus_name = 'coguk_sars_cov_2'
     # DICT KEYS
     STRAIN_NAME = 'strain_name'
     NUC_SEQUENCE = 'nuc_sequence'

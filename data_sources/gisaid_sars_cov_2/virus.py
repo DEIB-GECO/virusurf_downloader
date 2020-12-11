@@ -2,19 +2,17 @@ import json
 import os
 
 from json import JSONDecodeError
-from typing import Optional, Generator
+from typing import Generator
 
 from loguru import logger
 from tqdm import tqdm
 
 from data_sources.gisaid_sars_cov_2.sample import GISAIDSarsCov2Sample
 from data_sources.virus import VirusSource
-from database_tom import try_py_function, Sequence
-import stats_module
+from db_config.database_tom import try_py_function, Sequence
 
 
 # noinspection PyMethodMayBeStatic
-from locations import get_local_folder_for, FileType
 
 
 class GISAIDSarsCov2(VirusSource):

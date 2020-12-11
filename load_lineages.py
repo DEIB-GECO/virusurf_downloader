@@ -1,15 +1,16 @@
 """
 Created by tomalf2 on nov, 2020.
 """
-from os.path import abspath
-from database_tom import try_py_function, Sequence
+from db_config.database_tom import try_py_function, Sequence, config_db_engine
 from sqlalchemy import func
 from loguru import logger
-from typing import List
 from tqdm import tqdm
+from db_config import read_db_import_configuration as import_config
 
 
 def load(lineages_tsv_file_path):
+    db_params:dict = import_config.get_database_config_params()
+    config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
 
     def check_lineage_are_assigned_in_db(session):
         accession_ids = [x[0] for x in read_lineages()]

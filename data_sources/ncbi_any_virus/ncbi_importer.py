@@ -1,4 +1,3 @@
-from os.path import sep
 from collections import Counter, OrderedDict
 from data_sources.ncbi_any_virus.host_sample import NCBIHostSample
 from pipeline_nuc_variants__annotations__aa import sequence_aligner
@@ -9,13 +8,12 @@ import stats_module
 from queuable_tasks import Task, TaskManager, Worker
 from datetime import datetime
 from decimal import Decimal
-from typing import List, Optional, Tuple, Iterator
+from typing import Optional, Tuple, Iterator
 from data_sources.ncbi_services import host_taxon_id_from_ncbi_taxon_name, host_taxon_name_from_ncbi_taxon_id, \
-    _try_n_times, download_ncbi_taxonomy_as_xml, download_or_get_ncbi_sample_as_xml
+    download_ncbi_taxonomy_as_xml, download_or_get_ncbi_sample_as_xml, get_samples_accession_ids, read_config_params
 import dateutil.parser as dateparser
 import lxml
 from tqdm import tqdm
-import database_tom
 from vcm import vcm as vcm
 from geo_groups import geo_groups
 from xml_helper import text_at_node
@@ -24,16 +22,11 @@ from lxml import etree
 from locations import get_local_folder_for, FileType, remove_file
 from Bio import Entrez
 import pickle
-import cleaning_module
-Entrez.email = "Your.Name.Here@example.org"
+import data_cleaning_module
+from db_config import read_db_import_configuration as db_import_config, database_tom
+from data_sources.ncbi_any_virus import settings
 
 
-nucleotide_reference_sequence: Optional[str] = None # initialized elsewhere
-annotation_file_path: Optional[str] = None  # initialized elsewhere
-virus_sequence_chromosome_name: Optional[str] = None  # initialized elsewhere
-snpeff_db_name: Optional[str] = None  # initialized elsewhere
-log_with_name: Optional[str] = None
-user_provided_reference_query: Optional[str] = None
 DOWNLOAD_ATTEMPTS = 3
 DOWNLOAD_FAILED_PAUSE_SECONDS = 30
 
@@ -192,7 +185,7 @@ class AnyNCBIVNucSample:
             return False
         else:
             length = self.length()
-            reference_length = len(nucleotide_reference_sequence)
+            reference_length = settings.length_of_nuc_reference_sequence
             if length is not None and reference_length is not None and length < 0.95*reference_length:
                 return False
             else:
@@ -447,7 +440,7 @@ class AnyNCBIVNucSample:
                 host = self.host_name_suggested_by_other_method
             # correct typos
             if host:
-                host = cleaning_module.correct_typos(host)
+                host = data_cleaning_module.correct_typos(host)
                 self._host_taxon_name = host
             # at this point we may have None or a somehow valid host_taxon_name
             # let's try to uniform this value with its synonyms by searching it in NCBI
@@ -559,23 +552,10 @@ class AnyNCBIVNucSample:
         return self._external_host_data
 
 
-def _alt_ids_of_selected_sequences(samples_query: str, log_with_name: str) -> List[int]:
-    logger.trace(f'importing samples of organism "{log_with_name}"')
-
-    logger.trace(f'getting accession ids of samples...')
-    accession_ids = _get_samples_accession_ids(samples_query)
-
-    # if the reference sample is not selected already from samples_query, add it as first sample
-    global user_provided_reference_query
-    if user_provided_reference_query:
-        accession_ids.insert(0, _get_samples_accession_ids(user_provided_reference_query)[0])
-    return accession_ids
-
-
 # noinspection PyPep8Naming
-def _download_as_sample_object(alternative_accession_ids, log_with_name: str, SampleWrapperClass=AnyNCBIVNucSample) -> Iterator:
+def _download_as_sample_object(alternative_accession_ids, SampleWrapperClass=AnyNCBIVNucSample) -> Iterator:
     logger.trace(f'download and processing of sequences...')
-    download_sample_dir_path = get_local_folder_for(source_name=log_with_name, _type=FileType.SequenceOrSampleData)
+    download_sample_dir_path = get_local_folder_for(settings.generated_dir_name, _type=FileType.SequenceOrSampleData)
     network_skipped_samples = 0
     parser_skipped_samples = 0
     other_reasons_skipped_samples = 0
@@ -606,22 +586,22 @@ def _download_as_sample_object(alternative_accession_ids, log_with_name: str, Sa
             parser_skipped_samples += 1
             continue
         yield other_sample
-    logger.info(f"{network_skipped_samples} 've been skipped due to network errors.\n"
-                f"{parser_skipped_samples} 've been skipped due to XML parser errors.\n"
-                f"{other_reasons_skipped_samples} 've been skipped because of other errors.")
+    logger.info(f"\n\t{network_skipped_samples} 've been skipped due to network errors.\n"
+                f"\t{parser_skipped_samples} 've been skipped due to XML parser errors.\n"
+                f"\t{other_reasons_skipped_samples} 've been skipped because of other errors.")
 
 
 # noinspection PyPep8Naming
-def _reference_sample_from_organism(samples_query: str, log_with_name: str, SampleWrapperClass=AnyNCBIVNucSample):
-    logger.trace(f'importing reference sample of organism "{log_with_name}"')
+def _reference_sample_from_organism(SampleWrapperClass=AnyNCBIVNucSample):
+    logger.trace(f'importing reference sample of organism "{settings.log_with_name}"')
 
     logger.trace(f'getting accession ids of refseq...')
-    reference_query = samples_query+' AND srcdb_refseq[Properties]'
-    accession_ids = _get_samples_accession_ids(reference_query)
+    reference_query = settings.reference_sample_query    # initializes a temporary variable
+    user_provided_reference_query: Optional[str] = None  # stores user input (if necessary) between executions of test_query
+    accession_ids = get_samples_accession_ids(settings.reference_sample_query)
 
-    def test_query():
-        global user_provided_reference_query
-        nonlocal accession_ids, reference_query
+    def check_query():
+        nonlocal accession_ids, reference_query, user_provided_reference_query
         if len(accession_ids) == 0:
             logger.warning(f'No reference sequence exists in the sample group identified by the query\n'
                            f'<<<\n'
@@ -630,8 +610,8 @@ def _reference_sample_from_organism(samples_query: str, log_with_name: str, Samp
                            f'Type a valid query selecting only one sample to be used as reference sample or press Ctrl+C to abort')
             user_provided_reference_query = input().strip()
             reference_query = user_provided_reference_query
-            accession_ids = _get_samples_accession_ids(reference_query)
-            test_query()
+            accession_ids = get_samples_accession_ids(reference_query)
+            check_query()
         if len(accession_ids) != 1:
             logger.warning(f'More than one reference sequence found in the sample group identified by the query\n'
                            f'<<<\n'
@@ -641,12 +621,12 @@ def _reference_sample_from_organism(samples_query: str, log_with_name: str, Samp
                            f'Type a valid query selecting only one sample to be used as reference sample or press Ctrl+C to abort')
             user_provided_reference_query = input().strip()
             reference_query = user_provided_reference_query
-            accession_ids = _get_samples_accession_ids(reference_query)
-            test_query()
+            accession_ids = get_samples_accession_ids(reference_query)
+            check_query()
 
-    test_query()
+    check_query()    # if reference_sample_query doesn't provide one sample, it asks user input until a valid query is given
     logger.trace(f'download and processing of the reference sample...')
-    download_sample_dir_path = get_local_folder_for(source_name=log_with_name, _type=FileType.SequenceOrSampleData)
+    download_sample_dir_path = get_local_folder_for(source_name=settings.generated_dir_name, _type=FileType.SequenceOrSampleData)
     try:
         sample_path = download_or_get_ncbi_sample_as_xml(download_sample_dir_path, accession_ids[0])
     except Exception as e:
@@ -655,40 +635,6 @@ def _reference_sample_from_organism(samples_query: str, log_with_name: str, Samp
         raise e
     ref_sample = SampleWrapperClass(sample_path, accession_ids[0])
     return ref_sample
-
-
-def _get_samples_accession_ids(all_samples_query: str) -> List[int]:
-    def do():
-        # DO PAGINATION
-        # total number of sequences
-        with Entrez.esearch(db="nuccore",
-                            term=f"{all_samples_query}",
-                            rettype='count') as handle:
-            response = Entrez.read(handle)
-            total_records = int(response['Count'])
-        # get pages
-        accessions_ids = list()
-        # noinspection PyPep8Naming
-        RECORDS_PER_PAGE = 5000
-        page_number = 0
-        import time
-        with tqdm(total=total_records) as progress_bar:
-            while total_records > page_number * RECORDS_PER_PAGE:
-                with Entrez.esearch(db="nuccore",
-                                    term=f"{all_samples_query}",
-                                    retmax=RECORDS_PER_PAGE, retstart=page_number * RECORDS_PER_PAGE) as handle:
-                    response = Entrez.read(handle)
-                for x in response['IdList']:
-                    accessions_ids.append(int(x))
-                page_number += 1
-                time.sleep(2)
-                progress_bar.update(
-                    RECORDS_PER_PAGE if page_number * RECORDS_PER_PAGE < total_records else total_records - (
-                                (page_number - 1) * RECORDS_PER_PAGE))
-        if len(accessions_ids) != total_records:
-            raise IOError('Some of the accession ids were not correctly downloaded')
-        return accessions_ids
-    return _try_n_times(DOWNLOAD_ATTEMPTS, DOWNLOAD_FAILED_PAUSE_SECONDS, do)
 
 
 def _deltas(virus_id, id_remote_samples):
@@ -716,18 +662,18 @@ def _deltas(virus_id, id_remote_samples):
 
 
 def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSample, db_sequence_id):
-    file_path = get_local_folder_for(log_with_name, FileType.Annotations) + str(sample.internal_id()) + ".pickle"
+    file_path = get_local_folder_for(settings.generated_dir_name, FileType.Annotations) + str(sample.internal_id()) + ".pickle"
     try:
         # logger.debug(f'callling sequence aligner with args: {db_sequence_id}, <ref_seq>, <seq>, {virus_sequence_chromosome_name}, {annotation_file_path}, {snpeff_db_name}')
         # logger.debug('seq: '+sample.nucleotide_sequence())
         if not os.path.exists(file_path):
             annotations_and_nuc_variants = sequence_aligner(
                 sample.internal_id(),
-                nucleotide_reference_sequence,
+                settings.nucleotide_reference_sequence,
                 sample.nucleotide_sequence(),
-                virus_sequence_chromosome_name,
-                annotation_file_path,
-                snpeff_db_name)
+                settings.chromosome_name,
+                settings.annotation_file_path,
+                settings.snpeff_db_name)
             with open(file_path, mode='wb') as cache_file:
                 pickle.dump(annotations_and_nuc_variants, cache_file, protocol=pickle.HIGHEST_PROTOCOL)
         else:
@@ -788,23 +734,14 @@ class TheWorker(Worker):
 
 
 # noinspection PyPep8Naming
-def import_samples_into_vcm(
-        samples_query,
-        bind_to_organism_taxon_id: int,
-        _log_with_name: str,
-        _annotation_file_path: str,
-        virus_chromosome_name: str,
-        _snpeff_db_name: str,
-        SampleWrapperClass=AnyNCBIVNucSample,
-        OrganismWrapperClass=AnyNCBITaxon,
-        from_sample: Optional[int] = None,
-        to_sample: Optional[int] = None):
-
-    global annotation_file_path, virus_sequence_chromosome_name, snpeff_db_name, log_with_name
-    annotation_file_path = _annotation_file_path
-    virus_sequence_chromosome_name = virus_chromosome_name
-    snpeff_db_name = _snpeff_db_name
-    log_with_name = _log_with_name
+def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSample, OrganismWrapperClass=AnyNCBITaxon,
+                            from_sample: Optional[int] = None, to_sample: Optional[int] = None):
+    # initialize globals
+    settings.initialize_settings(*tuple(settings.known_settings[source_name].values()))
+    # setup db connection
+    db_params: dict = db_import_config.get_database_config_params()
+    database_tom.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
+    # prepare multiprocessor
     task_manager = TaskManager(70, 70, TheWorker)
 
     def check_user_query():
@@ -812,16 +749,17 @@ def import_samples_into_vcm(
         Makes sure the user-provided query returns at least one sequence.
         :raise AssertionError if the user query returns 0 sequences.
         """
+        entrez_config = read_config_params()
         # total number of sequences
         with Entrez.esearch(db="nuccore",
-                            term=f"{samples_query}",
-                            rettype='count') as handle:
+                            term=f"({settings.non_reference_samples_query}) OR ({settings.reference_sample_query})",
+                            rettype='count', tool=entrez_config[0], email=entrez_config[1], api_key=entrez_config[2]) as handle:
             response = Entrez.read(handle)
         total_records = int(response['Count'])
         assert total_records > 0, f'The query provided does not select any sample from NCBI Nucleotide DB. ' \
                                   f'Retry with a different query \n' \
                                   f'<<<\n' \
-                                  f'{samples_query}\n' \
+                                  f'{settings.non_reference_samples_query}\n' \
                                   f'>>>'
         logger.info(f'The query provided selects {total_records} form NCBI Nucleotide DB.')
 
@@ -829,11 +767,11 @@ def import_samples_into_vcm(
         """
         Inserts or fetches the organism the user wants to bind the sequences to into the VIRUS table.
         Also it fetches the reference nucleotide sequence for such organism taking it from the DB if already present,
-        or extracting it from the samples selected from the user-provided query.
+        or taking it from the user-provided query.
         :return:
         """
-        taxonomy_download_dir = get_local_folder_for(log_with_name, FileType.TaxonomyData)
-        taxon_file_path = download_ncbi_taxonomy_as_xml(taxonomy_download_dir, bind_to_organism_taxon_id)
+        taxonomy_download_dir = get_local_folder_for(settings.generated_dir_name, FileType.TaxonomyData)
+        taxon_file_path = download_ncbi_taxonomy_as_xml(taxonomy_download_dir,  settings.virus_taxon_id)
         organism = OrganismWrapperClass(taxon_file_path)
 
         def get_virus_id_and_nuc_reference_sequence(session: database_tom.Session):
@@ -842,81 +780,64 @@ def import_samples_into_vcm(
             if virus:
                 _virus_id = virus.virus_id
             else:
-                logger.trace(f'inserting new organism {bind_to_organism_taxon_id} into VIRUS table')
+                logger.trace(f'inserting new organism { settings.virus_taxon_id} into VIRUS table')
                 _virus_id = vcm.create_or_get_virus(session, organism)
             # get nuc_reference_sequence
-            logger.trace(f'organism txid {bind_to_organism_taxon_id} already in VIRUS table.')
+            logger.trace(f'organism txid { settings.virus_taxon_id} already in VIRUS table.')
             refseq_row: database_tom.Sequence = vcm.get_reference_sequence_of_virus(session, _virus_id)
             if refseq_row:
-                return _virus_id, refseq_row.nucleotide_sequence, refseq_row.accession_id, True
+                return _virus_id, refseq_row.nucleotide_sequence, refseq_row.accession_id
             else:
                 logger.trace('caching the nucleotide sequence of the reference')
-                downloaded_ref_sample = _reference_sample_from_organism(samples_query, log_with_name, SampleWrapperClass)
-                return _virus_id, downloaded_ref_sample.nucleotide_sequence(), downloaded_ref_sample.primary_accession_number(), False
+                downloaded_ref_sample = _reference_sample_from_organism(SampleWrapperClass)
+                return _virus_id, downloaded_ref_sample.nucleotide_sequence(), downloaded_ref_sample.primary_accession_number()
 
-        return database_tom.try_py_function(
-            get_virus_id_and_nuc_reference_sequence
-        )
+        return database_tom.try_py_function(get_virus_id_and_nuc_reference_sequence)
 
-    def main_pipeline_part_2(session: database_tom.Session, sample: AnyNCBIVNucSample):
+    # noinspection PyTypeChecker
+    def main_pipeline_part_2(session: database_tom.Session, _sample: AnyNCBIVNucSample):
         """
         Inserts metadata and returns the SEQUENCE.sequence_id
         :return: SEQUENCE.sequence_id of every sample
         """
         try:
-            experiment_id = vcm.create_or_get_experiment(session, sample)
-            host_specie_id = vcm.create_or_get_host_specie(session, sample)
-            host_sample_id = vcm.create_or_get_host_sample(session, sample, host_specie_id)
-            sequencing_project_id = vcm.create_or_get_sequencing_project(session, sample)
-            sequence = vcm.create_and_get_sequence(session, sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
+            experiment_id = vcm.create_or_get_experiment(session, _sample)
+            host_specie_id = vcm.create_or_get_host_specie(session, _sample)
+            host_sample_id = vcm.create_or_get_host_sample(session, _sample, host_specie_id)
+            sequencing_project_id = vcm.create_or_get_sequencing_project(session, _sample)
+            sequence = vcm.create_and_get_sequence(session, _sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
             return sequence.sequence_id
         except ValueError as e:
             if str(e).endswith('missing nucleotide seq.'):
-                logger.warning(f'Sample {sample.internal_id()} is given without nucleotide sequence. Sample import skipped. File deleted')
-                remove_file(f"{get_local_folder_for(log_with_name, FileType.SequenceOrSampleData)}{sample.alternative_accession_number()}.xml")
+                logger.warning(f'Sample {_sample.internal_id()} is given without nucleotide sequence. Sample import skipped. File deleted')
+                remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
             else:
-                logger.exception(f"exception occurred while working on virus sample {sample.internal_id()}. Sample won't be imported")
+                logger.exception(f"exception occurred while working on virus sample {_sample.internal_id()}. Sample won't be imported")
             raise database_tom.Rollback()
         except AssertionError:
-            logger.exception(f"Sample {sample.internal_id()} may have a corrupted XML. The XML will be deleted. Sample won't be imported")
-            remove_file(f"{get_local_folder_for(log_with_name, FileType.SequenceOrSampleData)}{sample.alternative_accession_number()}.xml")
+            logger.exception(f"Sample {_sample.internal_id()} may have a corrupted XML. The XML will be deleted. Sample won't be imported")
+            remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
             raise database_tom.Rollback()
         except KeyboardInterrupt as e:
-            logger.info(f"import of sample {sample.internal_id()} interrupted. Sample won't be imported")
+            logger.info(f"import of sample {_sample.internal_id()} interrupted. Sample won't be imported")
             raise e  # i.e. it is handled outside but I don't want it to be logged as an unexpected error
         except Exception as e:
-            logger.exception(f"exception occurred while working on virus sample {sample.internal_id()}. Sample won't be imported")
+            logger.exception(f"exception occurred while working on virus sample {_sample.internal_id()}. Sample won't be imported")
             raise database_tom.Rollback()
 
     check_user_query()
 
-    global nucleotide_reference_sequence
+    # id of the virus in the VCM.Virus table, to which imported sequences will be bound
+    virus_id, nucleotide_reference_sequence, ref_acc_id = main_pipeline_part_1()
+    settings.set_nucleotide_refseq(nucleotide_reference_sequence)    # set as globally available var
 
-    # handle special case of SARS-Cov-1: The reference sample is not included in the sample set.
-    if log_with_name == 'New NCBI SARS-Cov-1':
-        previous_samples_query = samples_query
-        samples_query = 'txid694009[Organism] NOT txid2697049[Organism]'
-        virus_id, nucleotide_reference_sequence, ref_accession_id, already_imported = main_pipeline_part_1()
-        if not already_imported:
-            ref_sample = _reference_sample_from_organism(samples_query, log_with_name, SampleWrapperClass)
-            sequence_id = database_tom.try_py_function(
-                main_pipeline_part_2, ref_sample
-            )
-            database_tom.try_py_function(
-                main_pipeline_part_3, ref_sample, sequence_id
-            )
-        samples_query = previous_samples_query
-    else:
-        # id of the virus in the VCM.Virus table, to which imported sequences will be bound
-        virus_id, nucleotide_reference_sequence, ref_acc_id, already_imported = main_pipeline_part_1()
-
-    logger.info(f'importing the samples identified by the query provided as bound to organism txid{bind_to_organism_taxon_id}')
+    logger.info(f'importing the samples identified by the query provided as bound to organism txid{ settings.virus_taxon_id}')
 
     # update last import date
     database_tom.try_py_function(vcm.update_db_metadata, virus_id, 'GenBank')
 
     # find outdated and new samples from source
-    id_all_current_sequences = set(_alt_ids_of_selected_sequences(samples_query, log_with_name))
+    id_all_current_sequences = set(get_samples_accession_ids(f"({settings.non_reference_samples_query}) OR ({settings.reference_sample_query})"))
     _, id_outdated_sequences, id_new_sequences = _deltas(virus_id, id_all_current_sequences)
 
     # select range
@@ -938,7 +859,7 @@ def import_samples_into_vcm(
 
     logger.info('begin importing new sequences')
     try:
-        for sample in _download_as_sample_object(id_new_sequences, log_with_name, SampleWrapperClass):
+        for sample in _download_as_sample_object(id_new_sequences, SampleWrapperClass):
             sequence_id = database_tom.try_py_function(
                 main_pipeline_part_2, sample
             )
@@ -962,22 +883,5 @@ def import_samples_into_vcm(
         task_manager.stop_workers()
 
 
-
-prepared_parameters = {
-    'dengue_virus_1': ('txid11053[Organism:exp]', 11053, 'Dengue Virus 1', f'.{sep}annotations{sep}dengue_virus_1.tsv', 'NC_001477', 'dengue_virus_1'),
-    'dengue_virus_2': ('txid11060[Organism:exp]', 11060, 'Dengue Virus 2', f'.{sep}annotations{sep}dengue_virus_2.tsv', 'NC_001474', 'dengue_virus_2'),
-    'dengue_virus_3': ('txid11069[Organism:exp]', 11069, 'Dengue Virus 3', f'.{sep}annotations{sep}dengue_virus_3.tsv', 'NC_001475', 'dengue_virus_3'),
-    'dengue_virus_4': ('txid11070[Organism:exp]', 11070, 'Dengue Virus 4', f'.{sep}annotations{sep}dengue_virus_4.tsv', 'NC_002640', 'dengue_virus_4'),
-    'mers': ('txid1335626[Organism:noexp]', 1335626, 'MERS-CoV', f'.{sep}annotations{sep}mers.tsv', 'NC_019843', 'mers'),
-    'betacoronavirus_england_1': ('txid1263720[Organism:noexp]', 1263720, 'Betacoronavirus England 1', f'.{sep}annotations{sep}betacoronavirus_england_1.tsv', 'NC_038294', 'betacoronavirus_england_1'),
-    'zaire_ebolavirus': ('txid186538[Organism:exp]', 186538, 'Zaire ebolavirus', f'.{sep}annotations{sep}zaire_ebolavirus.tsv', 'NC_002549', 'zaire_ebolavirus'),
-    'sudan_ebolavirus': ('txid186540[Organism:exp]', 186540, 'Sudan ebolavirus', f'.{sep}annotations{sep}sudan_ebolavirus.tsv', 'NC_006432', 'sudan_ebolavirus'),
-    'reston_ebolavirus': ('txid186539[Organism:exp]', 186539, 'Reston ebolavirus', f'.{sep}annotations{sep}reston_ebolavirus.tsv', 'NC_004161', 'reston_ebolavirus'),
-    'bundibugyo_ebolavirus': ('txid565995[Organism:noexp]', 565995, 'Bundibugyo ebolavirus', f'.{sep}annotations{sep}bundibugyo_ebolavirus.tsv', 'NC_014373', 'bundibugyo_ebolavirus'),
-    'bombali_ebolavirus': ('txid2010960[Organism:noexp]', 2010960, 'Bombali ebolavirus', f'.{sep}annotations{sep}bombali_ebolavirus.tsv', 'NC_039345', 'bombali_ebolavirus'),
-    'tai_forest_ebolavirus': ('txid186541[Organism:exp]', 186541, 'Tai Forest ebolavirus', f'.{sep}annotations{sep}tai_forest_ebolavirus.tsv', 'NC_014372', 'tai_forest_ebolavirus'),
-    'new_ncbi_sars_cov_2': ('txid2697049[Organism]', 2697049, 'New NCBI SARS-Cov-2', f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv', 'NC_045512', 'new_ncbi_sars_cov_2'),
-    'new_ncbi_sars_cov_1': ('txid694009[Organism:noexp] NOT txid2697049[Organism]', 694009, 'New NCBI SARS-Cov-1', f'.{sep}annotations{sep}sars_cov_1.tsv', 'NC_004718', 'sars_cov_1')
-}
-# QUERY TO SELECT THE REFERENCE OF SARS COV 1
-# txid694009[Organism] NOT txid2697049[Organism] AND srcdb_refseq[Properties]
+# !!!!! ARE YOU LOOKING FOR prepared_parameters ? Use instead data_source.ncbi_any_virus.settings -> known_settings !!!!
+#########################################################################################################################

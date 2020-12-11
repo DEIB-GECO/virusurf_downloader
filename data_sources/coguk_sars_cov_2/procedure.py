@@ -1,21 +1,22 @@
 import os
 import pickle
-from os.path import sep
 from loguru import logger
 from typing import Optional, List
 from queuable_tasks import max_number_of_workers
-import database_tom
 from vcm import vcm as vcm
 from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
 from data_sources.coguk_sars_cov_2.virus import COGUKSarsCov2
 from multiprocessing import JoinableQueue, cpu_count, Process
 from sqlalchemy.orm.session import Session
-from Bio import Entrez
-
+from db_config import read_db_import_configuration as import_config, database_tom
+from data_sources.ncbi_any_virus.settings import known_settings as ncbi_known_settings
 from locations import get_local_folder_for, FileType, remove_file
 from pipeline_nuc_variants__annotations__aa import sequence_aligner
 import stats_module
-Entrez.email = "Your.Name.Here@example.org"
+
+sc2_chromosome = ncbi_known_settings["sars_cov_2"]["chromosome_name"]
+sc2_annotations_file_path = ncbi_known_settings["sars_cov_2"]["annotation_file_path"]
+sc2_snpeff_db_name = ncbi_known_settings["sars_cov_2"]["snpeff_db_name"]
 
 
 reference_sequence = None
@@ -33,9 +34,9 @@ def main_pipeline_part_3(session: database_tom.Session, sample, db_sequence_id):
                 sample.internal_id(),
                 reference_sequence,
                 sample.nucleotide_sequence(),
-                'NC_045512',
-                f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv',
-                'new_ncbi_sars_cov_2')
+                sc2_chromosome,
+                sc2_annotations_file_path,
+                sc2_snpeff_db_name)
             with open(file_path, mode='wb') as cache_file:
                 pickle.dump(annotations_and_nuc_variants, cache_file, protocol=pickle.HIGHEST_PROTOCOL)
         else:
@@ -170,6 +171,8 @@ def import_virus(session: Session, _virus: COGUKSarsCov2):
 
 def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     global virus, virus_id, import_method, successful_imports
+    db_params: dict = import_config.get_database_config_params()
+    database_tom.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
     virus = COGUKSarsCov2()
     # IMPORT VIRUS TAXON DATA
     virus_id = database_tom.try_py_function(import_virus, virus)

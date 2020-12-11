@@ -1,16 +1,16 @@
 import os
 from collections import OrderedDict
 from data_sources.ncbi_any_virus.ncbi_importer import AnyNCBIVNucSample
-from data_sources.ncbi_services import download_ncbi_taxonomy_as_xml
+from data_sources.ncbi_services import download_ncbi_taxonomy_as_xml, get_samples_accession_ids, download_or_get_ncbi_sample_as_xml
+from data_sources.ncbi_any_virus.settings import known_settings as ncbi_known_settings
 from lxml import etree
 import wget as wget
-from Bio import Entrez
 from tqdm import tqdm
 from typing import Generator, Optional
 from loguru import logger
 from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
 from locations import get_local_folder_for, FileType
-import database_tom
+from db_config import database_tom
 from vcm.vcm import sequence_primary_accession_ids
 import stats_module
 from xml_helper import text_at_node
@@ -18,7 +18,7 @@ from xml_helper import text_at_node
 
 class COGUKSarsCov2:
 
-    name = 'COG-UK_sars_cov_2'
+    name = 'coguk_sars_cov_2'
     sequence_file_url = 'https://cog-uk.s3.climb.ac.uk/2020-09-03/cog_2020-09-03_sequences.fasta'
     metadata_file_url = 'https://cog-uk.s3.climb.ac.uk/2020-09-03/cog_2020-09-03_metadata.csv'
 
@@ -155,34 +155,17 @@ class COGUKSarsCov2:
         if not hasattr(self, 'reference_sample'):
             # import a reference sequence from a different dataset that we'll use to call nucleotide variants
             # get reference sample accession id
-            handle = Entrez.esearch(db="nuccore",
-                                    term=f"(txid{self.taxon_id()}[Organism]) AND srcdb_refseq[Properties]")
-            response = Entrez.read(handle)
-            handle.close()
-            # Example response
-            # {
-            #     "Count": "1",                       <-- number of total records matching the query
-            #     "RetMax": "1",
-            #     "RetStart": "0",
-            #     "IdList": ["1798174254"],            <-- accession id of refseq
-            #     "TranslationSet": [],
-            #     "TranslationStack": [
-            #         {"Term": "txid2697049[Organism]", "Field": "Organism", "Count": "5511", "Explode": "Y"},
-            #         {"Term": "srcdb_refseq[Properties]", "Field": "Properties", "Count": "66995641", "Explode": "N"},
-            #         "AND"
-            #     ],
-            #     "QueryTranslation": "txid2697049[Organism] AND srcdb_refseq[Properties]"
-            # }
-            assert int(response['Count']) == 1, \
-                "no reference sample found or multiple RefSeqs" + "please check: https://www.ncbi.nlm.nih.gov/books/NBK25499/#chapter4.ESearch"
-            reference_seq_id = response['IdList'][0]
-
-            reference_seq_file_path = f"{get_local_folder_for(source_name=self.name, _type=FileType.SequenceOrSampleData)}reference_sample.xml"
-            if not os.path.exists(reference_seq_file_path):
-                with Entrez.efetch(db="nuccore", id=reference_seq_id, rettype="gbc", retmode="xml") as handle:
-                    with open(reference_seq_file_path, 'w') as f:
-                        f.write(handle.read())
-            self.reference_sample = AnyNCBIVNucSample(reference_seq_file_path, reference_seq_id)
+            ncbi_reference_sample_query = ncbi_known_settings["sars_cov_2"]["reference_sample_query"]
+            reference_accession_id = get_samples_accession_ids(ncbi_reference_sample_query)
+            assert len(reference_accession_id) == 1, \
+                "no reference sample found or multiple RefSeqs. Please correct the query used on NCBI nuccore"
+            # download file as XML
+            reference_seq_file_path = download_or_get_ncbi_sample_as_xml(
+                get_local_folder_for(source_name=self.name, _type=FileType.SequenceOrSampleData),
+                reference_accession_id[0]
+            )
+            # parse file and cache the object
+            self.reference_sample = AnyNCBIVNucSample(reference_seq_file_path, reference_accession_id[0])
         return self.reference_sample.nucleotide_sequence()
 
 
@@ -198,28 +181,3 @@ def download_or_get_sample_data(containing_directory: str) -> (str, str):
         logger.info(f'downloading sample metadata for COG-UK data from {COGUKSarsCov2.metadata_file_url} ...')
         wget.download(COGUKSarsCov2.metadata_file_url, metadata_local_file_path)
     return sequence_local_file_path, metadata_local_file_path
-
-
-def delete_virus_sample_xml(containing_directory: str, sample_accession_id: int):
-    """
-    :param containing_directory: directory where the file resides
-    :param sample_accession_id: sequence accession id ( == numeric part of a GI id, e.g. '1798174254' of 'gi|1798174254')
-    """
-    local_file_path = f"{containing_directory}{os.path.sep}{sample_accession_id}.xml"
-    try:
-        os.remove(local_file_path)
-    except OSError as e:
-        logger.error(f"Failed to remove file {local_file_path} with error: {e.strerror}")
-
-
-def download_or_get_virus_sample_as_xml(containing_directory: str, sample_accession_id: int) -> str:
-    """
-    :param containing_directory: directory where the file will be downloaded and cached
-    :param sample_accession_id: sequence accession id ( == numeric part of a GI id, e.g. '1798174254' of 'gi|1798174254')
-    :return: the local file path of the download INSDSeq XML file.
-    """
-    local_file_path = f"{containing_directory}{os.path.sep}{sample_accession_id}.xml"
-    with Entrez.efetch(db="nuccore", id=sample_accession_id, rettype="gbc", retmode="xml") as handle:
-        with open(local_file_path, 'w') as f:
-            f.write(handle.read())
-    return local_file_path

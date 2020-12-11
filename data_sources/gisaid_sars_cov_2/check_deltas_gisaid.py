@@ -5,9 +5,9 @@ from tqdm import tqdm
 from locations import get_local_folder_for, FileType
 
 # read only values
-source_db_name = 'vcm_gisaid_11'
+source_db_name = '<db_name_here>'
 source_name = 'GISAID_11'
-target_db_name = 'vcm_gisaid_12'
+target_db_name = '<another_db_name_here>'
 target_name = 'GISAID_12'
 
 # source_seq_file_path = f'.{sep}overlaps{sep}check_deltas_gisaid{sep}vcm_gisaid_11_seq.csv'

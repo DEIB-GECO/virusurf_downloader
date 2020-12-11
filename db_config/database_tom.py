@@ -6,9 +6,9 @@ from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.session import Session
 from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.sql import text
 from loguru import logger
 from time import sleep
-from sqlalchemy_utils import create_view
 
 # https://www.compose.com/articles/using-postgresql-through-sqlalchemy/
 
@@ -566,3 +566,34 @@ def disambiguate_chimera_sequences():
         )
     """
     _db_engine.execute(stmt)
+
+
+def run_script(path: str):
+    # Create an empty command string
+    sql_command = ''
+
+    session = get_session()
+
+    try:
+        with open(path, mode='r') as sql_file:
+            for line in sql_file:
+                # Ignore commented lines
+                if not line.startswith('--') and line.strip('\n'):
+                    # Append line to the command string
+                    sql_command += line.strip('\n')
+
+                    # If the command string ends with ';', it is a full statement
+                    if sql_command.endswith(';'):
+                        # Try to execute statement and commit it
+                        try:
+                            session.execute(text(sql_command))
+                            session.commit()
+                        # Assert in case of error
+                        except Exception as e:
+                            logger.exception(f'SQL command:\n{sql_command}\n Failed to execute. ')
+                            rollback(session)
+    finally:
+        session.close()
+
+
+

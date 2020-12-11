@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "type": "object",
+  "description": "Schema holding DB parameters for checking the overlaps.",
+  "definitions": {
+    "source_db_properties": {
+      "type": "object",
+      "properties": {
+        "db_name": {
+          "type": "string"
+        },
+        "db_user": {
+          "type": "string"
+        },
+        "db_psw": {
+          "type": "string"
+        },
+        "db_port": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "db_name",
+        "db_user",
+        "db_psw",
+        "db_port"
+      ]
+    }
+  },
+  "properties": {
+    "example_source_name": {
+      "$ref": "#/definitions/source_db_properties"
+    }
+  },
+  "additionalProperties": true
+}
