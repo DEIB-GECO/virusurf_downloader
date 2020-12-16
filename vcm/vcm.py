@@ -239,34 +239,25 @@ def create_and_get_sequence(session, virus_sample: VirusSample, virus_id, experi
 
 def create_annotation_and_aa_variants(session, sample: VirusSample, sequence: Sequence, reference_sample: VirusSample):
     for start, stop, feature_type, gene_name, product, db_xref_merged, amino_acid_sequence, aa_variants in sample.annotations_and_amino_acid_variants(reference_sample):
-        annotation = session.query(Annotation).filter(Annotation.start == start,
-                                                      Annotation.stop == stop,
-                                                      Annotation.feature_type == feature_type,
-                                                      Annotation.gene_name == gene_name,
-                                                      Annotation.product == product,
-                                                      Annotation.external_reference == db_xref_merged,
-                                                      Annotation.sequence_id == sequence.sequence_id,
-                                                      Annotation.aminoacid_sequence == amino_acid_sequence).one_or_none()
-        if not annotation:
-            annotation = Annotation(start=start,
-                                    stop=stop,
-                                    gene_name=gene_name,
-                                    feature_type=feature_type,
-                                    product=product,
-                                    external_reference=db_xref_merged,
-                                    sequence_id=sequence.sequence_id,
-                                    aminoacid_sequence=amino_acid_sequence)
-            session.add(annotation)
-            session.flush()
-            if aa_variants:
-                for original, alternative, mutpos, mut_len, mut_type in aa_variants:
-                    aa_variant = AminoAcidVariant(annotation_id=annotation.annotation_id,
-                                                  sequence_aa_original=original,
-                                                  sequence_aa_alternative=alternative,
-                                                  start_aa_original=mutpos,
-                                                  variant_aa_length=mut_len,
-                                                  variant_aa_type=mut_type)
-                    session.add(aa_variant)
+        annotation = Annotation(start=start,
+                                stop=stop,
+                                gene_name=gene_name,
+                                feature_type=feature_type,
+                                product=product,
+                                external_reference=db_xref_merged,
+                                sequence_id=sequence.sequence_id,
+                                aminoacid_sequence=amino_acid_sequence)
+        session.add(annotation)
+        session.flush()
+        if aa_variants:
+            for original, alternative, mutpos, mut_len, mut_type in aa_variants:
+                aa_variant = AminoAcidVariant(annotation_id=annotation.annotation_id,
+                                              sequence_aa_original=original,
+                                              sequence_aa_alternative=alternative,
+                                              start_aa_original=mutpos,
+                                              variant_aa_length=mut_len,
+                                              variant_aa_type=mut_type)
+                session.add(aa_variant)
             session.flush()
 
 
@@ -534,6 +525,58 @@ def remove_sequence_and_meta(session, primary_sequence_accession_id: Optional[st
                 Sequence.sequence_id != sequence_id).first()
     if not sequences_with_same_sequencing_project:
         session.query(SequencingProject).filter(SequencingProject.sequencing_project_id == sequence_project_id).delete(synchronize_session=False)
+
+
+def remove_sequence_and_meta_list(session, primary_sequence_accession_id: Optional[List[str]]=None, alternative_sequence_accession_id: Optional[List[str]]=None):
+    # get sequence_id of all
+    query = session.query(Sequence.sequence_id)
+    if primary_sequence_accession_id:
+        query = query\
+            .filter(Sequence.accession_id.in_(primary_sequence_accession_id))
+    elif alternative_sequence_accession_id:
+        query = query\
+            .filter(Sequence.alternative_accession_id.in_(alternative_sequence_accession_id))
+    else:
+        raise ValueError('one between primary_sequence_accession_id and alternative_sequence_accession_id arguments must '
+                         'be specified')
+    sequence_ids = query.all()
+    sequence_ids = [_[0] for _ in sequence_ids]
+
+    # delete aa variants and annotations
+    annotation_ids = session.query(Annotation.annotation_id).filter(Annotation.sequence_id.in_(sequence_ids)).all()
+    annotation_ids = [_[0] for _ in annotation_ids]
+    if annotation_ids:
+        session.query(AminoAcidVariant).filter(AminoAcidVariant.annotation_id.in_(annotation_ids)).delete(synchronize_session=False)
+    session.query(Annotation).filter(Annotation.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
+
+    # delete impacts and nuc variants
+    nuc_variant_ids = session.query(NucleotideVariant.nucleotide_variant_id).filter(NucleotideVariant.sequence_id.in_(sequence_ids)).all()
+    nuc_variant_ids = [_[0] for _ in nuc_variant_ids]
+    if nuc_variant_ids:
+        session.query(VariantImpact).filter(VariantImpact.nucleotide_variant_id.in_(nuc_variant_ids)).delete(synchronize_session=False)
+    session.query(NucleotideVariant).filter(NucleotideVariant.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
+
+    # delete sequence
+    session.query(Sequence).filter(Sequence.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
+
+    # delete unused meta
+    # (host sample)
+    session.query(HostSample)\
+        .filter(HostSample.host_sample_id.notin_(session.query(Sequence.host_sample_id))).delete(synchronize_session=False)
+
+    # (experiment)
+    session.query(ExperimentType) \
+        .filter(ExperimentType.experiment_type_id.notin_(session.query(Sequence.experiment_type_id))).delete(synchronize_session=False)
+
+    # (seq project)
+    session.query(SequencingProject) \
+        .filter(SequencingProject.sequencing_project_id.notin_(session.query(Sequence.sequencing_project_id))).delete(synchronize_session=False)
+
+    # (host specie)
+    session.query(HostSpecie) \
+        .filter(
+        (HostSpecie.host_id.notin_(session.query(HostSample.host_id))) &
+        (HostSpecie.host_id.notin_(session.query(Epitope.host_id)))).delete(synchronize_session=False)
 
 
 def check_existence_epitopes(session, virus_id):

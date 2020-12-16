@@ -25,7 +25,8 @@ def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch
     global _db_engine, _session_factory, _last_config_parameters
     _last_config_parameters = (db_name, db_user, db_psw, db_port, recreate_db_from_scratch)
     logger.info('configuring db... make sure a connection is available')
-    _db_engine = sqlalchemy.create_engine(f'postgresql://{db_user}:{db_psw}@localhost:{db_port}/{db_name}')
+    _db_engine = sqlalchemy.create_engine(f'postgresql://{db_user}:{db_psw}@localhost:{db_port}/{db_name}')\
+        .execution_options(schema_translate_map={None: "public"})
 
     try:
         if recreate_db_from_scratch:

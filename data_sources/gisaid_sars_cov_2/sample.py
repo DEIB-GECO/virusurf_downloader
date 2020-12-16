@@ -103,7 +103,11 @@ class GISAIDSarsCov2Sample(VirusSample):
 
     def lineage(self):
         try:
-            return strip_or_none(self.sequence_dict['covv_lineage'])
+            lin = strip_or_none(self.sequence_dict['covv_lineage'])
+            if lin == 'None':
+                return None
+            else:
+                return lin
         except KeyError:
             return None
 

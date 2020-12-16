@@ -1,6 +1,6 @@
 from collections import Counter, OrderedDict
 from data_sources.ncbi_any_virus.host_sample import NCBIHostSample
-from pipeline_nuc_variants__annotations__aa import sequence_aligner
+from nuc_aa_pipeline import sequence_aligner
 import re
 import os
 import urllib
@@ -167,7 +167,7 @@ class AnyNCBIVNucSample:
                 return fallback
             if strain == 'nasopharyngeal':
                 strain = None
-                isolation_source_suggested_by_other_method = 'nasopharyngeal'
+                self.isolation_source_suggested_by_other_method = 'nasopharyngeal'
         return strain
 
     def is_reference(self):
@@ -849,8 +849,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
         stats_module.StatsBasedOnIds([str(x) for x in id_new_sequences], False, virus_id, ['GenBank', 'RefSeq']))
 
     # remove outdated sequences
-    for alt_seq_acc_id in id_outdated_sequences:
-        database_tom.try_py_function(vcm.remove_sequence_and_meta, None, str(alt_seq_acc_id))
+    database_tom.try_py_function(vcm.remove_sequence_and_meta_list, None, [str(x) for x in id_outdated_sequences])
 
     # prepare multiprocessing
     database_tom.dispose_db_engine()

@@ -7,7 +7,7 @@ from Bio import Entrez
 from tqdm import tqdm
 import data_cleaning_module
 import stats_module
-from pipeline_nuc_variants__annotations__aa import sequence_aligner
+from nuc_aa_pipeline import sequence_aligner
 from loguru import logger
 from time import sleep
 from lxml import html, etree

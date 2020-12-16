@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from data_sources.gisaid_sars_cov_2.sample import GISAIDSarsCov2Sample
 from data_sources.virus import VirusSource
-from db_config.database_tom import try_py_function, Sequence
+from db_config.database_tom import try_py_function, Sequence, HostSample, SequencingProject
 
 
 # noinspection PyMethodMayBeStatic
@@ -83,10 +83,18 @@ class GISAIDSarsCov2(VirusSource):
     def get_sequences_in_current_data(self) -> dict:
         def do(session):
             all_sequences = dict()
-            for source_seq in session.query(Sequence) \
-                                      .filter(Sequence.strain_name.isnot(None)) \
+            for db_items in session.query(Sequence, HostSample, SequencingProject) \
+                                      .filter(Sequence.strain_name.isnot(None),
+                                              Sequence.host_sample_id == HostSample.host_sample_id,
+                                              Sequence.sequencing_project_id == SequencingProject.sequencing_project_id) \
                                       .yield_per(100):
-                all_sequences[source_seq.accession_id] = (source_seq.strain_name, source_seq.length)
+                source_seq, source_host, source_prj = db_items
+                all_sequences[source_seq.accession_id] = (source_seq.strain_name, source_seq.length,
+                                                          source_seq.gc_percentage, source_seq.n_percentage,
+                                                          source_host.collection_date, source_host.originating_lab,
+                                                          source_prj.submission_date, source_prj.sequencing_lab,
+                                                          source_host.country, source_host.region,
+                                                          source_host.isolation_source)
             return all_sequences
 
         return try_py_function(do)
@@ -123,7 +131,17 @@ class GISAIDSarsCov2(VirusSource):
             acc_id = new_sequence.primary_accession_number()
             try:
                 current_sequence_data = current_data[acc_id]
-                if current_sequence_data[0] != new_sequence.strain() or current_sequence_data[1] != new_sequence.length():
+                # if the gisaid id is the same, compare metadata to detect if the sample changed over time
+                if current_sequence_data[0] != new_sequence.strain() \
+                        or current_sequence_data[1] != new_sequence.length() \
+                        or current_sequence_data[2] != new_sequence.gc_percent() \
+                        or current_sequence_data[3] != new_sequence.n_percent() \
+                        or current_sequence_data[4] != str(new_sequence.collection_date()) \
+                        or current_sequence_data[5] != new_sequence.originating_lab() \
+                        or str(current_sequence_data[6]) != str(new_sequence.submission_date()) \
+                        or current_sequence_data[7] != new_sequence.sequencing_lab() \
+                        or (current_sequence_data[8], current_sequence_data[9]) != new_sequence.country__region__geo_group()[:2] \
+                        or current_sequence_data[9] != new_sequence.isolation_source():
                     acc_id_changed.append(acc_id)
             except KeyError:
                 pass  # the accession id is not present in current data. it's a new sequence
@@ -141,8 +159,8 @@ class GISAIDSarsCov2(VirusSource):
                     f'# {len(acc_id_missing_in_current)} never seen before.\n'
                     f'# {len(acc_id_changed)} have different attributes in the remote source\n'
                     f'# Sequences from local source: {len(acc_id_current)}. Of which\n'
-                    f'# {len(acc_id_missing_in_remote)} outdated and must be removed from local.\n'
-                    f'# In conclusion: {len(acc_id_to_remove)} sequences will be removed because outdated or changed in remote\n'
+                    f'# {len(acc_id_missing_in_remote)} are missing from remote and must be removed from local.\n'
+                    f'# In conclusion: {len(acc_id_to_remove)} sequences will be removed because missing or changed in remote\n'
                     f'# and {len(acc_id_to_import)} sequences will be imported because novel or changed in remote.')
 
         return acc_id_to_remove, acc_id_to_import

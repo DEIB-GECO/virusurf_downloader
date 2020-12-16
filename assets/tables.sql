@@ -1,37 +1,18 @@
--- public.db_meta definition
-
--- Drop table
-
--- DROP TABLE db_meta;
-
 CREATE TABLE public.db_meta (
 	virus_id int4 NOT NULL,
 	"source" varchar NOT NULL,
-	date_of_import date NULL
+	date_of_import date NULL,
+	PRIMARY KEY (virus_id, "source")
 );
 
-
--- public.experiment_type definition
-
--- Drop table
-
--- DROP TABLE experiment_type;
-
-CREATE TABLE experiment_type (
+CREATE TABLE public.experiment_type (
 	experiment_type_id serial primary key,
 	sequencing_technology varchar NULL,
 	assembly_method varchar NULL,
 	coverage int4 NULL
 );
 
-
--- public.sequencing_project definition
-
--- Drop table
-
--- DROP TABLE sequencing_project;
-
-CREATE TABLE sequencing_project (
+CREATE TABLE public.sequencing_project (
 	sequencing_project_id serial primary key ,
 	sequencing_lab varchar NULL,
 	submission_date date NULL,
@@ -39,14 +20,7 @@ CREATE TABLE sequencing_project (
 	bioproject_id varchar NULL
 );
 
-
--- public.virus definition
-
--- Drop table
-
--- DROP TABLE virus;
-
-CREATE TABLE virus (
+CREATE TABLE public.virus (
 	virus_id serial primary key,
 	taxon_id int4 NULL,
 	taxon_name varchar NULL,
@@ -60,14 +34,7 @@ CREATE TABLE virus (
 	is_positive_stranded bool NULL
 );
 
-
--- public.epitope definition
-
--- Drop table
-
--- DROP TABLE epitope;
-
-CREATE TABLE epitope (
+CREATE TABLE public.epitope (
 	epitope_id serial primary key,
 	virus_id int4 NOT NULL,
 	host_id int4 NOT NULL,
@@ -87,14 +54,7 @@ CREATE TABLE epitope (
 	assay_type varchar NULL
 );
 
-
--- public.epitope_fragment definition
-
--- Drop table
-
--- DROP TABLE epitope_fragment;
-
-CREATE TABLE epitope_fragment (
+CREATE TABLE public.epitope_fragment (
 	epi_fragment_id serial primary key,
 	epitope_id int4 NULL,
 	epi_fragment_sequence varchar NULL,
@@ -102,27 +62,13 @@ CREATE TABLE epitope_fragment (
 	epi_frag_annotation_stop int4 NULL
 );
 
-
--- public.host_specie definition
-
--- Drop table
-
--- DROP TABLE host_specie;
-
-CREATE TABLE host_specie (
+CREATE TABLE public.host_specie (
 	host_id serial primary key,
 	host_taxon_id int4 NULL,
 	host_taxon_name varchar NULL
 );
 
-
--- public.host_sample definition
-
--- Drop table
-
--- DROP TABLE host_sample;
-
-CREATE TABLE host_sample (
+CREATE TABLE public.host_sample (
 	host_sample_id serial primary key,
 	host_id int4 NULL,
 	collection_date varchar NULL,
@@ -135,14 +81,7 @@ CREATE TABLE host_sample (
 	gender varchar NULL
 );
 
-
--- public."sequence" definition
-
--- Drop table
-
--- DROP TABLE "sequence";
-
-CREATE TABLE "sequence" (
+CREATE TABLE public."sequence" (
 	sequence_id serial primary key,
 	experiment_type_id int4 NOT NULL,
 	virus_id int4 NOT NULL,
@@ -163,14 +102,7 @@ CREATE TABLE "sequence" (
 	gisaid_only bool NOT NULL
 );
 
-
--- public.nucleotide_variant definition
-
--- Drop table
-
--- DROP TABLE nucleotide_variant;
-
-CREATE TABLE nucleotide_variant (
+CREATE TABLE public.nucleotide_variant (
 	nucleotide_variant_id serial primary key,
 	sequence_id int4 NOT NULL,
 	sequence_original varchar NOT NULL,
@@ -181,14 +113,7 @@ CREATE TABLE nucleotide_variant (
 	variant_type varchar NOT NULL
 );
 
-
--- public.variant_impact definition
-
--- Drop table
-
--- DROP TABLE variant_impact;
-
-CREATE TABLE variant_impact (
+CREATE TABLE public.variant_impact (
 	variant_impact_id bigserial primary key,
 	nucleotide_variant_id int4 NOT NULL,
 	effect varchar NULL,
@@ -196,14 +121,7 @@ CREATE TABLE variant_impact (
 	impact_gene_name varchar NULL
 );
 
-
--- public.annotation definition
-
--- Drop table
-
--- DROP TABLE annotation;
-
-CREATE TABLE annotation (
+CREATE TABLE public.annotation (
 	annotation_id serial primary key,
 	sequence_id int4 NOT NULL,
 	feature_type varchar NOT NULL,
@@ -216,14 +134,7 @@ CREATE TABLE annotation (
 	annotation_nucleotide_sequence varchar NULL
 );
 
-
--- public.aminoacid_variant definition
-
--- Drop table
-
--- DROP TABLE aminoacid_variant;
-
-CREATE TABLE aminoacid_variant (
+CREATE TABLE public.aminoacid_variant (
 	aminoacid_variant_id serial primary key,
 	annotation_id int4 NOT NULL,
 	sequence_aa_original varchar NOT NULL,

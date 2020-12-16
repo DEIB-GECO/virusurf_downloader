@@ -124,11 +124,6 @@ class Sequential:
 #         self.shared_session.close()
 
 
-def remove_outdated_sequences(session, accession_ids):
-    for ai in accession_ids:
-        vcm.remove_sequence_and_meta(session=session, primary_sequence_accession_id=ai)
-
-
 def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     db_params: dict = import_config.get_database_config_params()
     database_tom.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
@@ -169,9 +164,9 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
 
     logger.info('Removing outdated sequences...')
     # REMOVE OUTDATED SEQUENCES
-    database_tom.try_py_function(
-        remove_outdated_sequences, acc_ids_sequences_to_remove
-    )
+    database_tom.try_py_function(vcm.remove_sequence_and_meta_list, acc_ids_sequences_to_remove, None)
+    stats_module.removed_samples(acc_ids_sequences_to_remove)
+
     # IMPORT NEW/CHANGED SEQUENCES
     logger.info(f'Importing virus sequences and related tables...')
     import_method = Sequential(virus_id)

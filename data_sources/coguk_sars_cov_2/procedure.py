@@ -11,7 +11,7 @@ from sqlalchemy.orm.session import Session
 from db_config import read_db_import_configuration as import_config, database_tom
 from data_sources.ncbi_any_virus.settings import known_settings as ncbi_known_settings
 from locations import get_local_folder_for, FileType, remove_file
-from pipeline_nuc_variants__annotations__aa import sequence_aligner
+from nuc_aa_pipeline import sequence_aligner
 import stats_module
 
 sc2_chromosome = ncbi_known_settings["sars_cov_2"]["chromosome_name"]
@@ -72,6 +72,7 @@ class Sequential:
 
     def tear_down(self):
         pass
+
 
 class Parallel:
 
@@ -165,17 +166,13 @@ class Parallel:
         logger.info('all processes_finished')
 
 
-def import_virus(session: Session, _virus: COGUKSarsCov2):
-    return vcm.create_or_get_virus(session, _virus)
-
-
 def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     global virus, virus_id, import_method, successful_imports
     db_params: dict = import_config.get_database_config_params()
     database_tom.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
     virus = COGUKSarsCov2()
     # IMPORT VIRUS TAXON DATA
-    virus_id = database_tom.try_py_function(import_virus, virus)
+    virus_id = database_tom.try_py_function(vcm.create_or_get_virus, virus)
 
     # update last import date
     database_tom.try_py_function(vcm.update_db_metadata, virus_id, 'COG-UK')

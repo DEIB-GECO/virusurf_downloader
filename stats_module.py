@@ -44,12 +44,16 @@ class StatsType(ABC):
     def completed_sample(self, *args, **kwargs):
         raise NotImplementedError
 
+    def removed_samples(self, *args, **kwargs):
+        raise NotImplementedError
+
 
 class StatsBasedOnTotals(StatsType):
     def __init__(self, number_of_scheduled_samples: int, virus_db_id: Optional[int] = None, sources: Optional[List[str]] = None):
         super().__init__()
         self._number_scheduled_samples = number_of_scheduled_samples
         self._number_completed_samples = Value('i', 0)  # multiprocess-safe int initialized to 0
+        self._number_removed_samples = Value('i', 0)  # multiprocess-safe int initialized to 0
         message = f"\n" \
                   f"STATS MODULE:\n" \
                   f"scheduled import of {number_of_scheduled_samples} samples"
@@ -61,13 +65,19 @@ class StatsBasedOnTotals(StatsType):
         with self._number_completed_samples.get_lock():
             self._number_completed_samples.value += 1
 
+    def removed_samples(self, number):
+        with self._number_removed_samples.get_lock():
+            self._number_removed_samples.value += number
+
     def check_samples_imported(self):
         # overwrite Value object with int for a simpler handling
         self._number_completed_samples = self._number_completed_samples.value
+        self._number_removed_samples = self._number_removed_samples.value
 
         message = f"\n" \
                   f"STATS MODULE:\n" \
                   f"Scheduled import of {self._number_scheduled_samples} samples\n" \
+                  f"Removed {self._number_removed_samples} samples\n" \
                   f"Completed {self._number_completed_samples} samples\n"
         warn = False
 
@@ -91,7 +101,7 @@ class StatsBasedOnTotals(StatsType):
             message += f"Sequences in DB:\n" \
                        f"\tprevious number {sum(self._sequences_in_db_at_start.values())}.\n" \
                        f"\tcurrent number {sum(current_sequences_in_db.values())}\n" \
-                       f"\tdifference: {sum(inserted_in_db.values())} new_ones - {sum(removed_from_db.values())} deleted = {sum(inserted_in_db.values()) - sum(removed_from_db.values())}\n"
+                       f"\tdifference: {sum(inserted_in_db.values())} new - {sum(removed_from_db.values())} missing from source and deleted = {sum(inserted_in_db.values()) - sum(removed_from_db.values())}\n"
             # check duplicates
             num_duplcates_at_start = sum(self._sequences_in_db_at_start.values()) - len(set(self._sequences_in_db_at_start))
             num_current_duplicates = sum(current_sequences_in_db.values()) - len(set(current_sequences_in_db))
@@ -102,7 +112,7 @@ class StatsBasedOnTotals(StatsType):
                            f"\tcurrent number of duplicates: {num_current_duplicates}\n" \
                            f"\tdetail of current duplicated accession_ids: {sorted(list(current_sequences_in_db - Counter(set(current_sequences_in_db))))}\n"
 
-            num_completed_not_inserted = self._number_completed_samples - sum(inserted_in_db.values())
+            num_completed_not_inserted = self._number_completed_samples - sum(inserted_in_db.values()) - self._number_removed_samples
             if num_completed_not_inserted > 0:
                 warn = True
                 message += f'Number of samples completed and not imported (or imported twice) into the DB: {num_completed_not_inserted}\n'
@@ -142,10 +152,15 @@ class StatsBasedOnIds(StatsType):
             message += f"{sorted(_duplicated_accession_id)}"
             logger.error(message)
             sys.exit(1)
-        self._completed_samples_acc_id = Queue(maxsize=len(self._scheduled_samples_acc_id)*2)
+        self._completed_samples_acc_id = Queue()
+        self._removed_samples_acc_id = Queue()
 
     def completed_sample(self, sample_acc_id: str):
         self._completed_samples_acc_id.put_nowait(sample_acc_id)
+
+    def removed_samples(self, samples_acc_id: List[str]):
+        for i in samples_acc_id:
+            self._removed_samples_acc_id.put_nowait(i)
 
     def check_samples_imported(self):
         if self._completed_samples_acc_id is None:
@@ -157,7 +172,10 @@ class StatsBasedOnIds(StatsType):
             _scheduled_samples_acc_id = set(self._scheduled_samples_acc_id)
             message += f"Scheduled import of {len(_scheduled_samples_acc_id)} samples\n"
             completed_samples_acc_id = self._queue_to_set(self._completed_samples_acc_id)
+            removed_samples_acc_id = self._queue_to_set(self._removed_samples_acc_id)
             self._completed_samples_acc_id.close()
+            self._removed_samples_acc_id.close()
+            message += f"Removed {len(removed_samples_acc_id)} samples\n"
             message += f"Completed {len(completed_samples_acc_id)} samples\n"
 
             # find errors
@@ -186,7 +204,7 @@ class StatsBasedOnIds(StatsType):
                 message += f"Sequences in DB:\n" \
                            f"\tprevious number {sum(self._sequences_in_db_at_start.values())}.\n" \
                            f"\tcurrent number {sum(current_sequences_in_db.values())}\n" \
-                           f"\tdifference: {sum(inserted_in_db.values())} new_ones - {sum(removed_from_db.values())} deleted = {sum(inserted_in_db.values()) - sum(removed_from_db.values())}\n"
+                           f"\tdifference: {sum(inserted_in_db.values())} new - {sum(removed_from_db.values())} missing from source and deleted  = {sum(inserted_in_db.values()) - sum(removed_from_db.values())}\n"
                 # check duplicates
                 num_duplicates_at_start = sum(self._sequences_in_db_at_start.values()) - len(set(self._sequences_in_db_at_start))
                 num_current_duplicates = sum(current_sequences_in_db.values()) - len(set(current_sequences_in_db))
@@ -197,8 +215,10 @@ class StatsBasedOnIds(StatsType):
                                f"\tcurrent number of duplicates: {num_current_duplicates}\n" \
                                f"\tdetail of current duplicated accession_ids: {sorted(list(current_sequences_in_db - Counter(set(current_sequences_in_db))))}\n"
 
-                completed_not_inserted = Counter(completed_samples_acc_id) - inserted_in_db
-                inserted_not_completed = inserted_in_db - Counter(completed_samples_acc_id)
+                # check errors in insertions
+                changed_in_db = Counter(removed_samples_acc_id) # this set cannot be retrieved from the database
+                completed_not_inserted = Counter(completed_samples_acc_id) - inserted_in_db - changed_in_db
+                inserted_not_completed = inserted_in_db - Counter(completed_samples_acc_id) - changed_in_db
                 if sum(completed_not_inserted.values()) > 0:
                     warn = True
                     message += f'Number of samples completed and not imported into the DB: {sum(completed_not_inserted.values())}\n' \
@@ -237,6 +257,10 @@ def schedule_samples(set_info: StatsType):
 
 def completed_sample(*args, **kwargs):
     _stats_type.completed_sample(*args, **kwargs)
+
+
+def removed_samples(*args, **kwargs):
+    _stats_type.removed_samples(*args, **kwargs)
 
 
 def check_samples_imported(*args, **kwargs):

@@ -8,7 +8,7 @@ from pipeline_nuc_variants__annotations__aa import \
     filter_nuc_variants, \
     call_annotation_variant, \
     filter_ann_and_variants
-from data_sources.ncbi_any_virus.ncbi_importer import known_settings
+from data_sources.ncbi_any_virus.settings import known_settings as ncbi_known_settings
 import json
 
 
@@ -253,7 +253,7 @@ def main():
     reference_sequence = SeqIO.parse(open(reference_fasta_file_name),
                                          'fasta').__next__().seq
 
-    specie_parameters = known_settings[species]
+    specie_parameters = ncbi_known_settings[species]
     annotation_file_name = specie_parameters["annotation_file_path"]
     chr_name = specie_parameters["chromosome_name"]
     snpeff_db_name = specie_parameters["snpeff_db_name"]
