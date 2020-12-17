@@ -3,8 +3,8 @@ from overlaps import multi_database_manager
 
 
 def run():
-    inp = sys.argv[7].lower()
-    to_commit_str = sys.argv[8].lower()
+    inp = sys.argv[2].lower()
+    to_commit_str = sys.argv[3].lower()
     if to_commit_str == 'true' or to_commit_str == 'yes':
         multi_database_manager.user_asked_to_commit = True
     else:

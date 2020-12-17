@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS lineages (
     note varchar
 );
 
-\copy lineages FROM '/home/alfonsi/lineages.csv' WITH DELIMITER ',' CSV HEADER;
+\copy lineages FROM 'pathtocsvfile' WITH DELIMITER ',' CSV HEADER;
 
 update sequence s set lineage = l.lineage from lineages l where s.accession_id = l.accession_id and l.lineage != 'None';
 

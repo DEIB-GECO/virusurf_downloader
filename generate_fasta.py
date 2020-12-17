@@ -4,12 +4,23 @@ Created by tomalf2 on ott, 2020.
 from typing import Generator, Tuple
 from sqlalchemy import func
 from tqdm import tqdm
-from db_config import database_tom
+from db_config import read_db_import_configuration as import_config, database_tom
 from locations import get_local_folder_for, FileType
 from epitopes import virus_database_id
+from os.path import abspath
+from loguru import logger
 
 
-def generate_fasta(virus_taxon_id: int, virus_folder_name:str, generated_file_name:str):
+
+def generate_fasta(virus_taxon_id: int, virus_folder_name:str, generated_file_name:str) -> str:
+    """
+    Generates a multi fasta file containing all the sequences of the given virus.
+
+    :return: the absolute path to the generated fasta file.
+    """
+    db_params: dict = import_config.get_database_config_params()
+    database_tom.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
+
     virus_db_id = virus_database_id(virus_taxon_id)
 
     if virus_db_id is None:
@@ -36,6 +47,7 @@ def generate_fasta(virus_taxon_id: int, virus_folder_name:str, generated_file_na
             .first()[0]
 
     target_file_path = get_local_folder_for(virus_folder_name, FileType.Fasta) + generated_file_name
+    logger.info(f"Generating fasta...")
     with open(file=target_file_path, mode='w') as file:
         total_count = database_tom.try_py_function(get_total_acc_ids_from_db)
         print(total_count)
@@ -50,3 +62,6 @@ def generate_fasta(virus_taxon_id: int, virus_folder_name:str, generated_file_na
             file.write(f'\n>{acc_id_and_sequences[0]}\n')
             file.write(acc_id_and_sequences[1])
             progress.update()
+    target_file_path = abspath(target_file_path)
+    logger.info(f"Fasta file generated at {target_file_path}")
+    return target_file_path

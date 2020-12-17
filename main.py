@@ -6,6 +6,8 @@ import data_sources.nmdc.procedure as nmdc
 import stats_module
 from logger_settings import setup_logger
 from db_config import read_db_import_configuration as import_config, database_tom
+import os
+from os.path import sep
 
 log_file_keyword = ""
 
@@ -15,12 +17,12 @@ wrong_arguments_message = "Accepted parameters:\n" \
                           "\timport <db_name> coguk|gisaid|" + "|".join(ncbi_virus_names) + "\n" \
                           "\tepitopes <db_name> " + "|".join(ncbi_virus_names) + "\n" \
                           "\toverlaps <source1>_<source2> <commit to the DB ?>\n" \
-                          "\tlineages <db_name> <lineages TSV file path>"
+                          "\tlineages <db_name> " + "|".join(ncbi_virus_names) + "\n"
 wrong_arguments_message += 'When action is "import", the source name can be optionally followed by a range of samples to import as <min> (included) <max> (excluded).\n'
 
 try:
     action = sys.argv[1].lower()
-    if action in ['import', 'epitope', 'lineage', 'fasta', 'sql']:     # get database name if action is not 'overlaps'
+    if action in ['import', 'epitopes', 'lineages']:     # get database name if action is not 'overlaps'
         db_name = sys.argv[2]
         import_config.set_db_name(db_name)
     if action == 'import':
@@ -35,16 +37,13 @@ try:
         except IndexError:
             _from = None
             to = None
-    elif 'epitope' in action:
+    elif 'epitopes' in action:
         _epitope_target = sys.argv[3]
         log_file_keyword = f"epi_{_epitope_target}"
-    elif 'lineage' in action:
-        _lineages_tsv_file_path = sys.argv[3]
-        log_file_keyword = f"lineages"
-    elif 'fasta' in action:
+    elif 'lineages' in action:
         _fasta_target = sys.argv[3]
-        log_file_keyword = f"fasta_{_fasta_target}"
-    elif 'overlap' in action:
+        log_file_keyword = f"lineages_{_fasta_target}"
+    elif 'overlaps' in action:
         _overlap_target = sys.argv[2]
         log_file_keyword = f"overlaps_{_overlap_target}"
     else:
@@ -65,7 +64,7 @@ try:
         database_tom.create_views()
     elif 'chimera_sequence' in action:
         database_tom.disambiguate_chimera_sequences()
-    elif 'epitope' in action:
+    elif 'epitopes' in action:
         from epitopes import import_epitopes
         # noinspection PyUnboundLocalVariable
         virus_import_parameters = known_settings.get(_epitope_target)
@@ -73,10 +72,6 @@ try:
             raise ValueError(f'{_epitope_target} is not recognised as an importable virus')
         virus_txid = virus_import_parameters[1]
         import_epitopes(virus_txid)
-    elif 'lineage' in action:
-        from load_lineages import load
-        # noinspection PyUnboundLocalVariable
-        load(_lineages_tsv_file_path)
     elif 'import' in action:
         # noinspection PyUnboundLocalVariable
         if source in ['coguk', 'cog-uk']:
@@ -91,16 +86,22 @@ try:
             nmdc.import_samples_into_vcm()
         else:
             logger.error(f'the argument {source} is not recognised.\n'+wrong_arguments_message)
-    elif 'fasta' in action:
+    elif 'lineages' in action:
+        logger.warning('This action requires pangolin to be installed in a pangolin environment.')
         from generate_fasta import generate_fasta
+        from db_config.read_db_import_configuration import get_database_config_params
         # noinspection PyUnboundLocalVariable
         virus_import_parameters = known_settings.get(_fasta_target)
         if not virus_import_parameters:
             raise ValueError(f'{_fasta_target} is not recognised as an importable virus')
         virus_txid = virus_import_parameters["virus_taxon_id"]
         virus_folder = virus_import_parameters["generated_dir_name"]
-        generate_fasta(virus_txid, virus_folder, f'{_fasta_target}.fasta')
-    elif 'overlap' in action:
+        fasta_path = generate_fasta(virus_txid, virus_folder, f'{_fasta_target}.fasta')
+        # the following script runs pangolin and loads the result into the database
+        db_user = get_database_config_params()["db_user"]
+        db_name = get_database_config_params()["db_name"]
+        os.system(f"bash .{sep}bash_scripts{sep}load_lineages.sh {fasta_path} {db_name} {db_user}")
+    elif 'overlaps' in action:
         from overlaps import overlaps_controller
         overlaps_controller.run()
     else:
