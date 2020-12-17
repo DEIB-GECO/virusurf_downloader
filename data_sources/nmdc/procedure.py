@@ -22,7 +22,7 @@ from data_sources.ncbi_services import host_taxon_id_from_ncbi_taxon_name, downl
 from vcm import vcm
 import dateutil.parser as dateparser
 from geo_groups import geo_groups
-from db_config import read_db_import_configuration as import_config, database_tom
+from db_config import read_db_import_configuration as import_config, database
 
 Entrez.email = "example@mail.com"   # just to silence the warning. Then a correct email can be set later
 
@@ -438,7 +438,7 @@ def import_samples_into_vcm():
     global fasta_list, refseq_sc1, refseq_sc2, refseq_sc1_len, refseq_sc2_len, cached_taxonomy, fasta_folder, \
         taxonomy_folder, imported_viruses
     db_params: dict = import_config.get_database_config_params()
-    database_tom.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
+    database.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
     fasta_folder = get_local_folder_for('NMDC', FileType.SequenceOrSampleData)
     taxonomy_folder = get_local_folder_for('NMDC', FileType.TaxonomyData)
     fasta_list = get_fasta_list()
@@ -456,11 +456,11 @@ def import_samples_into_vcm():
     refseq_sc1 = reference_sequence("txid694009[Organism:exp] NOT txid2697049[Organism] AND srcdb_refseq[Properties]")
     refseq_sc1_len = len(refseq_sc1)
 
-    def virus_taxonomy_pipeline(session: database_tom, taxon: AnyNCBITaxon):
+    def virus_taxonomy_pipeline(session: database, taxon: AnyNCBITaxon):
         return vcm.create_or_get_virus(session, taxon)
 
     # noinspection PyTypeChecker
-    def metadata_pipeline(session: database_tom.Session, a_sample: NMDCVirusSample):
+    def metadata_pipeline(session: database.Session, a_sample: NMDCVirusSample):
         try:
             experiment_id = vcm.create_or_get_experiment(session, a_sample)
             host_specie_id = vcm.create_or_get_host_specie(session, a_sample)
@@ -473,9 +473,9 @@ def import_samples_into_vcm():
                 logger.error(f'exception occurred while working on virus sample {a_sample}: {str(e)}')
             else:
                 logger.exception(f'exception occurred while working on virus sample {a_sample}')
-            raise database_tom.Rollback()
+            raise database.Rollback()
 
-    def nucleotide__annotations__pipeline(session: database_tom.Session, a_sample: NMDCVirusSample, db_sequence_id):
+    def nucleotide__annotations__pipeline(session: database.Session, a_sample: NMDCVirusSample, db_sequence_id):
         if a_sample.taxon_name() == 'Severe acute respiratory syndrome coronavirus 2':
             refseq = refseq_sc2
         elif a_sample.taxon_name() == 'Bat SARS-related coronavirus':
@@ -507,7 +507,7 @@ def import_samples_into_vcm():
             logger.exception(
                 f'exception occurred while working on annotations and nuc_variants of virus sample '
                 f'{a_sample.primary_accession_number()}. Rollback transaction.')
-            raise database_tom.Rollback()
+            raise database.Rollback()
 
     logger.info('begin import of selected records')
     total_sequences_imported = 0
@@ -540,19 +540,19 @@ def import_samples_into_vcm():
                 continue
 
             # virus id associated to this sample
-            virus_id = database_tom.try_py_function(virus_taxonomy_pipeline, organism)
+            virus_id = database.try_py_function(virus_taxonomy_pipeline, organism)
             if virus_id not in imported_viruses:
                 imported_viruses.add(virus_id)
-                database_tom.try_py_function(vcm.update_db_metadata, virus_id, 'NMDC')
+                database.try_py_function(vcm.update_db_metadata, virus_id, 'NMDC')
             if virus_id:
                 gisa_id = sample.gisa_id()
                 if gisa_id:
                     log_of_gisaid_id.write(gisa_id+'\n')
 
                 # import sample
-                sequence_id = database_tom.try_py_function(metadata_pipeline, sample)
+                sequence_id = database.try_py_function(metadata_pipeline, sample)
                 if sequence_id:
-                    database_tom.try_py_function(nucleotide__annotations__pipeline, sample, sequence_id)
+                    database.try_py_function(nucleotide__annotations__pipeline, sample, sequence_id)
                 total_sequences_imported += 1
 
         logger.info(f'{total_sequences_imported} sequences imported.')

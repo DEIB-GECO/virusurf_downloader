@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from db_config.database_tom import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
+from db_config.database import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
     VariantImpact, AminoAcidVariant, Epitope, EpitopeFragment, HostSpecie, DBMeta, get_session
 from sqlalchemy import func
 from locations import *

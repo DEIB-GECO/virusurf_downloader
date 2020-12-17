@@ -10,7 +10,7 @@ from typing import Generator, Optional
 from loguru import logger
 from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
 from locations import get_local_folder_for, FileType
-from db_config import database_tom
+from db_config import database
 from vcm.vcm import sequence_primary_accession_ids
 import stats_module
 from xml_helper import text_at_node
@@ -81,7 +81,7 @@ class COGUKSarsCov2:
             2. outdated sequences (to be removed)
             3. sequences new and to be imported
         """
-        id_local_samples = set(database_tom.try_py_function(
+        id_local_samples = set(database.try_py_function(
             sequence_primary_accession_ids, virus_id, 'COG-UK'
         ))
         id_outdated_sequences = id_local_samples - id_remote_samples

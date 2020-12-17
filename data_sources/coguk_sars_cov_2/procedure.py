@@ -8,7 +8,7 @@ from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
 from data_sources.coguk_sars_cov_2.virus import COGUKSarsCov2
 from multiprocessing import JoinableQueue, cpu_count, Process
 from sqlalchemy.orm.session import Session
-from db_config import read_db_import_configuration as import_config, database_tom
+from db_config import read_db_import_configuration as import_config, database
 from data_sources.ncbi_any_virus.settings import known_settings as ncbi_known_settings
 from locations import get_local_folder_for, FileType, remove_file
 from nuc_aa_pipeline import sequence_aligner
@@ -26,7 +26,7 @@ import_method = None
 successful_imports: Optional[int] = None
 
 
-def main_pipeline_part_3(session: database_tom.Session, sample, db_sequence_id):
+def main_pipeline_part_3(session: database.Session, sample, db_sequence_id):
     file_path = get_local_folder_for(virus.name, FileType.Annotations) + str(sample.internal_id()) + ".pickle"
     try:
         if not os.path.exists(file_path):
@@ -99,7 +99,7 @@ class Parallel:
             reference_sequence = virus.reference_sequence()
             # prepare workers
             for _ in range(Parallel.number_of_processes()):
-                worker = Parallel.Consumer(self._queue, virus.reference_sequence(), database_tom.get_session())
+                worker = Parallel.Consumer(self._queue, virus.reference_sequence(), database.get_session())
                 self.workers.append(worker)
                 worker.start()
 
@@ -130,7 +130,7 @@ class Parallel:
                             main_pipeline_part_3(self.shared_session, sample, sequence_id)
                             self.shared_session.commit()
                         except:
-                            database_tom.rollback(self.shared_session)
+                            database.rollback(self.shared_session)
                         finally:
                             self.jobs.task_done()
             finally:
@@ -169,13 +169,13 @@ class Parallel:
 def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     global virus, virus_id, import_method, successful_imports
     db_params: dict = import_config.get_database_config_params()
-    database_tom.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
+    database.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
     virus = COGUKSarsCov2()
     # IMPORT VIRUS TAXON DATA
-    virus_id = database_tom.try_py_function(vcm.create_or_get_virus, virus)
+    virus_id = database.try_py_function(vcm.create_or_get_virus, virus)
 
     # update last import date
-    database_tom.try_py_function(vcm.update_db_metadata, virus_id, 'COG-UK')
+    database.try_py_function(vcm.update_db_metadata, virus_id, 'COG-UK')
 
     # # IMPORT VIRUS SEQUENCES
     logger.info(f'importing virus sequences and related tables')
@@ -185,7 +185,7 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     def try_import_virus_sample(sample: COGUKSarsCov2Sample):
         global successful_imports
         try:
-            database_tom.try_py_function(import_method.import_virus_sample, sample)
+            database.try_py_function(import_method.import_virus_sample, sample)
             successful_imports += 1
         except:
             logger.exception(f'exception occurred while working on virus sample {sample.primary_accession_number()}')

@@ -9,7 +9,7 @@ from tqdm import tqdm
 
 from data_sources.gisaid_sars_cov_2.sample import GISAIDSarsCov2Sample
 from data_sources.virus import VirusSource
-from db_config.database_tom import try_py_function, Sequence, HostSample, SequencingProject
+from db_config.database import try_py_function, Sequence, HostSample, SequencingProject
 
 
 # noinspection PyMethodMayBeStatic

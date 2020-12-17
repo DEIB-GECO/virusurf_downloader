@@ -5,7 +5,7 @@ from data_sources.ncbi_any_virus.settings import known_settings
 import data_sources.nmdc.procedure as nmdc
 import stats_module
 from logger_settings import setup_logger
-from db_config import read_db_import_configuration as import_config, database_tom
+from db_config import read_db_import_configuration as import_config, database
 import os
 from os.path import sep
 
@@ -59,11 +59,11 @@ setup_logger(log_file_keyword)
 #   ###################################     PERFORM <action>       ###############
 try:
     if 'index' in action:
-        database_tom.create_indexes()
+        database.create_indexes()
     elif 'view' in action:
-        database_tom.create_views()
+        database.create_views()
     elif 'chimera_sequence' in action:
-        database_tom.disambiguate_chimera_sequences()
+        database.disambiguate_chimera_sequences()
     elif 'epitopes' in action:
         from epitopes import import_epitopes
         # noinspection PyUnboundLocalVariable

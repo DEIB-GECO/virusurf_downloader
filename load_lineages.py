@@ -1,7 +1,7 @@
 """
 Created by tomalf2 on nov, 2020.
 """
-from db_config.database_tom import try_py_function, Sequence, config_db_engine
+from db_config.database import try_py_function, Sequence, config_db_engine
 from sqlalchemy import func
 from loguru import logger
 from tqdm import tqdm

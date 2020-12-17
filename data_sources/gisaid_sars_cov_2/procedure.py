@@ -2,12 +2,12 @@ from typing import Optional
 from loguru import logger
 import stats_module
 from data_sources.virus_sample import VirusSample
-from db_config.database_tom import Session
+from db_config.database import Session
 from vcm import vcm
 from data_sources.gisaid_sars_cov_2.virus import GISAIDSarsCov2
 from time import sleep
 from tqdm import tqdm
-from db_config import read_db_import_configuration as import_config, database_tom
+from db_config import read_db_import_configuration as import_config, database
 
 
 class Sequential:
@@ -54,7 +54,7 @@ class Sequential:
 #
 #         if sample.is_reference():
 #             self.reference_sample = sample
-#             self.shared_session = database_tom.get_session()
+#             self.shared_session = database.get_session()
 #             # prepare workers
 #             for _ in range(Parallel.number_of_processes()):
 #                 worker = Parallel.Consumer(self._queue, sample.nucleotide_var_aligner(), self.shared_session)
@@ -91,7 +91,7 @@ class Sequential:
 #                         stats_module.completed_sample()
 #                     except:
 #                         logger.exception(f'unknown exception while calling nucleotides on sample {sample.internal_id()}')
-#                         database_tom.rollback(self.shared_session)
+#                         database.rollback(self.shared_session)
 #                     self.jobs.task_done()
 #
 #     @staticmethod
@@ -126,7 +126,7 @@ class Sequential:
 
 def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     db_params: dict = import_config.get_database_config_params()
-    database_tom.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
+    database.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
 
     def import_virus(session: Session, virus: GISAIDSarsCov2):
         return vcm.create_or_get_virus(session, virus)
@@ -134,15 +134,15 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     def try_import_virus_sample(sample: VirusSample):
         nonlocal successful_imports, import_method, progress
         try:
-            database_tom.try_py_function(import_method.import_virus_sample, sample)
+            database.try_py_function(import_method.import_virus_sample, sample)
             successful_imports += 1
         except:
             logger.exception(f'exception occurred while working on virus sample {sample.internal_id()}')
 
     # IMPORT VIRUS TAXON DATA
     virus = GISAIDSarsCov2()
-    virus_id = database_tom.try_py_function(import_virus, virus)
-    database_tom.try_py_function(vcm.update_db_metadata, virus_id, 'GISAID')
+    virus_id = database.try_py_function(import_virus, virus)
+    database.try_py_function(vcm.update_db_metadata, virus_id, 'GISAID')
 
     # COMPUTE DELTAS
     acc_ids_sequences_to_remove, acc_id_sequences_to_import = virus.deltas()
@@ -164,7 +164,7 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
 
     logger.info('Removing outdated sequences...')
     # REMOVE OUTDATED SEQUENCES
-    database_tom.try_py_function(vcm.remove_sequence_and_meta_list, acc_ids_sequences_to_remove, None)
+    database.try_py_function(vcm.remove_sequence_and_meta_list, acc_ids_sequences_to_remove, None)
     stats_module.removed_samples(acc_ids_sequences_to_remove)
 
     # IMPORT NEW/CHANGED SEQUENCES

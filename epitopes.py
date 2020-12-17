@@ -4,14 +4,14 @@ from loguru import logger
 from vcm import vcm as vcm
 from VirusGenoUtil.code.integrate_iedb_epitopes import epitopes_for_virus_taxon
 from data_sources.ncbi_services import host_taxon_name_from_ncbi_taxon_id
-from db_config import read_db_import_configuration as import_config, database_tom
+from db_config import read_db_import_configuration as import_config, database
 
 epitope_id_mappings = dict()
 
 
 def import_epitopes(virus_taxon_id: int):
     db_params:dict = import_config.get_database_config_params()
-    database_tom.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
+    database.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
     if virus_taxon_id in [2010960, 186539]:     # == bombali or reston ebolavirus
         logger.info(f'No epitopes available for virus {virus_taxon_id}.')
         return
@@ -36,7 +36,7 @@ def import_epitopes(virus_taxon_id: int):
     epitopes_fragm_file = open('./epitopes_fragments.csv', mode='w')
     epitopes_fragm_file.write('damianos_epitope_id\tseq\tstart\tstop\n')
 
-    def do(session: database_tom.Session):
+    def do(session: database.Session):
         global epitope_id_mappings
         try:
             for epitope in epitopes:
@@ -89,17 +89,17 @@ def import_epitopes(virus_taxon_id: int):
 
         except Exception as e:
             logger.exception('Exception occurred while computing and importing epitopes. Epitopes won\'t be inserted into the DB.')
-            raise database_tom.RollbackAndRaise(e)
+            raise database.RollbackAndRaise(e)
         finally:
             epitopes_file.close()
             epitopes_fragm_file.close()
 
-    database_tom.try_py_function(
+    database.try_py_function(
         do
     )
 
 
-def create_or_get_host_specie_db_id(session: database_tom.Session, organism_ncbi_taxon_id):
+def create_or_get_host_specie_db_id(session: database.Session, organism_ncbi_taxon_id):
     specie_db_id = vcm.get_specie_id(session, organism_ncbi_taxon_id)
     if not specie_db_id:
         organism_name_from_ncbi = host_taxon_name_from_ncbi_taxon_id(organism_ncbi_taxon_id)
@@ -119,11 +119,11 @@ def virus_database_id(virus_taxon_id) -> Optional[int]:
         db_virus = vcm.get_virus(session, Virus())
         return db_virus.virus_id if db_virus else None
 
-    return database_tom.try_py_function(
+    return database.try_py_function(
         get_virus_db_id
     )
 
 
 def epitopes_already_imported(virus_db_id):
-    return database_tom.try_py_function(
+    return database.try_py_function(
         vcm.check_existence_epitopes, virus_db_id)

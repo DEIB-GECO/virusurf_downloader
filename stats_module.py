@@ -4,7 +4,7 @@ from queue import Empty
 from typing import Collection, List, Optional
 from multiprocessing import Queue, Value
 from loguru import logger
-from db_config import database_tom
+from db_config import database
 from vcm import vcm
 from abc import ABC
 from collections import Counter
@@ -22,11 +22,11 @@ class StatsType(ABC):
         self._virus_db_id = virus_db_id
         self._sources = sources
         if is_primary_acc_id:
-            _sequences_in_db_at_start = database_tom.try_py_function(vcm.sequence_primary_accession_ids, virus_db_id,
-                                                                     sources)
+            _sequences_in_db_at_start = database.try_py_function(vcm.sequence_primary_accession_ids, virus_db_id,
+                                                                 sources)
         else:
-            _sequences_in_db_at_start = database_tom.try_py_function(vcm.sequence_alternative_accession_ids,
-                                                                     virus_db_id, sources)
+            _sequences_in_db_at_start = database.try_py_function(vcm.sequence_alternative_accession_ids,
+                                                                 virus_db_id, sources)
         self._sequences_in_db_at_start = Counter(_sequences_in_db_at_start)
 
     def _performance_message(self, num_processed_samples: int):
@@ -93,7 +93,7 @@ class StatsBasedOnTotals(StatsType):
 
         # check against DB
         if self._virus_db_id is not None:
-            current_sequences_in_db = database_tom.try_py_function(
+            current_sequences_in_db = database.try_py_function(
                 vcm.sequence_primary_accession_ids, self._virus_db_id, self._sources)
             current_sequences_in_db = Counter(current_sequences_in_db)
             inserted_in_db = current_sequences_in_db - self._sequences_in_db_at_start
@@ -193,10 +193,10 @@ class StatsBasedOnIds(StatsType):
             # check against DB
             if self._virus_db_id is not None:
                 if self._is_primary_acc_id:
-                    current_sequences_in_db = database_tom.try_py_function(
+                    current_sequences_in_db = database.try_py_function(
                         vcm.sequence_primary_accession_ids, self._virus_db_id, self._sources)
                 else:
-                    current_sequences_in_db = database_tom.try_py_function(
+                    current_sequences_in_db = database.try_py_function(
                         vcm.sequence_alternative_accession_ids, self._virus_db_id, self._sources)
                 current_sequences_in_db = Counter(current_sequences_in_db)
                 inserted_in_db = current_sequences_in_db - self._sequences_in_db_at_start

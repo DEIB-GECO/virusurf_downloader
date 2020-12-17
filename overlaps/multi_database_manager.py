@@ -6,7 +6,7 @@ from loguru import logger
 from typing import Optional, List
 from sqlalchemy import or_, func
 from sqlalchemy import create_engine
-from db_config.database_tom import Rollback, RollbackAndRaise, CommitAndRaise, rollback, \
+from db_config.database import Rollback, RollbackAndRaise, CommitAndRaise, rollback, \
     Sequence, SequencingProject, Virus, HostSample, ExperimentType
 
 _db_engine: Engine

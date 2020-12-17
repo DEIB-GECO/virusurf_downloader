@@ -23,7 +23,7 @@ from locations import get_local_folder_for, FileType, remove_file
 from Bio import Entrez
 import pickle
 import data_cleaning_module
-from db_config import read_db_import_configuration as db_import_config, database_tom
+from db_config import read_db_import_configuration as db_import_config, database
 from data_sources.ncbi_any_virus import settings
 
 
@@ -646,7 +646,7 @@ def _deltas(virus_id, id_remote_samples):
         2. outdated sequences (to be removed)
         3. sequences new and to be imported
     """
-    id_local_samples = set([int(i) for i in database_tom.try_py_function(
+    id_local_samples = set([int(i) for i in database.try_py_function(
         vcm.sequence_alternative_accession_ids, virus_id, ['GenBank', 'RefSeq']
     )])
     id_outdated_sequences = id_local_samples - id_remote_samples
@@ -661,7 +661,7 @@ def _deltas(virus_id, id_remote_samples):
     return id_unchanged_sequences, id_outdated_sequences, id_new_sequences
 
 
-def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSample, db_sequence_id):
+def main_pipeline_part_3(session: database.Session, sample: AnyNCBIVNucSample, db_sequence_id):
     file_path = get_local_folder_for(settings.generated_dir_name, FileType.Annotations) + str(sample.internal_id()) + ".pickle"
     try:
         # logger.debug(f'callling sequence aligner with args: {db_sequence_id}, <ref_seq>, <seq>, {virus_sequence_chromosome_name}, {annotation_file_path}, {snpeff_db_name}')
@@ -687,11 +687,11 @@ def main_pipeline_part_3(session: database_tom.Session, sample: AnyNCBIVNucSampl
     except KeyboardInterrupt:
         # cached file may be incomplete
         remove_file(file_path)
-        raise database_tom.Rollback()
+        raise database.Rollback()
     except Exception:
         logger.exception(f'exception occurred while working on annotations and nuc_variants of virus sample '
                          f'{sample.internal_id()}. Rollback transaction.')
-        raise database_tom.Rollback()
+        raise database.Rollback()
 
 
 class ImportAnnotationsAndNucVariants(Task):
@@ -706,11 +706,11 @@ class ImportAnnotationsAndNucVariants(Task):
             main_pipeline_part_3(self.session, self.sample, self.sequence_id)
             self.session.commit()
             stats_module.completed_sample(self.sample.alternative_accession_number())
-        except database_tom.Rollback:
-            database_tom.rollback(self.session)
+        except database.Rollback:
+            database.rollback(self.session)
         except:
             logger.exception(f'unknown exception while running pipeline_part_3 of sequence with id {self.sequence_id}')
-            database_tom.rollback(self.session)
+            database.rollback(self.session)
 
     def use_session(self, session):
         self.session = session
@@ -719,7 +719,7 @@ class ImportAnnotationsAndNucVariants(Task):
 class TheWorker(Worker):
     def __init__(self, tasks):
         super(TheWorker, self).__init__(tasks)
-        self.worker_session = database_tom.get_session()
+        self.worker_session = database.get_session()
 
     def pick_up_task(self) -> Optional[Task]:
         # noinspection PyTypeChecker
@@ -740,7 +740,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
     settings.initialize_settings(*tuple(settings.known_settings[source_name].values()))
     # setup db connection
     db_params: dict = db_import_config.get_database_config_params()
-    database_tom.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
+    database.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
     # prepare multiprocessor
     task_manager = TaskManager(70, 70, TheWorker)
 
@@ -774,7 +774,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
         taxon_file_path = download_ncbi_taxonomy_as_xml(taxonomy_download_dir,  settings.virus_taxon_id)
         organism = OrganismWrapperClass(taxon_file_path)
 
-        def get_virus_id_and_nuc_reference_sequence(session: database_tom.Session):
+        def get_virus_id_and_nuc_reference_sequence(session: database.Session):
             # get virus ID
             virus = vcm.get_virus(session, organism)
             if virus:
@@ -784,7 +784,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
                 _virus_id = vcm.create_or_get_virus(session, organism)
             # get nuc_reference_sequence
             logger.trace(f'organism txid { settings.virus_taxon_id} already in VIRUS table.')
-            refseq_row: database_tom.Sequence = vcm.get_reference_sequence_of_virus(session, _virus_id)
+            refseq_row: database.Sequence = vcm.get_reference_sequence_of_virus(session, _virus_id)
             if refseq_row:
                 return _virus_id, refseq_row.nucleotide_sequence, refseq_row.accession_id
             else:
@@ -792,10 +792,10 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
                 downloaded_ref_sample = _reference_sample_from_organism(SampleWrapperClass)
                 return _virus_id, downloaded_ref_sample.nucleotide_sequence(), downloaded_ref_sample.primary_accession_number()
 
-        return database_tom.try_py_function(get_virus_id_and_nuc_reference_sequence)
+        return database.try_py_function(get_virus_id_and_nuc_reference_sequence)
 
     # noinspection PyTypeChecker
-    def main_pipeline_part_2(session: database_tom.Session, _sample: AnyNCBIVNucSample):
+    def main_pipeline_part_2(session: database.Session, _sample: AnyNCBIVNucSample):
         """
         Inserts metadata and returns the SEQUENCE.sequence_id
         :return: SEQUENCE.sequence_id of every sample
@@ -813,17 +813,17 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
                 remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
             else:
                 logger.exception(f"exception occurred while working on virus sample {_sample.internal_id()}. Sample won't be imported")
-            raise database_tom.Rollback()
+            raise database.Rollback()
         except AssertionError:
             logger.exception(f"Sample {_sample.internal_id()} may have a corrupted XML. The XML will be deleted. Sample won't be imported")
             remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
-            raise database_tom.Rollback()
+            raise database.Rollback()
         except KeyboardInterrupt as e:
             logger.info(f"import of sample {_sample.internal_id()} interrupted. Sample won't be imported")
             raise e  # i.e. it is handled outside but I don't want it to be logged as an unexpected error
         except Exception as e:
             logger.exception(f"exception occurred while working on virus sample {_sample.internal_id()}. Sample won't be imported")
-            raise database_tom.Rollback()
+            raise database.Rollback()
 
     check_user_query()
 
@@ -834,7 +834,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
     logger.info(f'importing the samples identified by the query provided as bound to organism txid{ settings.virus_taxon_id}')
 
     # update last import date
-    database_tom.try_py_function(vcm.update_db_metadata, virus_id, 'GenBank')
+    database.try_py_function(vcm.update_db_metadata, virus_id, 'GenBank')
 
     # find outdated and new samples from source
     id_all_current_sequences = set(get_samples_accession_ids(f"({settings.non_reference_samples_query}) OR ({settings.reference_sample_query})"))
@@ -849,17 +849,17 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
         stats_module.StatsBasedOnIds([str(x) for x in id_new_sequences], False, virus_id, ['GenBank', 'RefSeq']))
 
     # remove outdated sequences
-    database_tom.try_py_function(vcm.remove_sequence_and_meta_list, None, [str(x) for x in id_outdated_sequences])
+    database.try_py_function(vcm.remove_sequence_and_meta_list, None, [str(x) for x in id_outdated_sequences])
 
     # prepare multiprocessing
-    database_tom.dispose_db_engine()
+    database.dispose_db_engine()
     task_manager.wake_up_workers()
-    database_tom.re_config_db_engine(False)
+    database.re_config_db_engine(False)
 
     logger.info('begin importing new sequences')
     try:
         for sample in _download_as_sample_object(id_new_sequences, SampleWrapperClass):
-            sequence_id = database_tom.try_py_function(
+            sequence_id = database.try_py_function(
                 main_pipeline_part_2, sample
             )
             if sequence_id:
@@ -867,7 +867,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
                 task_manager.assign_task(ImportAnnotationsAndNucVariants(sequence_id, sample))
                 # logger.debug(f'new job queued. waiting jobs: {task_manager.number_of_waiting_tasks()}')
                 # ... or do it one by one
-                # database_tom.try_py_function(
+                # database.try_py_function(
                 #     main_pipeline_part_3, sample, sequence_id
                 # )
     except KeyboardInterrupt:
