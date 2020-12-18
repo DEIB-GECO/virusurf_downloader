@@ -849,7 +849,9 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
         stats_module.StatsBasedOnIds([str(x) for x in id_new_sequences], False, virus_id, ['GenBank', 'RefSeq']))
 
     # remove outdated sequences
-    database.try_py_function(vcm.remove_sequence_and_meta_list, None, [str(x) for x in id_outdated_sequences])
+    id_outdated_sequences = [str(x) for x in id_outdated_sequences]
+    database.try_py_function(vcm.remove_sequence_and_meta_list, alternative_sequence_accession_id=id_outdated_sequences)
+    stats_module.removed_samples(id_outdated_sequences)
 
     # prepare multiprocessing
     database.dispose_db_engine()

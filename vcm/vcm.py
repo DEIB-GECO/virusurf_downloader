@@ -536,6 +536,10 @@ def remove_sequence_and_meta_list(session, primary_sequence_accession_id: Option
     elif alternative_sequence_accession_id:
         query = query\
             .filter(Sequence.alternative_accession_id.in_(alternative_sequence_accession_id))
+    elif (primary_sequence_accession_id is not None and len(primary_sequence_accession_id) == 0) or \
+        (alternative_sequence_accession_id is not None and len(alternative_sequence_accession_id) == 0):
+        # nothing to delete
+        return
     else:
         raise ValueError('one between primary_sequence_accession_id and alternative_sequence_accession_id arguments must '
                          'be specified')
