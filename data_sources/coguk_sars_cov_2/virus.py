@@ -19,8 +19,8 @@ from xml_helper import text_at_node
 class COGUKSarsCov2:
 
     name = 'coguk_sars_cov_2'
-    sequence_file_url = 'https://cog-uk.s3.climb.ac.uk/2020-09-03/cog_2020-09-03_sequences.fasta'
-    metadata_file_url = 'https://cog-uk.s3.climb.ac.uk/2020-09-03/cog_2020-09-03_metadata.csv'
+    sequence_file_url = 'https://cog-uk.s3.climb.ac.uk/phylogenetics/latest/cog_all.fasta'
+    metadata_file_url = 'https://cog-uk.s3.climb.ac.uk/phylogenetics/latest/cog_metadata.csv'
 
     def __init__(self):
         logger.info(f'importing virus {self.name} using NCBI SC2 for taxonomy data')
@@ -149,7 +149,10 @@ class COGUKSarsCov2:
                         except KeyError:
                             logger.error(
                                 f'Found a sequence without a paired metadata string. Foreign key was {sample_key}')
-                        yield COGUKSarsCov2Sample(sample)
+                        try:
+                            yield COGUKSarsCov2Sample(sample)
+                        except:
+                            logger.exception(f"Sample {sample_key} skipped due to an error while parsing the input data.")
 
     def reference_sequence(self) -> str:
         if not hasattr(self, 'reference_sample'):
