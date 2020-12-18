@@ -43,7 +43,7 @@ known_settings = {
         "virus_taxon_id": 2697049,
         "chromosome_name": "NC_045512",
         "snpeff_db_name": "new_ncbi_sars_cov_2",
-        "annotation_file_path": f".{sep}annotations{sep}new_ncbi_sars_cov_2.tsv",
+        "annotation_file_path": f".{sep}annotations{sep}sars_cov_2.tsv",
         "log_with_name": "NCBI-SC2",
         "generated_dir_name": "ncbi_sars_cov_2"
     },
@@ -178,4 +178,3 @@ known_settings = {
         "generated_dir_name": "tai_forest_ebolavirus"
     }
 }
-known_settings["new_ncbi_sars_cov_2"] = known_settings["sars_cov_2"]

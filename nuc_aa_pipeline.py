@@ -125,37 +125,34 @@ def filter_ann_and_variants(annotations_w_aa_variants):
     Transforms SUBs and DELs so that they're all of length 1
     Removes
     - substitutions whose alternative sequence is X (aligner error)
-    - annotations and variants located in proteins ORF1a/ORF1ab
     """
     new_annotations_w_aa_variants = []
     for gene_name, product, protein_id, feature_type, start, stop, nuc_seq, amino_acid_seq, aa_variants in annotations_w_aa_variants:
-        # remove annotations and variants on proteins ORf1a/ab
-        if not product.startswith('ORF1a'):
-            # filter variants
-            new_aa_variants = []
-            for gene, protein_name, protein_code, mutpos, ref, alt, mut_type in aa_variants:
-                # transform variants
-                if mut_type == 'DEL':
-                    for i in range(len(ref)):
+        # filter variants
+        new_aa_variants = []
+        for gene, protein_name, protein_code, mutpos, ref, alt, mut_type in aa_variants:
+            # transform variants
+            if mut_type == 'DEL':
+                for i in range(len(ref)):
+                    new_mutpos = mutpos + i if mutpos is not None else None
+                    new_aa_variants.append(
+                        (gene, protein_name, protein_code, new_mutpos, ref[i], '-', mut_type))
+            elif mut_type == 'SUB':
+                for i in range(len(ref)):
+                    if alt[i] == 'X':
+                        continue
+                    else:
                         new_mutpos = mutpos + i if mutpos is not None else None
                         new_aa_variants.append(
-                            (gene, protein_name, protein_code, new_mutpos, ref[i], '-', mut_type))
-                elif mut_type == 'SUB':
-                    for i in range(len(ref)):
-                        if alt[i] == 'X':
-                            continue
-                        else:
-                            new_mutpos = mutpos + i if mutpos is not None else None
-                            new_aa_variants.append(
-                                (gene, protein_name, protein_code, new_mutpos, ref[i], alt[i], mut_type))
-                else:
-                    new_aa_variants.append((gene, protein_name, protein_code, mutpos, ref, alt, mut_type))
-            # output only annotations with at least one variant
-            if len(new_aa_variants) > 0:
-                new_annotations_w_aa_variants.append((
-                    gene_name, product, protein_id, feature_type, start, stop, nuc_seq, amino_acid_seq,
-                    new_aa_variants
-                ))
+                            (gene, protein_name, protein_code, new_mutpos, ref[i], alt[i], mut_type))
+            else:
+                new_aa_variants.append((gene, protein_name, protein_code, mutpos, ref, alt, mut_type))
+        # include annotations of type gene and only the other ones coding for amino acids
+        if feature_type == 'gene' or amino_acid_seq is not None:
+            new_annotations_w_aa_variants.append((
+                gene_name, product, protein_id, feature_type, start, stop, nuc_seq, amino_acid_seq,
+                new_aa_variants
+            ))
     return new_annotations_w_aa_variants
 
 
@@ -330,6 +327,9 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
             else:
                 list_annotations.append(
                     (gene, protein, protein_id, atype, nuc_start, nuc_stop, nuc_seq, None, []))
+        elif atype == 'gene':
+            list_annotations.append(
+                (gene, protein, protein_id, atype, nuc_start, nuc_stop, nuc_seq, None, []))
 
     return list_annotations
 

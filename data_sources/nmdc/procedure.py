@@ -12,13 +12,13 @@ from loguru import logger
 from time import sleep
 from lxml import html, etree
 import requests
-from data_sources.ncbi_any_virus.ncbi_importer import AnyNCBIVNucSample
 from xml_helper import text_at_node
 from locations import get_local_folder_for, FileType
 import wget
 import os
-from os.path import sep
+from data_sources.ncbi_any_virus.ncbi_importer import AnyNCBIVNucSample
 from data_sources.ncbi_services import host_taxon_id_from_ncbi_taxon_name, download_ncbi_taxonomy_as_xml_from_name
+from data_sources.ncbi_any_virus.settings import known_settings as ncbi_known_settings
 from vcm import vcm
 import dateutil.parser as dateparser
 from geo_groups import geo_groups
@@ -26,6 +26,11 @@ from db_config import read_db_import_configuration as import_config, database
 
 Entrez.email = "example@mail.com"   # just to silence the warning. Then a correct email can be set later
 
+
+sc2_settings = ncbi_known_settings["sars_cov_2"]
+sc2_chr_name = sc2_settings["chromosome_name"]
+sc2_snpeff_db_name = sc2_settings["snpeff_db_name"]
+sc2_ann_file_path =  sc2_settings["annotation_file_path"]
 
 cached_taxonomy = {}
 
@@ -489,9 +494,9 @@ def import_samples_into_vcm():
                     db_sequence_id,
                     refseq,
                     a_sample.nucleotide_sequence(),
-                    'NC_045512',
-                    f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv',
-                    'new_ncbi_sars_cov_2')
+                    sc2_chr_name,
+                    sc2_ann_file_path,
+                    sc2_snpeff_db_name)
                 with open(file_path, mode='wb') as cache_file:
                     pickle.dump(annotations_and_nuc_variants, cache_file, protocol=pickle.HIGHEST_PROTOCOL)
             else:

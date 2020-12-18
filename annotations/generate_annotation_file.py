@@ -2,28 +2,14 @@ from lxml import etree
 from lxml.etree import ElementTree
 
 from xml_helper import text_at_node
-
+from data_sources.ncbi_any_virus.settings import known_settings as ncbi_knonw_settings
+from data_sources.ncbi_services import get_samples_accession_ids, download_or_get_ncbi_sample_as_xml
 from loguru import logger
 from locations import get_local_folder_for, FileType
 from os.path import sep
+from os import makedirs, chdir
 import os
-
-arguments = {
-    'sars_cov_1': (f'.{sep}generated{sep}NCBI_sars_cov_1{sep}samples{sep}30271926.xml', f'.{sep}annotations{sep}sars_cov_1.tsv'),
-    'sars_cov_2': (f'.{sep}generated{sep}New NCBI SARS-Cov-2{sep}samples{sep}sc2-refseq.xml', f'.{sep}annotations{sep}new_ncbi_sars_cov_2.tsv'),
-    'dengue_virus_1': (f'.{sep}generated{sep}Dengue Virus 1{sep}samples{sep}NC_001477.1.xml', f'.{sep}annotations{sep}dengue_virus_1.tsv'),
-    'dengue_virus_2': (f'.{sep}generated{sep}Dengue Virus 2{sep}samples{sep}NC_001474.2.xml', f'.{sep}annotations{sep}dengue_virus_2.tsv'),
-    'dengue_virus_3': (f'.{sep}generated{sep}Dengue Virus 3{sep}samples{sep}NC_001475.2.xml', f'.{sep}annotations{sep}dengue_virus_3.tsv'),
-    'dengue_virus_4': (f'.{sep}generated{sep}Dengue Virus 4{sep}samples{sep}NC_002640.1.xml', f'.{sep}annotations{sep}dengue_virus_4.tsv'),
-    'mers': (f'.{sep}generated{sep}MERS-CoV{sep}samples{sep}NC_019843.3.xml', f'.{sep}annotations{sep}mers.tsv'),
-    'betacoronavirus_england_1': (f'.{sep}generated{sep}Betacoronavirus England 1{sep}samples{sep}NC_038294.1.xml', f'.{sep}annotations{sep}betacoronavirus_england_1.tsv'),
-    'zaire_ebolavirus': (f'.{sep}generated{sep}Zaire ebolavirus{sep}samples{sep}NC_002549.1.xml', f'.{sep}annotations{sep}zaire_ebolavirus.tsv'),
-    'sudan_ebolavirus': (f'.{sep}generated{sep}Sudan ebolavirus{sep}samples{sep}NC_006432.1.xml', f'.{sep}annotations{sep}sudan_ebolavirus.tsv'),
-    'reston_ebolavirus': (f'.{sep}generated{sep}Reston ebolavirus{sep}samples{sep}NC_004161.1.xml', f'.{sep}annotations{sep}reston_ebolavirus.tsv'),
-    'bundibugyo_ebolavirus': (f'.{sep}generated{sep}Bundibugyo ebolavirus{sep}samples{sep}NC_014373.1.xml', f'.{sep}annotations{sep}bundibugyo_ebolavirus.tsv'),
-    'bombali_ebolavirus': (f'.{sep}generated{sep}Bombali ebolavirus{sep}samples{sep}NC_039345.1.xml', f'.{sep}annotations{sep}bombali_ebolavirus.tsv'),
-    'tai_forest_ebolavirus': (f'.{sep}generated{sep}Tai Forest ebolavirus{sep}samples{sep}NC_014372.1.xml', f'.{sep}annotations{sep}tai_forest_ebolavirus.tsv'),
-}
+import sys
 
 
 def generate_annotation_file(from_reference_sammple_file_path: str, destination_file_path: str):
@@ -45,29 +31,38 @@ def generate_annotation_file(from_reference_sammple_file_path: str, destination_
     annotations = []
     for a_feature in features_nodes:
         try:
+            # get chromosome
             chromosmes = a_feature.xpath('INSDFeature_intervals/INSDInterval/INSDInterval_accession')
             chromosome_name = text_at_node(
                 chromosmes[0],
                 '.',
                 mandatory=True)
+            # warn if more than one chromosome
             for c in chromosmes:
                 if text_at_node(c, '.', mandatory=True) != chromosome_name:
                     logger.warning(f'different chromosome names found while generating {destination_file_path}')
+            # interval position
             start_stop_string = concat_intervals(a_feature)
+            # feature type (CDS/ UTR / etc.)
             feature_type = text_at_node(
                 a_feature,
                 './/INSDFeature_key') or '.'
             if feature_type == 'source':
                 continue
             feature_type = feature_type.replace('mat_peptide', 'mature_protein_region')
+            # gene
             gene_name = text_at_node(
                 a_feature,
                 './/INSDQualifier[./INSDQualifier_name/text() = "gene"]/INSDQualifier_value',
                 False) or '.'
+            gene_name = gene_name.replace('orf', 'ORF')
+            # protein
             product = text_at_node(
                 a_feature,
                 './/INSDQualifier[./INSDQualifier_name/text() = "product"]/INSDQualifier_value',
                 False) or '.'
+            product = product.replace('orf', 'ORF')
+            # AA sequence (one of translation or peptide)
             translation = text_at_node(
                 a_feature,
                 './/INSDQualifier[./INSDQualifier_name/text() = "translation"]/INSDQualifier_value',
@@ -77,42 +72,43 @@ def generate_annotation_file(from_reference_sammple_file_path: str, destination_
                 './/INSDQualifier[./INSDQualifier_name/text() = "peptide"]/INSDQualifier_value',
                 False)
             amino_acid_sequence = translation or peptide or '.'
+            # protein ID
             protein_id = text_at_node(
                 a_feature,
                 './/INSDQualifier[./INSDQualifier_name/text() = "protein_id"]/INSDQualifier_value',
                 False) or '.'
 
-            # for a in annotations:
-            #     if a[3] == start_stop_string and a[4] == gene_name and a[2] == feature_type:
-            #         raise AssertionError()
             annotations.append(
                 (chromosome_name, 'RefSeq', feature_type, start_stop_string, gene_name, product, protein_id, amino_acid_sequence)
             )
         except AssertionError as e:
             pass
 
-
-
+    # filter annotations (remove duplicates)
     annotations_copy = []
     removed = []
 
-
     try:
         for i in range(len(annotations)):
+            # decide which annotations to consider
             do_not_add =  False
-            a = annotations[i]
+            a = annotations[i]  # pick one annotation
+            # separate start_stop_string
             a_start = a[3][:a[3].index(',')]
             a_stop = a[3][a[3].rindex(',')+1:]
+            # check if in the following annotations, there is one having the same start and stop coordinates
             for j in range(i+1,len(annotations)):
                 a2 = annotations[j]
                 a2_start = a2[3][:a2[3].index(',')]
                 a2_stop = a2[3][a2[3].rindex(',')+1:]
                 # print(f"a: {a[3]} ->  {a_start} - {a_stop} vs a2: {a2[3]} -> {a2_start} - {a2_stop}")
+
+                # if same coordinates and same gene:
+                #   ignore this one if the other one has same protein name and same AA sequence
+                #   (this is necessary because there are identical annotations (e.g. of mature protein region) except for
+                #   the protein_id.)
                 if a_start == a2_start and a_stop == a2_stop and a[4] == a2[4]:
-                    if a[2] == 'gene':
-                        do_not_add = True
-                        removed.append(a)
-                    elif a[5] == a2[5] and a[7] == a2[7]:
+                    if a[5] == a2[5] and a[7] == a2[7]:
                         do_not_add = True
                         removed.append(a)
             if not do_not_add:
@@ -191,46 +187,38 @@ def uniform_protein_names_sc2(ann_file_path: str):
     os.rename(new_file_path, ann_file_path)
 
 
-def create_snpeff_folders_for_viruses():
-    folders = [
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}betacoronavirus_england_1',
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}bombali_ebolavirus',
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}bundibugyo_ebolavirus',
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}dengue_virus_1',
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}dengue_virus_2',
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}dengue_virus_3',
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}dengue_virus_4',
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}mers',
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}reston_ebolavirus',
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}sudan_ebolavirus',
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}tai_forest_ebolavirus',
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}zaire_ebolavirus',
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}sars_cov_1',
-        f'.{sep}tmp_snpeff{sep}snpEff{sep}data{sep}covid'
-    ]
-    for path in folders:
-        if not os.path.exists(path):
-            os.makedirs(path, exist_ok=True)
+def download_refseq_of_viruses():
+    for virus_key_name, import_parameter in ncbi_knonw_settings.items():
+        virus_dir_name = import_parameter["generated_dir_name"]
+
+        virus_dir_path = get_local_folder_for(virus_dir_name, FileType.SequenceOrSampleData)
+        refseq_query = import_parameter["reference_sample_query"]
+        refseq_sample_acc_id = get_samples_accession_ids(refseq_query)
+        assert len(refseq_sample_acc_id) == 1, f'Invalid reference sequence for virus {import_parameter["log_with_name"]}'
+        path_of_refseq = download_or_get_ncbi_sample_as_xml(virus_dir_path, refseq_sample_acc_id[0])
+        yield path_of_refseq
 
 
-create_snpeff_folders_for_viruses()
-get_local_folder_for('Dengue Virus 1', FileType.SequenceOrSampleData)
-get_local_folder_for('Dengue Virus 2', FileType.SequenceOrSampleData)
-get_local_folder_for('Dengue Virus 3', FileType.SequenceOrSampleData)
-get_local_folder_for('Dengue Virus 4', FileType.SequenceOrSampleData)
-get_local_folder_for('MERS-CoV', FileType.SequenceOrSampleData)
-get_local_folder_for('Betacoronavirus England 1', FileType.SequenceOrSampleData)
-get_local_folder_for('Zaire ebolavirus', FileType.SequenceOrSampleData)
-get_local_folder_for('Sudan ebolavirus', FileType.SequenceOrSampleData)
-get_local_folder_for('Reston ebolavirus', FileType.SequenceOrSampleData)
-get_local_folder_for('Bundibugyo ebolavirus', FileType.SequenceOrSampleData)
-get_local_folder_for('Bombali ebolavirus', FileType.SequenceOrSampleData)
-get_local_folder_for('Tai Forest ebolavirus', FileType.SequenceOrSampleData)
-get_local_folder_for('New NCBI SARS-Cov-2', FileType.SequenceOrSampleData)
-get_local_folder_for('NCBI_sars_cov_1', FileType.SequenceOrSampleData)
-# TODO you have to download the xml files listed in arguments and put them in the correct path manually in order for this to work
-for x in arguments.keys():
-    generate_annotation_file(*arguments[x])
-    if x == "sars_cov_2":
-      uniform_protein_names_sc2(arguments[x][1])
+def get_paths_for_annotation_files():
+    for import_parameter in ncbi_knonw_settings.values():
+        path_of_annotation_file = import_parameter["annotation_file_path"]
+        yield path_of_annotation_file
 
+
+if __name__ == '__main__':
+    print("This module expects the path to the project directory as argument")
+    try:
+        proj_root_dir = sys.argv[1]
+    except IndexError:
+        print("Missing mandatory argument: path of project root dir")
+        sys.exit(-1)
+    chdir(proj_root_dir)
+    refseq_paths = list(download_refseq_of_viruses())
+    annotations_paths = list(get_paths_for_annotation_files())
+    for i in range(len(refseq_paths)):
+        refseq_path = refseq_paths[i]
+        target_annotation_file = annotations_paths[i]
+
+        generate_annotation_file(refseq_path, target_annotation_file)
+        if ('sars' in target_annotation_file and '2' in target_annotation_file) or 'covid' in target_annotation_file:
+            uniform_protein_names_sc2(target_annotation_file)
