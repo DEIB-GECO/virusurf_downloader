@@ -58,13 +58,7 @@ setup_logger(log_file_keyword)
 
 #   ###################################     PERFORM <action>       ###############
 try:
-    if 'index' in action:
-        database.create_indexes()
-    elif 'view' in action:
-        database.create_views()
-    elif 'chimera_sequence' in action:
-        database.disambiguate_chimera_sequences()
-    elif 'epitopes' in action:
+    if 'epitopes' in action:
         from epitopes import import_epitopes
         # noinspection PyUnboundLocalVariable
         virus_import_parameters = known_settings.get(_epitope_target)
