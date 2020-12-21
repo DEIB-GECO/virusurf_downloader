@@ -66,7 +66,7 @@ class Sequential:
         host_specie_id = vcm.create_or_get_host_specie(session, sample)
         host_sample_id = vcm.create_or_get_host_sample(session, sample, host_specie_id)
         sequencing_project_id = vcm.create_or_get_sequencing_project(session, sample)
-        sequence = vcm.create_and_get_sequence(session, sample, virus_id, experiment_id, host_sample_id,
+        sequence, nucleotide_seq = vcm.create_and_get_sequence(session, sample, virus_id, experiment_id, host_sample_id,
                                                sequencing_project_id)
         main_pipeline_part_3(session, sample, sequence.sequence_id)
 
@@ -91,7 +91,7 @@ class Parallel:
         host_specie_id = vcm.create_or_get_host_specie(session, sample)
         host_sample_id = vcm.create_or_get_host_sample(session, sample, host_specie_id)
         sequencing_project_id = vcm.create_or_get_sequencing_project(session, sample)
-        sequence = vcm.create_and_get_sequence(session, sample, virus_id, experiment_id, host_sample_id,
+        sequence, nucleotide_seq = vcm.create_and_get_sequence(session, sample, virus_id, experiment_id, host_sample_id,
                                                sequencing_project_id)
 
         if not self.workers:

@@ -38,16 +38,17 @@ def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch
             )
             sleep(10)
             logger.info('removal of all table records in progress...')
-            delete_indexes()
+            # delete_indexes()
 
             # DROP VIEWS (also removes dependencies on the tables)
-            for v in views:
-                v.drop()
+            # for v in views:
+            #     v.drop()
 
             # DROP TABLES
             _base.metadata.drop_all(_db_engine, tables=[ExperimentType.__table__, SequencingProject.__table__, Virus.__table__,
                                                         HostSample.__table__, Sequence.__table__, AminoAcidVariant.__table__,
-                                                        Annotation.__table__, NucleotideVariant.__table__,
+                                                        AnnotationSequence.__table__, Annotation.__table__,
+                                                        NucleotideVariant.__table__, NucleotideSequence.__table__,
                                                         VariantImpact.__table__, Epitope.__table__, EpitopeFragment.__table__,
                                                         DBMeta.__table__])
 
@@ -220,7 +221,6 @@ class Sequence(_base):
     strain_name = Column(String)
     is_reference = Column(Boolean, nullable=False)
     is_complete = Column(Boolean)
-    nucleotide_sequence = Column(String)
     strand = Column(String)
     length = Column(Integer)
     gc_percentage = Column(Float)
@@ -228,6 +228,13 @@ class Sequence(_base):
     lineage = Column(String)
     clade = Column(String)
     gisaid_only = Column(Boolean, default=True, nullable=False)
+
+
+class NucleotideSequence(_base):
+    __tablename__ = 'nucleotide_sequence'
+
+    sequence_id = Column(Integer, primary_key=True)
+    nucleotide_sequence = Column(String)
 
 
 class Annotation(_base):
@@ -242,6 +249,15 @@ class Annotation(_base):
     gene_name = Column(String)
     product = Column(String)
     external_reference = Column(String)
+
+
+class AnnotationSequence(_base):
+    __tablename__ = 'annotation_sequence'
+
+    annotation_id = Column(Integer, primary_key=True)
+    sequence_id = Column(Integer, nullable=False)
+
+    product = Column(String)
     aminoacid_sequence = Column(String)
     annotation_nucleotide_sequence = Column(String)
 
@@ -333,223 +349,223 @@ class DBMeta(_base):
 
 
 #   ###################################     VIEWS       ##################################
-class View:
-    """
-    SQLAlchemy gives a create_view function but it doesn't checks
-    the existence of the view before creating, so without a prior DROP VIEW, the create_all raises Exception.
-    This class offers a workaround to create and drop views when necessary.
-    """
+# class View:
+#     """
+#     SQLAlchemy gives a create_view function but it doesn't checks
+#     the existence of the view before creating, so without a prior DROP VIEW, the create_all raises Exception.
+#     This class offers a workaround to create and drop views when necessary.
+#     """
+#
+#     @staticmethod
+#     def create():
+#         raise NotImplementedError('Override this method to call _create_view with the correct parameters')
+#
+#     @staticmethod
+#     def drop():
+#         raise NotImplementedError('Override this method to call _drop_view with the correct parameters')
+#
+#     @staticmethod
+#     def _create_view(view_name, view_stmt):
+#         compiled_stmt = view_stmt.compile(compile_kwargs={"literal_binds": True}, dialect=_db_engine.dialect)
+#         _db_engine.execute(f'CREATE OR REPLACE VIEW {view_name} AS {compiled_stmt}')
+#
+#     @staticmethod
+#     def _drop_view(view_name):
+#         _db_engine.execute(f'DROP VIEW IF EXISTS {view_name}')
+#
+#
+# class MaterializedView:
+#     """
+#     SQLAlchemy gives a create_view function but it doesn't checks
+#     the existence of the view before creating, so without a prior DROP VIEW, the create_all raises Exception.
+#     This class offers a workaround to create and drop views when necessary.
+#     """
+#
+#     @staticmethod
+#     def create():
+#         raise NotImplementedError('Override this method to call _create_view with the correct parameters')
+#
+#     @staticmethod
+#     def drop():
+#         raise NotImplementedError('Override this method to call _drop_view with the correct parameters')
+#
+#     @staticmethod
+#     def _create_view(view_name, view_stmt):
+#         MaterializedView._drop_view(view_name)
+#         compiled_stmt = view_stmt.compile(compile_kwargs={"literal_binds": True}, dialect=_db_engine.dialect)
+#         _db_engine.execute(f'CREATE MATERIALIZED VIEW {view_name} AS {compiled_stmt}')
+#
+#     @staticmethod
+#     def _drop_view(view_name):
+#         _db_engine.execute(f'DROP MATERIALIZED VIEW IF EXISTS {view_name}')
+#
+#
+# class ViewAnnotationCDS(View):
+#     stmt = select([
+#         Annotation.annotation_id,
+#         Annotation.sequence_id,
+#         Annotation.start,
+#         Annotation.stop,
+#         Annotation.gene_name,
+#         Annotation.product,
+#         Annotation.external_reference,
+#         Annotation.aminoacid_sequence
+#     ]).where(Annotation.feature_type == 'CDS')
+#
+#     @staticmethod
+#     def create():
+#         ViewAnnotationCDS._create_view('annotation_cds', ViewAnnotationCDS.stmt)
+#
+#     @staticmethod
+#     def drop():
+#         ViewAnnotationCDS._drop_view('annotation_cds')
+#
+#
+# class ViewAnnotation(View):
+#     stmt = select([
+#         Annotation.sequence_id,
+#         Annotation.product.label('annotation_view_product'),
+#         Annotation.aminoacid_sequence.label('annotation_view_aminoacid_sequence'),
+#         Annotation.annotation_nucleotide_sequence.label('annotation_view_nucleotide_sequence')
+#     ]).where(
+#         # noqa              # == ignore warning on " != None" for this case
+#         (Annotation.product != None)
+#         & ((Annotation.aminoacid_sequence != None) | (Annotation.annotation_nucleotide_sequence != None))
+#     )
+#
+#     @staticmethod
+#     def create():
+#         ViewAnnotation._create_view('annotation_view', ViewAnnotation.stmt)
+#
+#     @staticmethod
+#     def drop():
+#         ViewAnnotation._drop_view('annotation_view')
+#
+#
+# class ViewNucleotideVariantAnnotation(MaterializedView):
+#     stmt = select([
+#         NucleotideVariant.nucleotide_variant_id,
+#         Annotation.feature_type.label('n_feature_type'),
+#         Annotation.gene_name.label('n_gene_name'),
+#         Annotation.product.label('n_product')
+#     ]).select_from(join(Annotation, NucleotideVariant,
+#                         (NucleotideVariant.start_original >= Annotation.start) &
+#                         (NucleotideVariant.start_original <= Annotation.stop) &
+#                         (NucleotideVariant.sequence_id == Annotation.sequence_id)))
+#
+#     @staticmethod
+#     def create():
+#         ViewNucleotideVariantAnnotation._create_view('nucleotide_variant_annotation', ViewNucleotideVariantAnnotation.stmt)
+#
+#     @staticmethod
+#     def drop():
+#         ViewNucleotideVariantAnnotation._drop_view('nucleotide_variant_annotation')
+#
+#     # try:
+#     #     __table__ = create_view('nucleotide_variant_annotation', stmt, _base.metadata)
+#     # except sqlalchemy.exc.ProgrammingError:
+#     #     pass    # view already exists
+#
+#
+# class ViewNucleotideVariantLimited(View):
+#     stmt = select([
+#         NucleotideVariant
+#     ]).where(NucleotideVariant.variant_length <= 20)
+#
+#     @staticmethod
+#     def create():
+#         ViewNucleotideVariantLimited._create_view('nucleotide_variant_limited', ViewNucleotideVariantLimited.stmt)
+#
+#     @staticmethod
+#     def drop():
+#         ViewNucleotideVariantLimited._drop_view('nucleotide_variant_limited')
+#
+#
+# class HostSampleView(View):
+#     stmt = select([
+#         HostSample, HostSpecie
+#     ]).select_from(join(HostSpecie, HostSpecie, HostSample.host_id == HostSpecie.host_id))
+#
+#     @staticmethod
+#     def create():
+#         HostSampleView._create_view('host_sample_view', HostSampleView.stmt)
+#
+#     @staticmethod
+#     def drop():
+#         HostSampleView._drop_view('host_sample_view')
+#
+#
+# views = [ViewAnnotationCDS, ViewNucleotideVariantAnnotation, ViewNucleotideVariantLimited, ViewAnnotation, HostSampleView]
+#
+#
+# def create_views():
+#     # CREATE OR REPLACE VIEWS
+#     for v in views:
+#         v.create()
 
-    @staticmethod
-    def create():
-        raise NotImplementedError('Override this method to call _create_view with the correct parameters')
 
-    @staticmethod
-    def drop():
-        raise NotImplementedError('Override this method to call _drop_view with the correct parameters')
-
-    @staticmethod
-    def _create_view(view_name, view_stmt):
-        compiled_stmt = view_stmt.compile(compile_kwargs={"literal_binds": True}, dialect=_db_engine.dialect)
-        _db_engine.execute(f'CREATE OR REPLACE VIEW {view_name} AS {compiled_stmt}')
-
-    @staticmethod
-    def _drop_view(view_name):
-        _db_engine.execute(f'DROP VIEW IF EXISTS {view_name}')
-
-
-class MaterializedView:
-    """
-    SQLAlchemy gives a create_view function but it doesn't checks
-    the existence of the view before creating, so without a prior DROP VIEW, the create_all raises Exception.
-    This class offers a workaround to create and drop views when necessary.
-    """
-
-    @staticmethod
-    def create():
-        raise NotImplementedError('Override this method to call _create_view with the correct parameters')
-
-    @staticmethod
-    def drop():
-        raise NotImplementedError('Override this method to call _drop_view with the correct parameters')
-
-    @staticmethod
-    def _create_view(view_name, view_stmt):
-        MaterializedView._drop_view(view_name)
-        compiled_stmt = view_stmt.compile(compile_kwargs={"literal_binds": True}, dialect=_db_engine.dialect)
-        _db_engine.execute(f'CREATE MATERIALIZED VIEW {view_name} AS {compiled_stmt}')
-
-    @staticmethod
-    def _drop_view(view_name):
-        _db_engine.execute(f'DROP MATERIALIZED VIEW IF EXISTS {view_name}')
-
-
-class ViewAnnotationCDS(View):
-    stmt = select([
-        Annotation.annotation_id,
-        Annotation.sequence_id,
-        Annotation.start,
-        Annotation.stop,
-        Annotation.gene_name,
-        Annotation.product,
-        Annotation.external_reference,
-        Annotation.aminoacid_sequence
-    ]).where(Annotation.feature_type == 'CDS')
-
-    @staticmethod
-    def create():
-        ViewAnnotationCDS._create_view('annotation_cds', ViewAnnotationCDS.stmt)
-
-    @staticmethod
-    def drop():
-        ViewAnnotationCDS._drop_view('annotation_cds')
-
-
-class ViewAnnotation(View):
-    stmt = select([
-        Annotation.sequence_id,
-        Annotation.product.label('annotation_view_product'),
-        Annotation.aminoacid_sequence.label('annotation_view_aminoacid_sequence'),
-        Annotation.annotation_nucleotide_sequence.label('annotation_view_nucleotide_sequence')
-    ]).where(
-        # noqa              # == ignore warning on " != None" for this case
-        (Annotation.product != None)
-        & ((Annotation.aminoacid_sequence != None) | (Annotation.annotation_nucleotide_sequence != None))
-    )
-
-    @staticmethod
-    def create():
-        ViewAnnotation._create_view('annotation_view', ViewAnnotation.stmt)
-
-    @staticmethod
-    def drop():
-        ViewAnnotation._drop_view('annotation_view')
-
-
-class ViewNucleotideVariantAnnotation(MaterializedView):
-    stmt = select([
-        NucleotideVariant.nucleotide_variant_id,
-        Annotation.feature_type.label('n_feature_type'),
-        Annotation.gene_name.label('n_gene_name'),
-        Annotation.product.label('n_product')
-    ]).select_from(join(Annotation, NucleotideVariant,
-                        (NucleotideVariant.start_original >= Annotation.start) &
-                        (NucleotideVariant.start_original <= Annotation.stop) &
-                        (NucleotideVariant.sequence_id == Annotation.sequence_id)))
-
-    @staticmethod
-    def create():
-        ViewNucleotideVariantAnnotation._create_view('nucleotide_variant_annotation', ViewNucleotideVariantAnnotation.stmt)
-
-    @staticmethod
-    def drop():
-        ViewNucleotideVariantAnnotation._drop_view('nucleotide_variant_annotation')
-
-    # try:
-    #     __table__ = create_view('nucleotide_variant_annotation', stmt, _base.metadata)
-    # except sqlalchemy.exc.ProgrammingError:
-    #     pass    # view already exists
-
-
-class ViewNucleotideVariantLimited(View):
-    stmt = select([
-        NucleotideVariant
-    ]).where(NucleotideVariant.variant_length <= 20)
-
-    @staticmethod
-    def create():
-        ViewNucleotideVariantLimited._create_view('nucleotide_variant_limited', ViewNucleotideVariantLimited.stmt)
-
-    @staticmethod
-    def drop():
-        ViewNucleotideVariantLimited._drop_view('nucleotide_variant_limited')
-
-
-class HostSampleView(View):
-    stmt = select([
-        HostSample, HostSpecie
-    ]).select_from(join(HostSpecie, HostSpecie, HostSample.host_id == HostSpecie.host_id))
-
-    @staticmethod
-    def create():
-        HostSampleView._create_view('host_sample_view', HostSampleView.stmt)
-
-    @staticmethod
-    def drop():
-        HostSampleView._drop_view('host_sample_view')
-
-
-views = [ViewAnnotationCDS, ViewNucleotideVariantAnnotation, ViewNucleotideVariantLimited, ViewAnnotation, HostSampleView]
-
-
-def create_views():
-    # CREATE OR REPLACE VIEWS
-    for v in views:
-        v.create()
-
-
-#                   ##############################      INDEXES     ##################################
+# #                   ##############################      INDEXES     ##################################
 # noinspection SqlDialectInspection,SqlNoDataSourceInspection
-def delete_indexes():
-    # the following names must match the ones declared during the generation of the indexes (see code below)
-    indexes_to_drop = ['aa__ann_id', 'aa__var_type_lower', 'aa__start_original', 'aa__var_type_normal',
-                        'ann__seq_id', 'ann__start', 'ann__stop',
-                        'nuc_var__seq_id', 'nuc_var__start_alt', 'nuc_var__start_orig', 'nuc_var__length',
-                        'seq__experiment_id', 'seq__host_id', 'seq__seq_proj_id', 'seq__virus_id',
-                        'impact__var_id', 'nuc_var_ann__var_id'
-                        ]
-    for i in indexes_to_drop:
-        try:
-            _db_engine.execute(f'DROP INDEX {i}')
-        except sqlalchemy.exc.ProgrammingError:
-            pass
-
-
-# noinspection SqlNoDataSourceInspection,SqlDialectInspection
-def create_indexes():
-    
-    def column_name(column_obj):
-        return str(column_obj).split('.', maxsplit=1)[1]
-
-    # one of the indexes depends on a materialized view. Check its existence before continuing
-    nuc_var_matview_exists = _db_engine.execute(
-        f"SELECT EXISTS ( SELECT FROM pg_catalog.pg_matviews WHERE matviewname = 'nucleotide_variant_annotation' )"
-        ).first().values()[0] is True
-    if not nuc_var_matview_exists:
-        raise RuntimeError('One of the indexes is based on a materialized view. First create the views, then indexes.\n'
-                           'Creation of indexes aborted. The database has not been changed.')
-
-    logger.info('Deleting previous version of indexes (if present)')
-    delete_indexes()
-    logger.info('Generating indexes...')
-
-    _db_engine.execute(f'CREATE INDEX aa__ann_id ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.annotation_id)}) TABLESPACE default_ts;')
-    _db_engine.execute(f'CREATE INDEX aa__var_type_lower ON {AminoAcidVariant.__table__}(lower({column_name(AminoAcidVariant.variant_aa_type)})) TABLESPACE default_ts;')
-    _db_engine.execute(f'CREATE INDEX aa__start_original ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.start_aa_original)}) TABLESPACE default_ts;')
-    _db_engine.execute(f'CREATE INDEX aa__var_type_normal ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.variant_aa_type)}) TABLESPACE default_ts;')
-
-    _db_engine.execute(f'CREATE INDEX ann__seq_id ON {Annotation.__table__}({column_name(Annotation.sequence_id)}) TABLESPACE default_ts;')
-    _db_engine.execute(f'CREATE INDEX ann__start ON {Annotation.__table__}({column_name(Annotation.start)}) TABLESPACE default_ts;')
-    _db_engine.execute(f'CREATE INDEX ann__stop ON {Annotation.__table__}({column_name(Annotation.stop)}) TABLESPACE default_ts;')
-
-    #            for now we'll keep the following index disabled
-    # _db_engine.execute(f'CREATE INDEX nuc_var__alt ON {NucleotideVariant.__table__}(lower({column_name(NucleotideVariant.sequence_alternative)}))')
-    _db_engine.execute(f'CREATE INDEX nuc_var__seq_id ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.sequence_id)}) TABLESPACE default_ts;')    # primary key
-    _db_engine.execute(f'CREATE INDEX nuc_var__start_alt ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.start_alternative)}) TABLESPACE default_ts;')
-    _db_engine.execute(f'CREATE INDEX nuc_var__start_orig ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.start_original)}) TABLESPACE default_ts;')
-    _db_engine.execute(f'CREATE INDEX nuc_var__length ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.variant_length)}) TABLESPACE default_ts;')
-
-    _db_engine.execute(f'CREATE INDEX seq__experiment_id ON {Sequence.__table__}({column_name(Sequence.experiment_type_id)}) TABLESPACE default_ts;')
-    _db_engine.execute(f'CREATE INDEX seq__host_id ON {Sequence.__table__}({column_name(Sequence.host_sample_id)}) TABLESPACE default_ts;')
-    _db_engine.execute(f'CREATE INDEX seq__seq_proj_id ON {Sequence.__table__}({column_name(Sequence.sequencing_project_id)}) TABLESPACE default_ts;')
-    _db_engine.execute(f'CREATE INDEX seq__virus_id ON {Sequence.__table__}({column_name(Sequence.virus_id)}) TABLESPACE default_ts;')
-    _db_engine.execute(f'CREATE UNIQUE INDEX seq__accession_id ON {Sequence.__table__}(lower({column_name(Sequence.accession_id)})) TABLESPACE default_ts;')
-    _db_engine.execute(f'CREATE UNIQUE INDEX seq__alternative_accession_id ON {Sequence.__table__}(lower({column_name(Sequence.alternative_accession_id)})) TABLESPACE default_ts;')
-
-    _db_engine.execute(f'CREATE INDEX impact__var_id ON {VariantImpact.__table__}({column_name(VariantImpact.nucleotide_variant_id)}) TABLESPACE default_ts;')
-
-    _db_engine\
-        .execute(f'CREATE INDEX nuc_var_ann__var_id ON nucleotide_variant_annotation USING btree (nucleotide_variant_id) TABLESPACE default_ts;')
+# def delete_indexes():
+#     # the following names must match the ones declared during the generation of the indexes (see code below)
+#     indexes_to_drop = ['aa__ann_id', 'aa__var_type_lower', 'aa__start_original', 'aa__var_type_normal',
+#                         'ann__seq_id', 'ann__start', 'ann__stop',
+#                         'nuc_var__seq_id', 'nuc_var__start_alt', 'nuc_var__start_orig', 'nuc_var__length',
+#                         'seq__experiment_id', 'seq__host_id', 'seq__seq_proj_id', 'seq__virus_id',
+#                         'impact__var_id', 'nuc_var_ann__var_id'
+#                         ]
+#     for i in indexes_to_drop:
+#         try:
+#             _db_engine.execute(f'DROP INDEX {i}')
+#         except sqlalchemy.exc.ProgrammingError:
+#             pass
+#
+#
+# # noinspection SqlNoDataSourceInspection,SqlDialectInspection
+# def create_indexes():
+#
+#     def column_name(column_obj):
+#         return str(column_obj).split('.', maxsplit=1)[1]
+#
+#     # one of the indexes depends on a materialized view. Check its existence before continuing
+#     nuc_var_matview_exists = _db_engine.execute(
+#         f"SELECT EXISTS ( SELECT FROM pg_catalog.pg_matviews WHERE matviewname = 'nucleotide_variant_annotation' )"
+#         ).first().values()[0] is True
+#     if not nuc_var_matview_exists:
+#         raise RuntimeError('One of the indexes is based on a materialized view. First create the views, then indexes.\n'
+#                            'Creation of indexes aborted. The database has not been changed.')
+#
+#     logger.info('Deleting previous version of indexes (if present)')
+#     delete_indexes()
+#     logger.info('Generating indexes...')
+#
+#     _db_engine.execute(f'CREATE INDEX aa__ann_id ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.annotation_id)}) TABLESPACE default_ts;')
+#     _db_engine.execute(f'CREATE INDEX aa__var_type_lower ON {AminoAcidVariant.__table__}(lower({column_name(AminoAcidVariant.variant_aa_type)})) TABLESPACE default_ts;')
+#     _db_engine.execute(f'CREATE INDEX aa__start_original ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.start_aa_original)}) TABLESPACE default_ts;')
+#     _db_engine.execute(f'CREATE INDEX aa__var_type_normal ON {AminoAcidVariant.__table__}({column_name(AminoAcidVariant.variant_aa_type)}) TABLESPACE default_ts;')
+#
+#     _db_engine.execute(f'CREATE INDEX ann__seq_id ON {Annotation.__table__}({column_name(Annotation.sequence_id)}) TABLESPACE default_ts;')
+#     _db_engine.execute(f'CREATE INDEX ann__start ON {Annotation.__table__}({column_name(Annotation.start)}) TABLESPACE default_ts;')
+#     _db_engine.execute(f'CREATE INDEX ann__stop ON {Annotation.__table__}({column_name(Annotation.stop)}) TABLESPACE default_ts;')
+#
+#     #            for now we'll keep the following index disabled
+#     # _db_engine.execute(f'CREATE INDEX nuc_var__alt ON {NucleotideVariant.__table__}(lower({column_name(NucleotideVariant.sequence_alternative)}))')
+#     _db_engine.execute(f'CREATE INDEX nuc_var__seq_id ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.sequence_id)}) TABLESPACE default_ts;')    # primary key
+#     _db_engine.execute(f'CREATE INDEX nuc_var__start_alt ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.start_alternative)}) TABLESPACE default_ts;')
+#     _db_engine.execute(f'CREATE INDEX nuc_var__start_orig ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.start_original)}) TABLESPACE default_ts;')
+#     _db_engine.execute(f'CREATE INDEX nuc_var__length ON {NucleotideVariant.__table__}({column_name(NucleotideVariant.variant_length)}) TABLESPACE default_ts;')
+#
+#     _db_engine.execute(f'CREATE INDEX seq__experiment_id ON {Sequence.__table__}({column_name(Sequence.experiment_type_id)}) TABLESPACE default_ts;')
+#     _db_engine.execute(f'CREATE INDEX seq__host_id ON {Sequence.__table__}({column_name(Sequence.host_sample_id)}) TABLESPACE default_ts;')
+#     _db_engine.execute(f'CREATE INDEX seq__seq_proj_id ON {Sequence.__table__}({column_name(Sequence.sequencing_project_id)}) TABLESPACE default_ts;')
+#     _db_engine.execute(f'CREATE INDEX seq__virus_id ON {Sequence.__table__}({column_name(Sequence.virus_id)}) TABLESPACE default_ts;')
+#     _db_engine.execute(f'CREATE UNIQUE INDEX seq__accession_id ON {Sequence.__table__}(lower({column_name(Sequence.accession_id)})) TABLESPACE default_ts;')
+#     _db_engine.execute(f'CREATE UNIQUE INDEX seq__alternative_accession_id ON {Sequence.__table__}(lower({column_name(Sequence.alternative_accession_id)})) TABLESPACE default_ts;')
+#
+#     _db_engine.execute(f'CREATE INDEX impact__var_id ON {VariantImpact.__table__}({column_name(VariantImpact.nucleotide_variant_id)}) TABLESPACE default_ts;')
+#
+#     _db_engine\
+#         .execute(f'CREATE INDEX nuc_var_ann__var_id ON nucleotide_variant_annotation USING btree (nucleotide_variant_id) TABLESPACE default_ts;')
 
 
 #                   ##############################      CHIMERA SEQUENCES       ######################

@@ -92,7 +92,6 @@ CREATE TABLE public."sequence" (
 	strain_name varchar NULL,
 	is_reference bool NOT NULL,
 	is_complete bool NULL,
-	nucleotide_sequence varchar NULL,
 	strand varchar NULL,
 	length int4 NULL,
 	gc_percentage float8 NULL,
@@ -100,6 +99,11 @@ CREATE TABLE public."sequence" (
 	lineage varchar NULL,
 	clade varchar NULL,
 	gisaid_only bool NOT NULL
+);
+
+CREATE TABLE public.nucleotide_sequence (
+    sequence_id int4 primary key,
+    nucleotide_sequence varchar NULL
 );
 
 CREATE TABLE public.nucleotide_variant (
@@ -129,7 +133,13 @@ CREATE TABLE public.annotation (
 	stop int4 NULL,
 	gene_name varchar NULL,
 	product varchar NULL,
-	external_reference varchar NULL,
+	external_reference varchar NULL
+);
+
+CREATE TABLE public.annotation_sequence (
+    annotation_id int4 primary key,
+	sequence_id int4 NOT NULL,
+	product varchar NULL,
 	aminoacid_sequence varchar NULL,
 	annotation_nucleotide_sequence varchar NULL
 );

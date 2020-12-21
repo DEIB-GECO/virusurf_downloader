@@ -784,9 +784,10 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
                 _virus_id = vcm.create_or_get_virus(session, organism)
             # get nuc_reference_sequence
             logger.trace(f'organism txid { settings.virus_taxon_id} already in VIRUS table.')
-            refseq_row: database.Sequence = vcm.get_reference_sequence_of_virus(session, _virus_id)
-            if refseq_row:
-                return _virus_id, refseq_row.nucleotide_sequence, refseq_row.accession_id
+            refseq_objects = vcm.get_reference_sequence_of_virus(session, _virus_id)
+            if refseq_objects:
+                ref_seq_obj, ref_nuc_seq_obj = refseq_objects
+                return _virus_id, ref_nuc_seq_obj.nucleotide_sequence, ref_seq_obj.accession_id
             else:
                 logger.trace('caching the nucleotide sequence of the reference')
                 downloaded_ref_sample = _reference_sample_from_organism(SampleWrapperClass)
@@ -805,7 +806,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
             host_specie_id = vcm.create_or_get_host_specie(session, _sample)
             host_sample_id = vcm.create_or_get_host_sample(session, _sample, host_specie_id)
             sequencing_project_id = vcm.create_or_get_sequencing_project(session, _sample)
-            sequence = vcm.create_and_get_sequence(session, _sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
+            sequence, nucleotide_seq = vcm.create_and_get_sequence(session, _sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
             return sequence.sequence_id
         except ValueError as e:
             if str(e).endswith('missing nucleotide seq.'):

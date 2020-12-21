@@ -5,7 +5,7 @@ from sqlalchemy import cast
 
 from data_sources.virus_sample import VirusSample
 from db_config.database import AminoAcidVariant, ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, \
-    Epitope, HostSpecie, EpitopeFragment
+    Epitope, HostSpecie, EpitopeFragment, NucleotideSequence, AnnotationSequence
 from xml_helper import *
 import string
 import random
@@ -178,7 +178,11 @@ def create_and_get_sequence(session, virus_sample: VirusSample, virus_id: int, e
                         virus_id=virus_id,
                         host_sample_id=host_sample_id)
     sequence.sequence_id = 1
-    return sequence
+    nucleotide_sequence_db_obj = None
+    if nucleotide_sequence:
+        nucleotide_sequence_db_obj = NucleotideSequence(sequence_id=sequence.sequence_id,
+                                                        nucleotide_sequence=nucleotide_sequence)
+    return sequence, nucleotide_sequence_db_obj
 
 
 def create_annotation_and_aa_variants(session, sample: VirusSample, sequence: Sequence, reference_sample: VirusSample):
@@ -382,6 +386,11 @@ def sequence_primary_accession_ids(session, virus_id: int, sources: Optional[Lis
 
 
 def remove_sequence_and_meta(session, primary_sequence_accession_id: Optional[str], alternative_sequence_accession_id: Optional[str]):
+    pass
+
+
+def remove_sequence_and_meta_list(session, primary_sequence_accession_id: Optional[List[str]] = None,
+                                  alternative_sequence_accession_id: Optional[List[str]] = None):
     pass
 
 

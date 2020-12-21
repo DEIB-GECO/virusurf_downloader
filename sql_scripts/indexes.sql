@@ -21,6 +21,9 @@ CREATE INDEX ann__seq_id ON annotation USING btree (sequence_id) TABLESPACE defa
 CREATE INDEX ann__start ON annotation USING btree (start) TABLESPACE default_ts;
 CREATE INDEX ann__stop ON annotation USING btree (stop) TABLESPACE default_ts;
 
+-- ANNOTATION SEQUENCE
+CREATE UNIQUE INDEX ann_seq__seq_id__product ON annotation_sequence(sequence_id, product) TABLESPACE default_ts;
+
 --AMINO ACID VARIANT
 CREATE INDEX aa__ann_id ON aminoacid_variant USING btree (annotation_id) TABLESPACE default_ts;
 CREATE INDEX aa__start_original ON aminoacid_variant USING btree (start_aa_original) TABLESPACE default_ts;

@@ -471,7 +471,7 @@ def import_samples_into_vcm():
             host_specie_id = vcm.create_or_get_host_specie(session, a_sample)
             host_sample_id = vcm.create_or_get_host_sample(session, a_sample, host_specie_id)
             sequencing_project_id = vcm.create_or_get_sequencing_project(session, a_sample)
-            sequence = vcm.create_and_get_sequence(session, a_sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
+            sequence, nucleotide_seq = vcm.create_and_get_sequence(session, a_sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
             return sequence.sequence_id
         except Exception as e:
             if str(e).startswith('duplicate key value violates unique constraint "sequence_accession_id_key"'):

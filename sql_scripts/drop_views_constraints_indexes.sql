@@ -22,6 +22,9 @@ DROP INDEX IF EXISTS ann__seq_id;
 DROP INDEX IF EXISTS ann__start;
 DROP INDEX IF EXISTS ann__stop;
 
+-- ANNOTATION SEQUENCE
+DROP INDEX IF ann_seq__seq_id__product;
+
 --AMINO ACID VARIANT
 DROP INDEX IF EXISTS aa__ann_id;
 DROP INDEX IF EXISTS aa__start_original;
@@ -74,8 +77,15 @@ ALTER TABLE sequence DROP CONSTRAINT IF EXISTS sequence_host_sample_id_fkey;
 ALTER TABLE sequence DROP CONSTRAINT IF EXISTS sequence_sequencing_project_id_fkey;
 ALTER TABLE sequence DROP CONSTRAINT IF EXISTS sequence_virus_id_fkey;
 
+-- NUCLEOTIDE SEQUENCE
+ALTER TABLE nucleotide_sequence DROP CONSTRAINT IF EXISTS nucleotide_sequence_sequence_id_fkey;
+
 --ANNOTATION
 ALTER TABLE annotation DROP CONSTRAINT IF EXISTS annotation_sequence_id_fkey;
+
+-- ANNOTATION SEQUENCE
+ALTER TABLE annotation_sequence DROP CONSTRAINT IF EXISTS annotation_sequence_sequence_id_fkey;
+ALTER TABLE annotation_sequence DROP CONSTRAINT IF EXISTS annotation_sequence_annotation_id_fkey;
 
 --NUCLEOTIDE VARIANT
 ALTER TABLE nucleotide_variant DROP CONSTRAINT IF EXISTS nucleotide_variant_sequence_id_fkey;

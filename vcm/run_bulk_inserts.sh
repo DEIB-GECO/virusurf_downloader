@@ -1,8 +1,9 @@
 #!/bin/bash
 
 START=$(date +%s.%N)
-echo "writing CSV"
-python main.py vcm_dev_bulk_inserts True geco geco78 5432 import coguk
+
+# Process the source with vcm_dev_bulk_inserts and then launch this script to load the generated files into the DB
+
 echo "copying CSV into DB"
 
 psql -h localhost -U geco -d vcm_dev_bulk_inserts -c "\copy annotation FROM '/home/alfonsi/virusurf_downloader/generated/COG-UK_sars_cov_2/other/ann.csv' WITH DELIMITER ',' CSV HEADER;"

@@ -1,6 +1,6 @@
 from typing import List, Tuple
 from db_config.database import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
-    VariantImpact, AminoAcidVariant, Epitope, EpitopeFragment, HostSpecie, DBMeta
+    VariantImpact, AminoAcidVariant, Epitope, EpitopeFragment, HostSpecie, DBMeta, NucleotideSequence, AnnotationSequence
 from locations import *
 from data_sources.virus_sample import VirusSample
 from xml_helper import *
@@ -201,7 +201,7 @@ def get_sequence(session, virus_sample: VirusSample, virus_id) -> Sequence:
     return sequence
 
 
-def create_and_get_sequence(session, virus_sample: VirusSample, virus_id, experiment_id, host_sample_id, sequencing_project_id):
+def create_and_get_sequence(session, virus_sample: VirusSample, virus_id, experiment_id, host_sample_id, sequencing_project_id) -> Tuple[Sequence, NucleotideSequence]:
     # data from sample
     accession_id = virus_sample.primary_accession_number()
     alternative_accession_id = virus_sample.alternative_accession_number()
@@ -222,7 +222,6 @@ def create_and_get_sequence(session, virus_sample: VirusSample, virus_id, experi
                         is_reference=is_reference,
                         is_complete=is_complete,
                         n_percentage=n_percentage,
-                        nucleotide_sequence=nucleotide_sequence,
                         strand=strand,
                         length=length,
                         gc_percentage=gc_percentage,
@@ -234,7 +233,12 @@ def create_and_get_sequence(session, virus_sample: VirusSample, virus_id, experi
                         host_sample_id=host_sample_id)
     session.add(sequence)
     session.flush()
-    return sequence
+    nucleotide_sequence_db_obj = None
+    if nucleotide_sequence:
+        nucleotide_sequence_db_obj = NucleotideSequence(sequence_id=sequence.sequence_id,
+                                                        nucleotide_sequence=nucleotide_sequence)
+        session.add(nucleotide_sequence_db_obj)
+    return sequence, nucleotide_sequence_db_obj
 
 
 def create_annotation_and_aa_variants(session, sample: VirusSample, sequence: Sequence, reference_sample: VirusSample):
@@ -245,8 +249,7 @@ def create_annotation_and_aa_variants(session, sample: VirusSample, sequence: Se
                                 feature_type=feature_type,
                                 product=product,
                                 external_reference=db_xref_merged,
-                                sequence_id=sequence.sequence_id,
-                                aminoacid_sequence=amino_acid_sequence)
+                                sequence_id=sequence.sequence_id)
         session.add(annotation)
         session.flush()
         if aa_variants:
@@ -270,11 +273,16 @@ def create_annotation_and_amino_acid_variants(session, sequence_id, *args):
                             feature_type=feature_type,
                             product=product,
                             sequence_id=sequence_id,
-                            external_reference=protein_id,
-                            annotation_nucleotide_sequence=nuc_seq,
-                            aminoacid_sequence=amino_acid_seq)
+                            external_reference=protein_id)
     session.add(annotation)
     session.flush()
+    if amino_acid_seq or nuc_seq:
+        annotation_sequence = AnnotationSequence(annotation_id=annotation.annotation_id,
+                                                 sequence_id=sequence_id,
+                                                 product=product,
+                                                 aminoacid_sequence=amino_acid_seq,
+                                                 annotation_nucleotide_sequence=nuc_seq)
+        session.add(annotation_sequence)
     if aa_variants:
         for gen_name, protein, protein_id, start_pos, sequence_aa_original, sequence_aa_alternative, variant_aa_type in aa_variants:
             aa_variant = AminoAcidVariant(annotation_id=annotation.annotation_id,
@@ -440,11 +448,14 @@ def get_specie_id(session, organism_taxon_id:int):
     return host_specie_id
 
 
-def get_reference_sequence_of_virus(session, virus_id) -> Optional[Sequence]:
-    return session.query(Sequence).filter(
+def get_reference_sequence_of_virus(session, virus_id) -> Optional[Tuple[Sequence, NucleotideSequence]]:
+
+
+    return session.query(Sequence, NucleotideSequence).filter(
         Sequence.virus_id == virus_id,
         # noqa              # == ignore warning on " == True" for this case
-        Sequence.is_reference == True
+        Sequence.is_reference == True,
+        Sequence.sequence_id == NucleotideSequence.sequence_id
     ).one_or_none()
 
 
@@ -472,7 +483,8 @@ def sequence_primary_accession_ids(session, virus_id: int, sources: Optional[Lis
     return [_[0] for _ in result]
 
 
-def remove_sequence_and_meta(session, primary_sequence_accession_id: Optional[str]=None, alternative_sequence_accession_id: Optional[str]=None):
+def remove_sequence_and_meta(session, primary_sequence_accession_id: Optional[str] = None,
+                             alternative_sequence_accession_id: Optional[str] = None):
     # get metadata ids
     query = session.query(Sequence.sequence_id, Sequence.experiment_type_id, Sequence.sequencing_project_id,
                           Sequence.host_sample_id)
@@ -492,6 +504,7 @@ def remove_sequence_and_meta(session, primary_sequence_accession_id: Optional[st
     annotation_ids = [_[0] for _ in annotation_ids]
     if annotation_ids:
         session.query(AminoAcidVariant).filter(AminoAcidVariant.annotation_id.in_(annotation_ids)).delete(synchronize_session=False)
+    session.query(AnnotationSequence).filter(AnnotationSequence.sequence_id == sequence_id).delete(synchronize_session=False)
     session.query(Annotation).filter(Annotation.sequence_id == sequence_id).delete(synchronize_session=False)
 
     # delete impacts and nuc variants
@@ -502,6 +515,7 @@ def remove_sequence_and_meta(session, primary_sequence_accession_id: Optional[st
     session.query(NucleotideVariant).filter(NucleotideVariant.sequence_id == sequence_id).delete(synchronize_session=False)
 
     # delete sequence
+    session.query(NucleotideSequence).filter(NucleotideSequence.sequence_id == sequence_id).delete(synchronize_session=False)
     session.query(Sequence).filter(Sequence.sequence_id == sequence_id).delete(synchronize_session=False)
 
     # delete related meta
@@ -527,7 +541,8 @@ def remove_sequence_and_meta(session, primary_sequence_accession_id: Optional[st
         session.query(SequencingProject).filter(SequencingProject.sequencing_project_id == sequence_project_id).delete(synchronize_session=False)
 
 
-def remove_sequence_and_meta_list(session, primary_sequence_accession_id: Optional[List[str]]=None, alternative_sequence_accession_id: Optional[List[str]]=None):
+def remove_sequence_and_meta_list(session, primary_sequence_accession_id: Optional[List[str]] = None,
+                                  alternative_sequence_accession_id: Optional[List[str]] = None):
     # get sequence_id of all
     query = session.query(Sequence.sequence_id)
     if primary_sequence_accession_id:
@@ -551,6 +566,7 @@ def remove_sequence_and_meta_list(session, primary_sequence_accession_id: Option
     annotation_ids = [_[0] for _ in annotation_ids]
     if annotation_ids:
         session.query(AminoAcidVariant).filter(AminoAcidVariant.annotation_id.in_(annotation_ids)).delete(synchronize_session=False)
+    session.query(AnnotationSequence).filter(AnnotationSequence.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
     session.query(Annotation).filter(Annotation.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
 
     # delete impacts and nuc variants
@@ -561,6 +577,7 @@ def remove_sequence_and_meta_list(session, primary_sequence_accession_id: Option
     session.query(NucleotideVariant).filter(NucleotideVariant.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
 
     # delete sequence
+    session.query(NucleotideSequence).filter(NucleotideSequence.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
     session.query(Sequence).filter(Sequence.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
 
     # delete unused meta

@@ -32,10 +32,24 @@ ALTER TABLE sequence ADD CONSTRAINT sequence_virus_id_fkey FOREIGN KEY (virus_id
 ON UPDATE NO ACTION
 ON DELETE NO ACTION;
 
+-- NUCLEOTIDE SEQUENCE
+ALTER TABLE nucleotide_sequence ADD CONSTRAINT nucleotide_sequence_sequence_id_fkey FOREIGN KEY (sequence_id) REFERENCES sequence(sequence_id) MATCH SIMPLE
+ON UPDATE NO ACTION
+ON DELETE NO ACTION;
+
 --ANNOTATION
 ALTER TABLE annotation ADD CONSTRAINT annotation_sequence_id_fkey FOREIGN KEY (sequence_id) REFERENCES sequence(sequence_id) MATCH SIMPLE
 ON UPDATE NO ACTION
 ON DELETE NO ACTION;
+
+-- ANNOTATION SEQUENCE
+ALTER TABLE annotation_sequence ADD CONSTRAINT annotation_sequence_sequence_id_fkey FOREIGN KEY (sequence_id) REFERENCES sequence(sequence_id) MATCH SIMPLE
+ON UPDATE NO ACTION
+ON DELETE NO ACTION;
+ALTER TABLE annotation_sequence ADD CONSTRAINT annotation_sequence_annotation_id_fkey FOREIGN KEY (annotation_id) REFERENCES annotation(annotation_id) MATCH SIMPLE
+ON UPDATE NO ACTION
+ON DELETE NO ACTION;
+-- plus a unique index on annotation_sequence(sequence_id, product)
 
 --NUCLEOTIDE VARIANT
 ALTER TABLE nucleotide_variant ADD CONSTRAINT nucleotide_variant_sequence_id_fkey FOREIGN KEY (sequence_id) REFERENCES sequence(sequence_id) MATCH SIMPLE

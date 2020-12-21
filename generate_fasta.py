@@ -28,12 +28,10 @@ def generate_fasta(virus_taxon_id: int, virus_folder_name:str, generated_file_na
                         f'virus associated with taxon {virus_taxon_id}')
 
     def get_acc_ids_and_sequences_from_db(session: database.Session) -> Generator[Tuple, None, None]:
-        query_result = session.query(
-                database.Sequence.accession_id,
-                database.Sequence.nucleotide_sequence) \
-            .filter(
-            database.Sequence.virus_id == virus_db_id
-            ) \
+        query_result = session.query(database.Sequence.accession_id,
+                                     database.NucleotideSequence.nucleotide_sequence)\
+            .filter(database.Sequence.virus_id == virus_db_id,
+                    database.Sequence.sequence_id == database.NucleotideSequence.sequence_id) \
             .all()
         for pair in query_result:
             yield pair[0], pair[1]
