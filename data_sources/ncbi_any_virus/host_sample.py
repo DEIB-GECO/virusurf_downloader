@@ -28,9 +28,16 @@ class NCBIHostSample:
         #     for l in f.readlines():
         #         print(l)
 
+        attribute_nodes_cleaned = []
         attribute_nodes = self.host_xml.xpath('.//Attributes/Attribute')
-        self.attributes = {}
+        # remove attributes with not applicable value
         for node in attribute_nodes:
+            value = node.text.lower()
+            if 'not' not in value:  # like "not applicable"
+                attribute_nodes_cleaned.append(node)
+        # save attributes ina key-value pairs
+        self.attributes = {}
+        for node in attribute_nodes_cleaned:
             if 'attribute_name' in node.attrib:
                 key = node.attrib['attribute_name'].lower()
             else:
@@ -78,6 +85,7 @@ class NCBIHostSample:
         value = _find_in_attributes(self.attributes, 'coverage')[1]
         if value is not None:
             try:
+                # noinspection PyTypeChecker
                 return round(float(value))
             except ValueError:
                 logger.error(f'Error while parsing coverage string {value} from host XML data')
@@ -111,7 +119,7 @@ class NCBIHostSample:
         return host_name
 
     def age(self) -> Optional[str]:
-        age_value =  _find_in_attributes_(self.attributes, ('age', 'years'), ('coverage',))[1]
+        age_value = _find_in_attributes_(self.attributes, ('age', 'years'), ('coverage', 'stage', 'passage'))[1]
         # parse to int to eliminate possible decimals
         if age_value is not None:
             if 'not' in age_value: # like 'not collected'
@@ -122,8 +130,9 @@ class NCBIHostSample:
 
     def gender(self) -> Optional[int]:
         gender = _find_in_attributes_(self.attributes, ('sex', 'gender'))[1]
-        if gender is not None and 'not' in gender or 'restricted' in gender: # like 'not provided' or 'restricted access'
-            gender = None
+        if gender is not None:
+            if 'not' in gender or 'restricted' in gender: # like 'not provided' or 'restricted access'
+                gender = None
         return gender
 
 

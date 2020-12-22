@@ -7,6 +7,7 @@ import os
 # from .prepared_parameters import parameters
 import json
 import datetime
+from loguru import logger
 
 
 class BlastResult:
@@ -555,6 +556,33 @@ def call_nucleotide_variants(sequence_id, reference, sequence, ref_aligned, seq_
     return filter_nuc_variants(parse_annotated_variants(annotated_variants))
 
 
+def choose_alignment(alignments: Align.PairwiseAlignments):
+    try:
+        first_alignment = str(next(alignments))[:-1]    # remove trailing "\n"
+    except StopIteration as e:
+        logger.error('No alignments available for this sequence')
+        raise e
+    ref_aligned, _, seq_aligned = first_alignment.split('\n')
+    min_length_without_gaps = len(seq_aligned) - seq_aligned.count('-')
+    # compare length of this alignment with next 10K alignments
+    num_alignements = 1
+    for i in range(10000):
+        try:
+            next_alignment = str(next(alignments))[:-1]
+            next_ref_aligned, _, next_seq_aligned = next_alignment.split('\n')
+            next_length_without_gaps = len(next_seq_aligned) - next_seq_aligned.count('-')
+            if next_length_without_gaps < min_length_without_gaps:
+                min_length_without_gaps = next_length_without_gaps
+                ref_aligned = next_ref_aligned
+                seq_aligned = next_seq_aligned
+            num_alignements += 1
+        except:
+            break
+    if num_alignements > 1000:
+        logger.trace(f"More than 1000 alignments have been compared ({num_alignements})")
+    return ref_aligned, seq_aligned
+
+
 def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file, snpeff_database_name):
     aligner = Align.PairwiseAligner()
     aligner.match_score = 3.0  # the documentation states we can pass the scores in the constructor of PairwiseAligner but it doesn't work
@@ -562,11 +590,7 @@ def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file
     aligner.open_gap_score = -2.5
     aligner.extend_gap_score = -1
 
-    alignments = sorted(list(aligner.align(reference, sequence)),
-                        key = lambda x: len(str(x).strip().split('\n')[2].strip("-")))
-    alignment = str(alignments[0]).strip().split('\n')
-    ref_aligned = alignment[0]
-    seq_aligned = alignment[2]
+    ref_aligned, seq_aligned = choose_alignment(aligner.align(reference, sequence))
     ref_positions = np.zeros(len(seq_aligned), dtype=int)
 
     pos = 0

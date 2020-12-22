@@ -82,8 +82,8 @@ def create_or_get_host_specie(session, sample: VirusSample) -> int:
     host_specie = HostSpecie(host_taxon_id=host_taxon_id,
                              host_taxon_name=host_taxon_name)
 
-    logger.info(f'ACC.ID: {sample.primary_accession_number()} - {sample.alternative_accession_number()}')
-    logger.info(f'HOST_SPECIE: {host_taxon_name} - {host_taxon_id}')
+    # logger.info(f'ACC.ID: {sample.primary_accession_number()} - {sample.alternative_accession_number()}')
+    # logger.info(f'HOST_SPECIE: {host_taxon_name} - {host_taxon_id}')
     return 1
 
 
@@ -125,7 +125,7 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
                              gender=gender,
                              )
     host_sample.host_sample_id = 1
-    logger.info(f'HOST_SAMPLE: {collection_date} - {isolation_source} - {originating_lab} - {country} - {region} - {geo_group} - {age} - {gender}')
+    # logger.info(f'HOST_SAMPLE: {collection_date} - {isolation_source} - {originating_lab} - {country} - {region} - {geo_group} - {age} - {gender}')
     return host_sample.host_sample_id
 
 
@@ -167,7 +167,6 @@ def create_and_get_sequence(session, virus_sample: VirusSample, virus_id: int, e
                         is_reference=is_reference,
                         is_complete=is_complete,
                         n_percentage=n_percentage,
-                        nucleotide_sequence=nucleotide_sequence,
                         strand=strand,
                         length=length,
                         gc_percentage=gc_percentage,
@@ -187,31 +186,21 @@ def create_and_get_sequence(session, virus_sample: VirusSample, virus_id: int, e
 
 def create_annotation_and_aa_variants(session, sample: VirusSample, sequence: Sequence, reference_sample: VirusSample):
     for start, stop, feature_type, gene_name, product, db_xref_merged, amino_acid_sequence, aa_variants in sample.annotations_and_amino_acid_variants(reference_sample):
-        annotation = session.query(Annotation).filter(Annotation.start == start,
-                                                      Annotation.stop == stop,
-                                                      Annotation.feature_type == feature_type,
-                                                      Annotation.gene_name == gene_name,
-                                                      Annotation.product == product,
-                                                      Annotation.external_reference == db_xref_merged,
-                                                      Annotation.sequence_id == sequence.sequence_id,
-                                                      Annotation.aminoacid_sequence == amino_acid_sequence).one_or_none()
-        if not annotation:
-            annotation = Annotation(start=start,
-                                    stop=stop,
-                                    gene_name=gene_name,
-                                    feature_type=feature_type,
-                                    product=product,
-                                    external_reference=db_xref_merged,
-                                    sequence_id=sequence.sequence_id,
-                                    aminoacid_sequence=amino_acid_sequence)
-            if aa_variants:
-                for original, alternative, mutpos, mut_len, mut_type in aa_variants:
-                    aa_variant = AminoAcidVariant(annotation_id=annotation.annotation_id,
-                                                  sequence_aa_original=original,
-                                                  sequence_aa_alternative=alternative,
-                                                  start_aa_original=mutpos,
-                                                  variant_aa_length=mut_len,
-                                                  variant_aa_type=mut_type)
+        annotation = Annotation(start=start,
+                                stop=stop,
+                                gene_name=gene_name,
+                                feature_type=feature_type,
+                                product=product,
+                                external_reference=db_xref_merged,
+                                sequence_id=sequence.sequence_id)
+        if aa_variants:
+            for original, alternative, mutpos, mut_len, mut_type in aa_variants:
+                aa_variant = AminoAcidVariant(annotation_id=annotation.annotation_id,
+                                              sequence_aa_original=original,
+                                              sequence_aa_alternative=alternative,
+                                              start_aa_original=mutpos,
+                                              variant_aa_length=mut_len,
+                                              variant_aa_type=mut_type)
 
 
 def create_annotation_and_amino_acid_variants(session, sequence_id, *args):
