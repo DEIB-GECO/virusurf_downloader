@@ -1,4 +1,5 @@
 import os
+import shutil
 from collections import OrderedDict
 from data_sources.ncbi_any_virus.ncbi_importer import AnyNCBIVNucSample
 from data_sources.ncbi_services import download_ncbi_taxonomy_as_xml, get_samples_accession_ids, download_or_get_ncbi_sample_as_xml
@@ -9,11 +10,12 @@ from tqdm import tqdm
 from typing import Generator, Optional
 from loguru import logger
 from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
-from locations import get_local_folder_for, FileType
+from locations import get_local_folder_for, FileType, remove_file
 from db_config import database
 from vcm.vcm import sequence_primary_accession_ids
 import stats_module
 from xml_helper import text_at_node
+from urllib.request import Request, urlopen
 
 
 class COGUKSarsCov2:
@@ -24,11 +26,25 @@ class COGUKSarsCov2:
 
     def __init__(self):
         logger.info(f'importing virus {self.name} using NCBI SC2 for taxonomy data')
-
+        # fetch taxonomy data from NCBI
         taxonomy_file_path = download_ncbi_taxonomy_as_xml(
             get_local_folder_for(source_name=self.name, _type=FileType.TaxonomyData),
             self.taxon_id())
-        self.tax_tree = etree.parse(taxonomy_file_path, parser=etree.XMLParser(remove_blank_text=True))
+        try:
+            self.tax_tree = etree.parse(taxonomy_file_path, parser=etree.XMLParser(remove_blank_text=True))
+        except etree.XMLSyntaxError as e:  # happens on AWS if for some reason the downloaded file is corrupted
+            remove_file(taxonomy_file_path)
+            ncbi_sc2_taxonomy_dir = get_local_folder_for(
+                source_name=ncbi_known_settings["sars_cov_2"]["generated_dir_name"], _type=FileType.TaxonomyData)
+            alternative_taxonomy_path = ncbi_sc2_taxonomy_dir + f"{ncbi_known_settings['sars_cov_2']['virus_taxon_id']}.xml"
+            if os.path.exists(alternative_taxonomy_path):
+                shutil.copyfile(alternative_taxonomy_path, taxonomy_file_path)
+                self.tax_tree = etree.parse(taxonomy_file_path, parser=etree.XMLParser(remove_blank_text=True))
+            else:
+                logger.error(f"Taxonomy file of SARS-CoV-2 was empty. Attempt to use the one from {ncbi_sc2_taxonomy_dir} "
+                             f"failed because the filed doesn't exist. Can't proceed.")
+                raise e
+        # fetch latest source data
         download_dir = get_local_folder_for(source_name=self.name, _type=FileType.SequenceOrSampleData)
         self.sequence_file_path, self.metadata_file_path = download_or_get_sample_data(download_dir)
 
@@ -176,11 +192,41 @@ def download_or_get_sample_data(containing_directory: str) -> (str, str):
     """
     :return: the local file path of the downloaded sequence and metadata files.
     """
+    def get_download_size(url) -> Optional[int]:
+        """
+        Returns the size of the downloadable resource in bytes supported by the protocol
+        of the downloadable resource; None otherwise.
+        """
+        req = Request(url=url, method='HEAD')
+        f = urlopen(req)
+        if int(f.status) == 200:
+            return int(f.headers['Content-Length'])
+        else:
+            return None
+
+    def get_local_file_size(path) -> Optional[int]:
+        """
+        Returns the size of the local file in bytes if it exists; None otherwise.
+        """
+        if os.path.exists(path):
+            return os.stat(path).st_size
+        else:
+            return None
+
+    def download_coguk_data():
+        logger.info(f'downloading sample sequences for COG-UK data from {COGUKSarsCov2.sequence_file_url} ...')
+        wget.download(COGUKSarsCov2.sequence_file_url, sequence_local_file_path)
+        logger.info(f'\ndownloading sample metadata for COG-UK data from {COGUKSarsCov2.metadata_file_url} ...')
+        wget.download(COGUKSarsCov2.metadata_file_url, metadata_local_file_path)
+        logger.info('\n')
+
     sequence_local_file_path = containing_directory + COGUKSarsCov2.sequence_file_url.rsplit('/', maxsplit=1)[1]
     metadata_local_file_path = containing_directory + COGUKSarsCov2.metadata_file_url.rsplit('/', maxsplit=1)[1]
     if not os.path.exists(sequence_local_file_path) or not os.path.exists(metadata_local_file_path):
-        logger.info(f'downloading sample sequences for COG-UK data from {COGUKSarsCov2.sequence_file_url} ...')
-        wget.download(COGUKSarsCov2.sequence_file_url, sequence_local_file_path)
-        logger.info(f'downloading sample metadata for COG-UK data from {COGUKSarsCov2.metadata_file_url} ...')
-        wget.download(COGUKSarsCov2.metadata_file_url, metadata_local_file_path)
+        download_coguk_data()
+    else:
+        # compare size of local with remote ones
+        if get_download_size(COGUKSarsCov2.sequence_file_url) != get_local_file_size(sequence_local_file_path) or \
+                get_download_size(COGUKSarsCov2.metadata_file_url) != get_local_file_size(metadata_local_file_path):
+            download_coguk_data()
     return sequence_local_file_path, metadata_local_file_path

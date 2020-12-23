@@ -63,8 +63,8 @@ def setup_telegram_notifier():
                    level="ERROR",
                    format="<green>{time:YYYY-MM-DD HH:mm:ss Z}</green> | "
                           "<level>{level: <8}</level> | "
-                          "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>"
-                   )
+                          "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
+                   backtrace=False, diagnose=False)  # disables sending exception stacktrace
 
 
 def setup_any_additional_error_notifiers():
