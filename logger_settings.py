@@ -2,6 +2,7 @@ import logging
 
 from loguru import logger
 from notifiers.logging import NotificationHandler
+import notifiers.exceptions
 import os
 from tqdm import tqdm
 import warnings
@@ -89,12 +90,15 @@ class NotificationHandlerWrapper(logging.Handler):
     def emit(self, record: logging.LogRecord):
         # send up to 4096 chars per notification
         message: str = record.getMessage()
-        while len(message) > NotificationHandlerWrapper.MAX_MSG_LENGTH:
-            record.msg = f"{message[:NotificationHandlerWrapper.MAX_MSG_LENGTH_WITH_TRAILING_ADDITION]} -- CONTINUE IN NEXT MSG"
+        try:
+            while len(message) > NotificationHandlerWrapper.MAX_MSG_LENGTH:
+                record.msg = f"{message[:NotificationHandlerWrapper.MAX_MSG_LENGTH_WITH_TRAILING_ADDITION]} -- CONTINUE IN NEXT MSG"
+                self.handler.emit(record)
+                message = message[NotificationHandlerWrapper.MAX_MSG_LENGTH_WITH_TRAILING_ADDITION:]
+            record.msg = message
             self.handler.emit(record)
-            message = message[NotificationHandlerWrapper.MAX_MSG_LENGTH_WITH_TRAILING_ADDITION:]
-        record.msg = message
-        self.handler.emit(record)
+        except notifiers.exceptions.NotificationError:
+            logger.info(f"Last attempt to send a notification message has been rejected because the sending rate was too high.")
 
     def handleError(self, record: logging.LogRecord):
         self.handler.handleError(record)
