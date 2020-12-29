@@ -1,9 +1,9 @@
-/tmp_snpeff/*.vcf
-/downloads/
-/generated/
+tmp_snpeff/*.vcf
+downloads/
+generated/
 notifier_params.tsv
-/snpEff_genes.txt
-/snpEff_summary.html
+snpEff_genes.txt
+snpEff_summary.html
 e-utils_api_config.csv
 
 #########IDEA#########

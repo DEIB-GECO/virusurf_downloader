@@ -107,16 +107,16 @@ known_settings = {
         "log_with_name": "MERS",
         "generated_dir_name": "mers"
     },
-    "betacoronavirus_england_1": {
-        "reference_sample_query": "txid1263720[Organism:noexp] AND srcdb_refseq[Properties]",
-        "non_reference_samples_query": "txid1263720[Organism:noexp] NOT srcdb_refseq[Properties]",
-        "virus_taxon_id": 1263720,
-        "chromosome_name": "NC_038294",
-        "snpeff_db_name": "betacoronavirus_england_1",
-        "annotation_file_path": f".{sep}annotations{sep}betacoronavirus_england_1.tsv",
-        "log_with_name": "BETA-COV-EN-1",
-        "generated_dir_name": "betacov_england_1"
-    },
+    # "betacoronavirus_england_1": {
+    #     "reference_sample_query": "txid1263720[Organism:noexp] AND srcdb_refseq[Properties]",
+    #     "non_reference_samples_query": "txid1263720[Organism:noexp] NOT srcdb_refseq[Properties]",
+    #     "virus_taxon_id": 1263720,
+    #     "chromosome_name": "NC_038294",
+    #     "snpeff_db_name": "betacoronavirus_england_1",
+    #     "annotation_file_path": f".{sep}annotations{sep}betacoronavirus_england_1.tsv",
+    #     "log_with_name": "BETA-COV-EN-1",
+    #     "generated_dir_name": "betacov_england_1"
+    # },
     "zaire_ebolavirus": {
         "reference_sample_query": "txid186538[Organism:exp] AND srcdb_refseq[Properties]",
         "non_reference_samples_query": "txid186538[Organism:exp] NOT srcdb_refseq[Properties]",
