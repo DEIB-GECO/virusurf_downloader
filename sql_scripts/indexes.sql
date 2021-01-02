@@ -30,22 +30,16 @@ CREATE INDEX aa__start_original ON aminoacid_variant USING btree (start_aa_origi
 CREATE INDEX aa__var_type_lower ON aminoacid_variant USING btree (lower((variant_aa_type)::text)) TABLESPACE default_ts;
 CREATE INDEX aa__var_type_normal ON aminoacid_variant USING btree (variant_aa_type) TABLESPACE default_ts;
 
-
---NUCLEOTIDE VARIANT ANNOTATION
-CREATE INDEX nuc_var_ann__var_id ON public.nucleotide_variant_annotation USING btree (nucleotide_variant_id) TABLESPACE default_ts;
-
-
 --NUCLEOTIDE VARIANT ANNOTATED
 -- JOIN KEY
 CREATE INDEX nucleotide_variant_annotated__sequence_id__idx ON nucleotide_variant_annotated(sequence_id) WITH (FILLFACTOR = 100) TABLESPACE default_ts;
 
 CLUSTER VERBOSE nucleotide_variant_annotated USING nucleotide_variant_annotated__sequence_id__idx;
 
-CREATE INDEX nucleotide_variant_annotated__nucleotide_variant_id__idx ON nucleotide_variant_annotated(nucleotide_variant_id) WITH (FILLFACTOR = 100) TABLESPACE default_ts;
-CREATE INDEX nucleotide_variant_annotated__variant_type_lower__idx ON nucleotide_variant_annotated(LOWER(variant_type)) WITH (FILLFACTOR = 100) TABLESPACE default_ts;
-CREATE INDEX nucleotide_variant_annotated__start_original__idx ON nucleotide_variant_annotated(start_original) WITH (FILLFACTOR = 100) TABLESPACE default_ts;
-CREATE INDEX nucleotide_variant_annotated__sequence_original_lower__idx ON nucleotide_variant_annotated(LOWER(sequence_original)) WITH (FILLFACTOR = 100) TABLESPACE default_ts;
-CREATE INDEX nucleotide_variant_annotated__sequence_alternative_lower__idx ON nucleotide_variant_annotated(LOWER(sequence_alternative)) WITH (FILLFACTOR = 100) TABLESPACE default_ts;
-CREATE INDEX nucleotide_variant_annotated__n_feature_type_lower__idx ON nucleotide_variant_annotated(LOWER(n_feature_type)) WITH (FILLFACTOR = 100) TABLESPACE default_ts;
-CREATE INDEX nucleotide_variant_annotated__n_gene_name_lower__idx ON nucleotide_variant_annotated(LOWER(n_gene_name)) WITH (FILLFACTOR = 100) TABLESPACE default_ts;
-CREATE INDEX nucleotide_variant_annotated__n_product__idx ON nucleotide_variant_annotated(LOWER(n_product)) WITH (FILLFACTOR = 100) TABLESPACE default_ts;
+CREATE INDEX nucleotide_variant_annotated__nucleotide_variant_id__idx ON public.nucleotide_variant_annotated USING btree (nucleotide_variant_id) WITH (FILLFACTOR=100) TABLESPACE default_ts;
+CREATE INDEX nucleotide_variant_annotated__sequence_alternative_lower__idx ON public.nucleotide_variant_annotated USING btree (lower(sequence_alternative::text) COLLATE pg_catalog."default") WITH (FILLFACTOR=100) TABLESPACE default_ts;
+CREATE INDEX nucleotide_variant_annotated__sequence_id__idx ON public.nucleotide_variant_annotated USING btree (sequence_id) WITH (FILLFACTOR=100) TABLESPACE default_ts;
+CREATE INDEX nucleotide_variant_annotated__sequence_original_lower__idx ON public.nucleotide_variant_annotated USING btree (lower(sequence_original::text) COLLATE pg_catalog."default") WITH (FILLFACTOR=100) TABLESPACE default_ts;
+CREATE INDEX nucleotide_variant_annotated__start_original__idx ON public.nucleotide_variant_annotated USING btree (start_original) WITH (FILLFACTOR=100) TABLESPACE default_ts;
+CREATE INDEX nucleotide_variant_annotated__variant_type_lower__idx ON public.nucleotide_variant_annotated USING btree (lower(variant_type::text) COLLATE pg_catalog."default") WITH (FILLFACTOR=100) TABLESPACE default_ts;
+CREATE INDEX nucleotide_variant_annotated__n_gene_name_lower__idx ON public.nucleotide_variant_annotated USING btree (lower(n_gene_name::text) COLLATE pg_catalog."default") WITH (FILLFACTOR=100) TABLESPACE default_ts;

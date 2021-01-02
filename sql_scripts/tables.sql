@@ -118,7 +118,7 @@ CREATE TABLE public.nucleotide_variant (
 );
 
 CREATE TABLE public.variant_impact (
-	variant_impact_id bigserial primary key,
+	variant_impact_id serial primary key,
 	nucleotide_variant_id int4 NOT NULL,
 	effect varchar NULL,
 	putative_impact varchar NULL,

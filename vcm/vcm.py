@@ -276,7 +276,7 @@ def create_annotation_and_amino_acid_variants(session, sequence_id, *args):
                             external_reference=protein_id)
     session.add(annotation)
     session.flush()
-    if amino_acid_seq or nuc_seq:
+    if feature_type != 'gene' and (amino_acid_seq or nuc_seq):
         annotation_sequence = AnnotationSequence(annotation_id=annotation.annotation_id,
                                                  sequence_id=sequence_id,
                                                  product=product,
