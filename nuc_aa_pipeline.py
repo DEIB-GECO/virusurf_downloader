@@ -563,14 +563,14 @@ def choose_alignment(alignments: Align.PairwiseAlignments):
         logger.error('No alignments available for this sequence')
         raise e
     ref_aligned, _, seq_aligned = first_alignment.split('\n')
-    min_length_without_gaps = len(seq_aligned) - seq_aligned.count('-')
+    min_length_without_gaps = len(seq_aligned.strip("-"))
     # compare length of this alignment with next 10K alignments
     num_alignements = 1
     for i in range(10000):
         try:
             next_alignment = str(next(alignments))[:-1]
             next_ref_aligned, _, next_seq_aligned = next_alignment.split('\n')
-            next_length_without_gaps = len(next_seq_aligned) - next_seq_aligned.count('-')
+            next_length_without_gaps = len(next_seq_aligned.strip("-"))
             if next_length_without_gaps < min_length_without_gaps:
                 min_length_without_gaps = next_length_without_gaps
                 ref_aligned = next_ref_aligned
@@ -589,6 +589,10 @@ def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file
     aligner.mismatch_score = -2.0
     aligner.open_gap_score = -2.5
     aligner.extend_gap_score = -1
+    aligner.right_extend_gap_score = 0
+    aligner.left_extend_gap_score = 0
+    aligner.right_open_gap_score = 0
+    aligner.left_open_gap_score = 0
 
     ref_aligned, seq_aligned = choose_alignment(aligner.align(reference, sequence))
     ref_positions = np.zeros(len(seq_aligned), dtype=int)
