@@ -1,29 +1,29 @@
-CREATE OR REPLACE VIEW public.annotation_cds
-AS SELECT annotation.annotation_id,
-    annotation.sequence_id,
-    annotation.start,
-    annotation.stop,
-    annotation.gene_name,
-    annotation.product,
-    annotation.external_reference,
-    annotation.aminoacid_sequence
-   FROM annotation
-  WHERE annotation.feature_type::text = 'CDS'::text;
-
-
-CREATE OR REPLACE VIEW public.annotation_view
-AS SELECT annotation.sequence_id,
-    annotation.product AS annotation_view_product,
-    annotation.aminoacid_sequence AS annotation_view_aminoacid_sequence,
-    annotation.annotation_nucleotide_sequence AS annotation_view_nucleotide_sequence
-   FROM annotation
-  WHERE annotation.product IS NOT NULL AND
-        (annotation.aminoacid_sequence IS NOT NULL OR annotation.annotation_nucleotide_sequence IS NOT NULL);
+-- CREATE OR REPLACE VIEW public.annotation_cds
+-- AS SELECT annotation.annotation_id,
+--     annotation.sequence_id,
+--     annotation.start,
+--     annotation.stop,
+--     annotation.gene_name,
+--     annotation.product,
+--     annotation.external_reference,
+--     annotation.aminoacid_sequence
+--    FROM annotation
+--   WHERE annotation.feature_type::text = 'CDS'::text;
+--
+--
+-- CREATE OR REPLACE VIEW public.annotation_view
+-- AS SELECT annotation.sequence_id,
+--     annotation.product AS annotation_view_product,
+--     annotation.aminoacid_sequence AS annotation_view_aminoacid_sequence,
+--     annotation.annotation_nucleotide_sequence AS annotation_view_nucleotide_sequence
+--    FROM annotation
+--   WHERE annotation.product IS NOT NULL AND
+--         (annotation.aminoacid_sequence IS NOT NULL OR annotation.annotation_nucleotide_sequence IS NOT NULL);
 
 
 CREATE OR REPLACE VIEW public.host_sample_view
 AS SELECT host_sample.*,
-    host_specie.*
+    host_specie.host_taxon_id, host_specie.host_taxon_name
    FROM host_sample
      JOIN host_specie USING (host_id);
 
