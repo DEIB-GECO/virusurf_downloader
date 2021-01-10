@@ -25,6 +25,12 @@ def read_config_params():
     global _config_params
     if not _config_params:
         config_file_path = f".{sep}e-utils_api_config.csv"
+        # create template file if it doesn't exist
+        if not exists(config_file_path):
+            with open(config_file_path, mode='w') as blank_file:
+                blank_file.write("# lines starting with # are comments\n"
+                                 "# Write below the following values: tool name,email,api_key")
+        # else read it
         values = (None, 'example@email.com', None)  # defaults
         configuration_found = False
         with open(config_file_path, mode='r') as config_file:
