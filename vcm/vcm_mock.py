@@ -295,6 +295,7 @@ def create_nuc_variants_and_impacts(session, sequence_id, args):
     #                                       impact_gene_name=impact_gene_name)
     pass
 
+
 def create_epitope(session, epitope: Tuple):
     db_virus_id, host_specie_db_id, host_name, host_iri, protein_ncbi_id, cell_type, \
     mhc_class, mhc_allele, response_frequency_positive, assay_type, seq, start, stop, ext_links, \
@@ -332,6 +333,7 @@ def get_virus(session, a_virus) -> Optional[Virus]:
     # return session.query(Virus).filter(Virus.taxon_id == a_virus.taxon_id()).one_or_none()
     v = Virus(virus_id=1)
     return v
+
 
 def get_specie_id(session, organism_taxon_id:int):
     return 1

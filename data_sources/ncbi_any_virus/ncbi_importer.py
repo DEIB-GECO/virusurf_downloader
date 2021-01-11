@@ -106,7 +106,7 @@ class AnyNCBIVNucSample:
     re_patent_submission_date_lab = re.compile(r'^.* (\d+-\w+-\d+)(?: (.+))?$')
     gender_suggested_by_other_method: Optional[str] = None
     country_suggested_by_other_method: Optional[str] = None
-    host_name_suggested_by_other_method:Optional[str] = None
+    host_name_suggested_by_other_method: Optional[str] = None
     isolation_source_suggested_by_other_method: Optional[str] = None
 
     def __init__(self, virus_sample_file_path: str, internal_accession_id):
@@ -264,7 +264,7 @@ class AnyNCBIVNucSample:
         if not _input:
             info = None
         else:
-            info = self.re_anna_RuL3z.match(_input) # result of regular expression to extract the value may be None
+            info = self.re_anna_RuL3z.match(_input)  # result of regular expression to extract the value may be None
             if not info:
                 logger.warning(f'coverage string in sample {self.internal_id()} is {_input} and cannot be parsed. '
                                f'EXPERIMENT_TYPE.coverage set to NULL.\n'
@@ -457,7 +457,6 @@ class AnyNCBIVNucSample:
         taxon_name = self.host_taxon_name()  # this call may initialize the cached taxon id
         return self._host_taxon_id or host_taxon_id_from_ncbi_taxon_name(taxon_name)
 
-
     def gender(self) -> Optional[str]:
         host = self._init_and_get_host_values()
         if host:
@@ -542,7 +541,8 @@ class AnyNCBIVNucSample:
             if len(nodes) == 1:
                 try:
                     host_id = text_at_node(nodes[0], './INSDXref_id', True)
-                    self._external_host_data = NCBIHostSample(host_id)
+                    host_data_download_dir = get_local_folder_for(settings.generated_dir_name, FileType.HostData)
+                    self._external_host_data = NCBIHostSample(host_id, host_data_download_dir)
                 except AssertionError as e:
                     logger.error('malforned XML file. BioSample attribute without ID')
                     raise e
@@ -691,6 +691,7 @@ def main_pipeline_part_3(session: database.Session, sample: AnyNCBIVNucSample, d
     except Exception:
         logger.exception(f'exception occurred while working on annotations and nuc_variants of virus sample '
                          f'{sample.internal_id()}. Rollback transaction.')
+        remove_file(file_path)
         raise database.Rollback()
 
 
@@ -811,9 +812,9 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
         except ValueError as e:
             if str(e).endswith('missing nucleotide seq.'):
                 logger.warning(f'Sample {_sample.internal_id()} is given without nucleotide sequence. Sample import skipped. File deleted')
-                remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
             else:
                 logger.exception(f"exception occurred while working on virus sample {_sample.internal_id()}. Sample won't be imported")
+            remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
             raise database.Rollback()
         except AssertionError:
             logger.exception(f"Sample {_sample.internal_id()} may have a corrupted XML. The XML will be deleted. Sample won't be imported")
@@ -824,6 +825,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
             raise e  # i.e. it is handled outside but I don't want it to be logged as an unexpected error
         except Exception as e:
             logger.exception(f"exception occurred while working on virus sample {_sample.internal_id()}. Sample won't be imported")
+            remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
             raise database.Rollback()
 
     check_user_query()

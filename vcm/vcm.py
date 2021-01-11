@@ -449,8 +449,6 @@ def get_specie_id(session, organism_taxon_id:int):
 
 
 def get_reference_sequence_of_virus(session, virus_id) -> Optional[Tuple[Sequence, NucleotideSequence]]:
-
-
     return session.query(Sequence, NucleotideSequence).filter(
         Sequence.virus_id == virus_id,
         # noqa              # == ignore warning on " == True" for this case
@@ -552,52 +550,53 @@ def remove_sequence_and_meta_list(session, primary_sequence_accession_id: Option
         query = query\
             .filter(Sequence.alternative_accession_id.in_(alternative_sequence_accession_id))
     elif (primary_sequence_accession_id is not None and len(primary_sequence_accession_id) == 0) or \
-        (alternative_sequence_accession_id is not None and len(alternative_sequence_accession_id) == 0):
+         (alternative_sequence_accession_id is not None and len(alternative_sequence_accession_id) == 0):
         # nothing to delete
         return
     else:
         raise ValueError('one between primary_sequence_accession_id and alternative_sequence_accession_id arguments must '
                          'be specified')
     sequence_ids = query.all()
-    sequence_ids = [_[0] for _ in sequence_ids]
+    sequence_ids = [_[0] for _ in sequence_ids]  # flatten list
+    if len(sequence_ids) > 0:
 
-    # delete aa variants and annotations
-    annotation_ids = session.query(Annotation.annotation_id).filter(Annotation.sequence_id.in_(sequence_ids)).all()
-    annotation_ids = [_[0] for _ in annotation_ids]
-    if annotation_ids:
-        session.query(AminoAcidVariant).filter(AminoAcidVariant.annotation_id.in_(annotation_ids)).delete(synchronize_session=False)
-    session.query(AnnotationSequence).filter(AnnotationSequence.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
-    session.query(Annotation).filter(Annotation.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
+        # delete aa variants and annotations
+        annotation_ids = session.query(Annotation.annotation_id).filter(Annotation.sequence_id.in_(sequence_ids)).all()
+        annotation_ids = [_[0] for _ in annotation_ids]  # flatten list
+        if annotation_ids:
+            session.query(AminoAcidVariant).filter(AminoAcidVariant.annotation_id.in_(annotation_ids)).delete(synchronize_session=False)
+        session.query(AnnotationSequence).filter(AnnotationSequence.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
+        session.query(Annotation).filter(Annotation.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
 
-    # delete impacts and nuc variants
-    nuc_variant_ids = session.query(NucleotideVariant.nucleotide_variant_id).filter(NucleotideVariant.sequence_id.in_(sequence_ids)).all()
-    nuc_variant_ids = [_[0] for _ in nuc_variant_ids]
-    if nuc_variant_ids:
-        session.query(VariantImpact).filter(VariantImpact.nucleotide_variant_id.in_(nuc_variant_ids)).delete(synchronize_session=False)
-    session.query(NucleotideVariant).filter(NucleotideVariant.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
+        # delete impacts and nuc variants
+        nuc_variant_ids = session.query(NucleotideVariant.nucleotide_variant_id).filter(NucleotideVariant.sequence_id.in_(sequence_ids)).all()
+        nuc_variant_ids = [_[0] for _ in nuc_variant_ids]  # flatten list
+        if nuc_variant_ids:
+            session.query(VariantImpact).filter(VariantImpact.nucleotide_variant_id.in_(nuc_variant_ids)).delete(synchronize_session=False)
+        session.query(NucleotideVariant).filter(NucleotideVariant.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
 
-    # delete sequence
-    session.query(NucleotideSequence).filter(NucleotideSequence.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
-    session.query(Sequence).filter(Sequence.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
+        # delete sequence
+        session.query(NucleotideSequence).filter(NucleotideSequence.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
+        session.query(Sequence).filter(Sequence.sequence_id.in_(sequence_ids)).delete(synchronize_session=False)
 
-    # delete unused meta
-    # (host sample)
-    session.query(HostSample)\
-        .filter(HostSample.host_sample_id.notin_(session.query(Sequence.host_sample_id))).delete(synchronize_session=False)
+        # delete unused meta
+        # (host sample)
+        session.query(HostSample)\
+            .filter(HostSample.host_sample_id.notin_(session.query(Sequence.host_sample_id))).delete(synchronize_session=False)
 
-    # (experiment)
-    session.query(ExperimentType) \
-        .filter(ExperimentType.experiment_type_id.notin_(session.query(Sequence.experiment_type_id))).delete(synchronize_session=False)
+        # (experiment)
+        session.query(ExperimentType) \
+            .filter(ExperimentType.experiment_type_id.notin_(session.query(Sequence.experiment_type_id))).delete(synchronize_session=False)
 
-    # (seq project)
-    session.query(SequencingProject) \
-        .filter(SequencingProject.sequencing_project_id.notin_(session.query(Sequence.sequencing_project_id))).delete(synchronize_session=False)
+        # (seq project)
+        session.query(SequencingProject) \
+            .filter(SequencingProject.sequencing_project_id.notin_(session.query(Sequence.sequencing_project_id))).delete(synchronize_session=False)
 
-    # (host specie)
-    session.query(HostSpecie) \
-        .filter(
-        (HostSpecie.host_id.notin_(session.query(HostSample.host_id))) &
-        (HostSpecie.host_id.notin_(session.query(Epitope.host_id)))).delete(synchronize_session=False)
+        # (host specie)
+        session.query(HostSpecie) \
+            .filter(
+            (HostSpecie.host_id.notin_(session.query(HostSample.host_id))) &
+            (HostSpecie.host_id.notin_(session.query(Epitope.host_id)))).delete(synchronize_session=False)
 
 
 def check_existence_epitopes(session, virus_id):
