@@ -7,13 +7,11 @@ from data_sources.ncbi_any_virus.settings import known_settings as ncbi_known_se
 from lxml import etree
 import wget as wget
 from tqdm import tqdm
-from typing import Generator, Optional
+from typing import Generator, Optional, Collection
 from loguru import logger
 from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
+from db_config.database import Sequence, HostSample, SequencingProject, try_py_function, NucleotideSequence
 from locations import get_local_folder_for, FileType, remove_file
-from db_config import database
-from vcm.vcm import sequence_primary_accession_ids
-import stats_module
 from xml_helper import text_at_node
 from urllib.request import Request, urlopen
 
@@ -88,71 +86,59 @@ class COGUKSarsCov2:
         return True
 
     @staticmethod
-    def _deltas(virus_id, id_remote_samples):
-        """
-        :param virus_id: virus_id from the DB of the virus being imported
-        :param id_remote_samples: alternative accession id of the sequences avbailable from remote
-        :return: three sets containing the alternative accession ids of
-            1. sequences that are unchanged (local == remote)
-            2. outdated sequences (to be removed)
-            3. sequences new and to be imported
-        """
-        id_local_samples = set(database.try_py_function(
-            sequence_primary_accession_ids, virus_id, 'COG-UK'
-        ))
-        id_outdated_sequences = id_local_samples - id_remote_samples
-        id_new_sequences = id_remote_samples - id_local_samples
-        id_unchanged_sequences = id_local_samples - id_outdated_sequences
-        logger.info(f'\n'
-                    f'# Sequences from remote source: {len(id_remote_samples)}. Of which\n'
-                    f'# {len(id_unchanged_sequences)} present also locally and unchanged\n'
-                    f'# {len(id_new_sequences)} never seen before.\n'
-                    f'# Sequences from local source: {len(id_local_samples)}. Of which\n'
-                    f'# {len(id_outdated_sequences)} outdated and must be removed from local')
-        return id_unchanged_sequences, id_outdated_sequences, id_new_sequences
+    def get_sequences_in_current_data() -> dict:
+        def do(session):
+            all_sequences = dict()
+            for db_items in session.query(Sequence, HostSample, NucleotideSequence) \
+                    .select_from(Sequence, HostSample, SequencingProject, NucleotideSequence) \
+                    .filter(Sequence.strain_name.isnot(None),
+                            Sequence.host_sample_id == HostSample.host_sample_id,
+                            Sequence.sequence_id == NucleotideSequence.sequence_id,
+                            Sequence.sequencing_project_id == SequencingProject.sequencing_project_id,
+                            SequencingProject.database_source == 'COG-UK') \
+                    .yield_per(100):
+                source_seq, source_host, nuc_seq_db_obj = db_items
+                all_sequences[source_seq.accession_id] = (source_seq.length,
+                                                          source_seq.gc_percentage, source_seq.n_percentage,
+                                                          source_host.collection_date,
+                                                          source_host.country, source_host.region,
+                                                          nuc_seq_db_obj.nucleotide_sequence)
+            return all_sequences
 
-    def virus_samples(self, virus_id: int, from_sample: Optional[int] = None, to_sample: Optional[int] = None) -> Generator[COGUKSarsCov2Sample, None, None]:
-        # import metadata (few KB, we can save it in memory)
-        # noinspection PyAttributeOutsideInit
-        logger.info('parsing metadata file...')
+        return try_py_function(do)
+
+    def get_sequences_of_updated_source(self, filter_accession_ids: Optional[Collection] = None):
         meta = {}
         with open(self.metadata_file_path, mode='r') as metadata_file:
-            metadata_file.readline()    # skip header
+            header = metadata_file.readline()  # skip header
+            if not header.startswith("sequence_name,country,adm1,pillar_2,sample_date,epi_week,lineage"):
+                raise AssertionError(f"Unexpected metadata columns in file {self.metadata_file_path}.\n"
+                                     f"Check the compatibility of this new metadata file before importing.")
             for line in metadata_file:
                 try:
                     key, content = line.split(sep=',', maxsplit=1)  # key = <sequence name>, content = <other metadata>
                     meta[key] = content.rstrip()
-                    # logger.debug(f'new meta_key: {key}')
                 except:
-                    logger.error(f'Unable to parse the following line from the metadata file {self.metadata_file_path}:\n\t'
-                                 f'{line}')
+                    logger.error(
+                        f'Unable to parse the following line from the metadata file {self.metadata_file_path}:\n\t'
+                        f'{line}')
 
-        # do _deltas() or import everything
-        id_new_sequences = meta.keys()
+        accession_ids_of_interest = filter_accession_ids if filter_accession_ids else meta.keys()
 
-        # slice the sequences
-        id_new_sequences = sorted(list(id_new_sequences))
-        if from_sample is not None and to_sample is not None:
-            id_new_sequences = id_new_sequences[from_sample:to_sample]
-
-        # proceed importing selected sequences
-        meta = dict(filter(lambda kv: kv[0] in id_new_sequences, meta.items()))
-
-        stats_module.schedule_samples(
-            stats_module.StatsBasedOnIds(id_new_sequences, True, virus_id, ['COG-UK']))
-
-        # generate a VirusSample for each line from region data file
-        logger.info('reading sample sequence file...')
+        # scan the multi-fasta file
         with open(self.sequence_file_path, mode='r') as seq_file:
-            progress = tqdm(total=len(meta.keys()))
+            progress = tqdm(total=len(accession_ids_of_interest))
             while True:
                 sample_key = seq_file.readline()
                 sample_sequence = seq_file.readline()
+                # exit loop when sequences are finished
                 if not sample_sequence or not sample_key:
-                    break  # EOF
+                    break
                 else:
-                    sample_key = sample_key[1:].rstrip()  # in the sequence file, the strain name is preceded by a '>', while in the metadata file not
-                    if sample_key not in meta.keys():
+                    # in the sequence file, the strain name is preceded by a '>', while in the metadata file not
+                    sample_key = sample_key[1:].rstrip()
+                    # ignore sequences not in the accession_ids_of_interest list
+                    if sample_key not in accession_ids_of_interest:
                         continue
                     else:
                         progress.update()
@@ -168,7 +154,142 @@ class COGUKSarsCov2:
                         try:
                             yield COGUKSarsCov2Sample(sample)
                         except:
-                            logger.exception(f"Sample {sample_key} skipped due to an error while parsing the input data.")
+                            logger.exception(
+                                f"Sample {sample_key} skipped due to an error while parsing the input data.")
+
+    def deltas(self):
+        """
+        Returns the set of Sequence.accession_id to remove from current database, and the set of Sequence.accession_id
+        that should be imported from the source. Note that because sequences in the current data may have been updated,
+        the two sets are not necessarily disjoint. So first remove the sequences to be removed and only then
+         insert the new ones.
+         """
+        logger.info("Reading updated data...")
+        acc_id_remote = set([x.primary_accession_number() for x in self.get_sequences_of_updated_source()])  # all the sequences from remote
+        logger.info('Reading current data...')
+        current_data = self.get_sequences_in_current_data()
+        acc_id_current = set(current_data.keys())
+
+        acc_id_missing_in_remote = acc_id_current - acc_id_remote
+        acc_id_missing_in_current = acc_id_remote - acc_id_current
+
+        acc_id_present_in_current_and_remote = acc_id_current & acc_id_remote
+        acc_id_changed = []
+
+        # to compare sequences present in both, have to scan the file of remote sequences
+        logger.info('Comparing current data with that from source...')
+        for new_sequence in self.get_sequences_of_updated_source(filter_accession_ids=acc_id_present_in_current_and_remote):
+            acc_id = new_sequence.primary_accession_number()
+            try:
+                current_sequence_data = current_data[acc_id]
+                # if the gisaid id is the same, compare metadata to detect if the sample changed over time
+                if current_sequence_data[0] != new_sequence.length() \
+                        or float(current_sequence_data[1]) != float(new_sequence.gc_percent()) \
+                        or float(current_sequence_data[2]) != float(new_sequence.n_percent()) \
+                        or current_sequence_data[3] != new_sequence.collection_date() \
+                        or (current_sequence_data[4], current_sequence_data[5]) != new_sequence.country__region__geo_group()[:2]\
+                        or current_sequence_data[6] != new_sequence.nucleotide_sequence():
+                    acc_id_changed.append(acc_id)
+            except KeyError:
+                pass  # the accession id is not present in current data. it's a new sequence
+
+        # compute additional sets
+        acc_id_changed = set(acc_id_changed)
+        acc_id_unchanged = acc_id_present_in_current_and_remote - acc_id_changed
+
+        acc_id_to_remove = acc_id_missing_in_remote | acc_id_changed
+        acc_id_to_import = acc_id_missing_in_current | acc_id_changed
+
+        logger.info(f'\n'
+                    f'# Sequences from remote source: {len(acc_id_remote)}. Of which\n'
+                    f'# {len(acc_id_unchanged)} present also locally and unchanged\n'
+                    f'# {len(acc_id_missing_in_current)} never seen before.\n'
+                    f'# {len(acc_id_changed)} have different attributes in the remote source\n'
+                    f'# Sequences from local source: {len(acc_id_current)}. Of which\n'
+                    f'# {len(acc_id_missing_in_remote)} are missing from remote and must be removed from local.\n'
+                    f'# In conclusion: {len(acc_id_to_remove)} sequences will be removed because missing or changed in remote\n'
+                    f'# and {len(acc_id_to_import)} sequences will be imported because novel or changed in remote.')
+
+        return acc_id_to_remove, acc_id_to_import
+
+    # following function is a copy of deltas with some debug prints
+    # def deltas(self):
+    #     """
+    #     Returns the set of Sequence.accession_id to remove from current database, and the set of Sequence.accession_id
+    #     that should be imported from the source. Note that because sequences in the current data may have been updated,
+    #     the two sets are not necessarily disjoint. So first remove the sequences to be removed and only then
+    #      insert the new ones.
+    #      """
+    #     logger.info("Reading updated data...")
+    #     acc_id_remote = set([x.primary_accession_number() for x in self.get_sequences_of_updated_source()])  # all the sequences from remote
+    #     logger.info('Reading current data...')
+    #     current_data = self.get_sequences_in_current_data()
+    #     acc_id_current = set(current_data.keys())
+    #
+    #     acc_id_missing_in_remote = acc_id_current - acc_id_remote
+    #     acc_id_missing_in_current = acc_id_remote - acc_id_current
+    #
+    #     acc_id_present_in_current_and_remote = acc_id_current & acc_id_remote
+    #     acc_id_changed = []
+    #     acc_id_changed_sequence = []
+    #
+    #     # to compare sequences present in both, have to scan the file of remote sequences
+    #     logger.info('Comparing current data with that from source...')
+    #     for new_sequence in self.get_sequences_of_updated_source(filter_accession_ids=acc_id_present_in_current_and_remote):
+    #         acc_id = new_sequence.primary_accession_number()
+    #         try:
+    #             current_sequence_data = current_data[acc_id]
+    #             # if the gisaid id is the same, compare metadata to detect if the sample changed over time
+    #             if current_sequence_data[0] != new_sequence.length() \
+    #                     or float(current_sequence_data[1]) != float(new_sequence.gc_percent()) \
+    #                     or float(current_sequence_data[2]) != float(new_sequence.n_percent()) \
+    #                     or current_sequence_data[3] != new_sequence.collection_date() \
+    #                     or (current_sequence_data[4], current_sequence_data[5]) != new_sequence.country__region__geo_group()[:2]:
+    #                 acc_id_changed.append(acc_id)
+    #
+    #                 logger.trace(f"current data of {acc_id}: {current_sequence_data[0]}, {float(current_sequence_data[1])}, {float(current_sequence_data[2])}, {current_sequence_data[3]}, {current_sequence_data[4]}, {current_sequence_data[5]}")
+    #                 logger.trace(f"updated data of {acc_id}: {new_sequence.length()}, {float(new_sequence.gc_percent())}, {float(new_sequence.n_percent())}, {new_sequence.collection_date()}, {new_sequence.country__region__geo_group()[0]}, {new_sequence.country__region__geo_group()[1]}")
+    #
+    #                 if current_sequence_data[0] != new_sequence.length():
+    #                     logger.trace("is length")
+    #                 elif float(current_sequence_data[1]) != float(new_sequence.gc_percent()):
+    #                     logger.trace("is gc percent")
+    #                 elif float(current_sequence_data[2]) != float(new_sequence.n_percent()):
+    #                     logger.trace("is n percent")
+    #                 elif current_sequence_data[3] != new_sequence.collection_date():
+    #                     logger.trace("is coll date")
+    #                 elif [current_sequence_data[4], current_sequence_data[5]] != new_sequence.country__region__geo_group()[:2]:
+    #                     logger.trace("is country or region")
+    #
+    #             elif current_sequence_data[6] != new_sequence.nucleotide_sequence():
+    #                 acc_id_changed_sequence.append(acc_id)
+    #
+    #                 logger.trace(f"{acc_id} has a different sequence")
+    #
+    #         except KeyError:
+    #             pass  # the accession id is not present in current data. it's a new sequence
+    #
+    #     # compute additional sets
+    #     acc_id_changed = set(acc_id_changed)
+    #     acc_id_changed_sequence = set(acc_id_changed_sequence)
+    #
+    #     acc_id_unchanged = acc_id_present_in_current_and_remote - acc_id_changed - acc_id_changed_sequence
+    #
+    #     acc_id_to_remove = acc_id_missing_in_remote | acc_id_changed | acc_id_changed_sequence
+    #     acc_id_to_import = acc_id_missing_in_current | acc_id_changed | acc_id_changed_sequence
+    #
+    #     logger.info(f'\n'
+    #                 f'# Sequences from remote source: {len(acc_id_remote)}. Of which\n'
+    #                 f'# {len(acc_id_unchanged)} present also locally and unchanged\n'
+    #                 f'# {len(acc_id_missing_in_current)} never seen before.\n'
+    #                 f'# {len(acc_id_changed)} have different metadata attributes in the remote source\n'
+    #                 f'# {len(acc_id_changed_sequence)} have different sequence in the remote source\n'
+    #                 f'# Sequences from local source: {len(acc_id_current)}. Of which\n'
+    #                 f'# {len(acc_id_missing_in_remote)} are missing from remote and must be removed from local.\n'
+    #                 f'# In conclusion: {len(acc_id_to_remove)} sequences will be removed because missing or changed metdata in remote\n'
+    #                 f'# and {len(acc_id_to_import)} sequences will be imported because novel or changed metadtata in remote.')
+    #
+    #     return acc_id_to_remove, acc_id_to_import
 
     def reference_sequence(self) -> str:
         if not hasattr(self, 'reference_sample'):
@@ -214,6 +335,7 @@ def download_or_get_sample_data(containing_directory: str) -> (str, str):
             return None
 
     def download_coguk_data():
+        # make sure the output path does not exist already, or wget assigns a trailing number to it
         logger.info(f'downloading sample sequences for COG-UK data from {COGUKSarsCov2.sequence_file_url} ...')
         wget.download(COGUKSarsCov2.sequence_file_url, sequence_local_file_path)
         logger.info(f'\ndownloading sample metadata for COG-UK data from {COGUKSarsCov2.metadata_file_url} ...')
@@ -228,5 +350,7 @@ def download_or_get_sample_data(containing_directory: str) -> (str, str):
         # compare size of local with remote ones
         if get_download_size(COGUKSarsCov2.sequence_file_url) != get_local_file_size(sequence_local_file_path) or \
                 get_download_size(COGUKSarsCov2.metadata_file_url) != get_local_file_size(metadata_local_file_path):
+            remove_file(sequence_local_file_path)
+            remove_file(metadata_local_file_path)
             download_coguk_data()
     return sequence_local_file_path, metadata_local_file_path

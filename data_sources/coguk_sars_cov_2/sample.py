@@ -36,7 +36,7 @@ class COGUKSarsCov2Sample(VirusSample):
         meta: str = sample_dict.get(self.METADATA_RAW_STRING)
         if meta:
             try:
-                country, region, collection_date, epi_week, lineage, lineage_support = meta.split(',')[:6]
+                country, region, pillar_2, collection_date, epi_week, lineage = meta.split(',')[:6]
             except Exception as e:
                 logger.error(f'Unable to parse metadata for sample {sample_dict[self.STRAIN_NAME]}. Metadata string is:\n\t{meta}')
                 raise e

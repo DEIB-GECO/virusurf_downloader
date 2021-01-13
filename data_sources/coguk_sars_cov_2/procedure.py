@@ -1,5 +1,6 @@
 import os
 import pickle
+from time import sleep
 from loguru import logger
 from typing import Optional, List
 from queuable_tasks import max_number_of_workers
@@ -23,7 +24,6 @@ reference_sequence = None
 virus: Optional[COGUKSarsCov2] = None
 virus_id: Optional[int] = None
 import_method = None
-successful_imports: Optional[int] = None
 
 
 def main_pipeline_part_3(session: database.Session, sample, db_sequence_id):
@@ -167,7 +167,7 @@ class Parallel:
 
 
 def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
-    global virus, virus_id, import_method, successful_imports
+    global virus, virus_id, import_method
     db_params: dict = import_config.get_database_config_params()
     database.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
     virus = COGUKSarsCov2()
@@ -177,30 +177,69 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     # update last import date
     database.try_py_function(vcm.update_db_metadata, virus_id, 'COG-UK')
 
-    # # IMPORT VIRUS SEQUENCES
+    # find outdated and new samples from source (some sequences can be updated, so the sets are not necessarily disjoint)
+    logger.warning(
+        "Current implementation of deltas for COG-UK uses more than 10 GB of RAM to cache query results and save time.\n"
+        "IF YOUR SYSTEM CAN'T PROVIDE MORE THAN 10 GB OF RAM, STOP THE PROCESS NOW.\n"
+        "The program will resume in 15 seconds")
+    try:
+        sleep(15)
+    except KeyboardInterrupt:
+        return
+    id_outdated_sequences, id_new_sequences = virus.deltas()
+    logger.warning('Check deltas.. The program will resume in 30 seconds.')
+    try:
+        sleep(30)
+    except KeyboardInterrupt:
+        return
+
+    # select range
+    if from_sample is not None and to_sample is not None:
+        id_new_sequences = {id_new_sequences.pop() for i in range(to_sample-from_sample)}
+
+    # initialize statistics module
+    stats_module.schedule_samples(
+        stats_module.StatsBasedOnIds(id_new_sequences, True, virus_id, ['COG-UK']))
+
+    # remove outdated sequences
+    logger.info(f'removing outdated sequences')
+    database.try_py_function(vcm.remove_sequence_and_meta_list, primary_sequence_accession_id=id_outdated_sequences)
+    stats_module.removed_samples(id_outdated_sequences)
+    for _id in id_outdated_sequences:
+        file_path = get_local_folder_for(virus.name, FileType.Annotations) + str(_id).replace('/', '-') + ".pickle"
+        remove_file(file_path)
+
+    # prepare multiprocessing
     logger.info(f'importing virus sequences and related tables')
     import_method = Parallel()
-    successful_imports = 0
 
-    def try_import_virus_sample(sample: COGUKSarsCov2Sample):
-        global successful_imports
-        try:
-            database.try_py_function(import_method.import_virus_sample, sample)
-            successful_imports += 1
-        except:
-            logger.exception(f'exception occurred while working on virus sample {sample.primary_accession_number()}')
-
-    # total_s = 2
-    for s in virus.virus_samples(virus_id, from_sample, to_sample):
+    for s in virus.get_sequences_of_updated_source(filter_accession_ids=id_new_sequences):
         if not s.nucleotide_sequence():
             logger.info(f'sample {s.primary_accession_number()} skipped because nucleotide sequence is empty or null')
             continue
-        # if total_s > 0:
-        #     total_s -= 1
-        # else:
-        #     break
-        try_import_virus_sample(s)
+        try:
+            database.try_py_function(import_method.import_virus_sample, s)
+        except:
+            logger.exception(f'exception occurred while working on virus sample {s.primary_accession_number()}')
 
     logger.info('main process completed')
     import_method.tear_down()
-    logger.info(f'successful imports: {successful_imports} (not reliable when parallel processing)')
+
+    # remove leftovers of failed samples
+    try:
+        metadata_samples_to_remove: set = stats_module.get_scheduled_not_completed()
+        if len(metadata_samples_to_remove) > 0:
+            logger.info(
+                f"Removing metadata leftovers of imports that failed during variant/annotation calling or metadata"
+                f" ({len(metadata_samples_to_remove)} samples)")
+
+            metadata_samples_to_remove_as_string: list = [str(x) for x in metadata_samples_to_remove]
+            logger.trace("Accession id of failed imports:\n"
+                         f"{metadata_samples_to_remove_as_string}")
+            logger.info("Deleting leftovers in database")
+            database.try_py_function(vcm.remove_sequence_and_meta_list,
+                                     primary_sequence_accession_id=metadata_samples_to_remove_as_string)
+    except:
+        logger.exception(
+            "Removal of metadata leftovers in the DB of the samples that failed was not successful.")
+
