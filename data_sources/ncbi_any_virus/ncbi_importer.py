@@ -1,4 +1,6 @@
+import sys
 from collections import Counter, OrderedDict
+from time import sleep
 from data_sources.ncbi_any_virus.host_sample import NCBIHostSample
 from nuc_aa_pipeline import sequence_aligner
 import re
@@ -162,7 +164,8 @@ class AnyNCBIVNucSample:
             except AssertionError as e:
                 logger.warning(f'In sample {self.internal_id()}: {str(e)}.')
                 isolates = self.sample_xml.xpath('.//INSDQualifier[./INSDQualifier_name/text() = "isolate"]/INSDQualifier_value')
-                fallback = text_at_node(isolates[0], '.', mandatory=True)
+                isolates = [text_at_node(x, '.', mandatory=True) for x in isolates]
+                fallback = isolates[0]
                 logger.warning(f'Isolate strings are {isolates}. Only {fallback} was retained as strain')
                 return fallback
             if strain == 'nasopharyngeal':
@@ -551,10 +554,14 @@ class AnyNCBIVNucSample:
                 return None
         return self._external_host_data
 
+    def remove_external_host_data_file(self):
+        if self._external_host_data is not None and self._external_host_data != -1:
+            remove_file(self._external_host_data.file_path)
+
 
 # noinspection PyPep8Naming
 def _download_as_sample_object(alternative_accession_ids, SampleWrapperClass=AnyNCBIVNucSample) -> Iterator:
-    logger.trace(f'download and processing of sequences...')
+    logger.info(f'download and processing of sequences...')
     download_sample_dir_path = get_local_folder_for(settings.generated_dir_name, _type=FileType.SequenceOrSampleData)
     network_skipped_samples = 0
     parser_skipped_samples = 0
@@ -657,7 +664,12 @@ def _deltas(virus_id, id_remote_samples):
                 f'# {len(id_unchanged_sequences)} present also locally and unchanged\n'
                 f'# {len(id_new_sequences)} never seen before.\n'
                 f'# Sequences from local source: {len(id_local_samples)}. Of which\n'
-                f'# {len(id_outdated_sequences)} outdated and must be removed from local')
+                f'# {len(id_outdated_sequences)} outdated and must be removed from local.\n'
+                f'Check deltas. The program will resume in 20 sec.')
+    try:
+        sleep(20)
+    except KeyboardInterrupt:
+        sys.exit(0)
     return id_unchanged_sequences, id_outdated_sequences, id_new_sequences
 
 
@@ -811,20 +823,23 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
             return sequence.sequence_id
         except ValueError as e:
             if str(e).endswith('missing nucleotide seq.'):
-                logger.warning(f'Sample {_sample.internal_id()} is given without nucleotide sequence. Sample import skipped. File deleted')
+                logger.warning(f'Sample {_sample.internal_id()} is given without nucleotide sequence. Sample import skipped. Sample and host files will be deleted.')
             else:
-                logger.exception(f"exception occurred while working on virus sample {_sample.internal_id()}. Sample won't be imported")
+                logger.exception(f"exception occurred while working on virus sample {_sample.internal_id()}. Sample won't be imported. Sample import skipped. Sample and host files will be deleted.")
+            _sample.remove_external_host_data_file()
             remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
             raise database.Rollback()
         except AssertionError:
-            logger.exception(f"Sample {_sample.internal_id()} may have a corrupted XML. The XML will be deleted. Sample won't be imported")
+            logger.exception(f"Sample {_sample.internal_id()} may have a corrupted XML. Sample won't be imported. Sample and host files will be deleted.")
+            _sample.remove_external_host_data_file()
             remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
             raise database.Rollback()
         except KeyboardInterrupt as e:
             logger.info(f"import of sample {_sample.internal_id()} interrupted. Sample won't be imported")
             raise e  # i.e. it is handled outside but I don't want it to be logged as an unexpected error
         except Exception as e:
-            logger.exception(f"exception occurred while working on virus sample {_sample.internal_id()}. Sample won't be imported")
+            logger.exception(f"exception occurred while working on virus sample {_sample.internal_id()}. Sample won't be imported. Sample and host files will be deleted.")
+            _sample.remove_external_host_data_file()
             remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
             raise database.Rollback()
 
@@ -878,13 +893,32 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
     except KeyboardInterrupt:
         # When using multiprocessing, each process receives KeyboardInterrupt. Child process should take care of clean up.
         # Child process should not raise themselves KeyboardInterrupt
-        task_manager.discard_waiting_tasks()
         logger.info('Execution aborted by the user. Cancelling waiting tasks...')
+        task_manager.discard_waiting_tasks()
     except Exception as e:
         logger.error("AN EXCEPTION CAUSED THE LOOP TO TERMINATE. Workers will be terminated.")
         raise e
     finally:
         task_manager.stop_workers()
+
+    # remove leftovers of failed samples
+    try:
+        metadata_samples_to_remove: set = stats_module.get_scheduled_not_completed()
+        if len(metadata_samples_to_remove) > 0:
+            logger.info(f"Removing metadata leftovers of imports that failed during variant/annotation calling or metadata"
+                        f" ({len(metadata_samples_to_remove)} samples)")
+
+            metadata_samples_to_remove_as_string: list = [str(x) for x in metadata_samples_to_remove]
+            logger.trace("Alternative accession id of failed imports:\n"
+                         f"{metadata_samples_to_remove_as_string}")
+            logger.info("Deleting leftovers in database")
+            database.try_py_function(vcm.remove_sequence_and_meta_list,
+                                     alternative_sequence_accession_id=metadata_samples_to_remove_as_string)
+            logger.info("Deleting XML sequence files")
+            for x in metadata_samples_to_remove_as_string:
+                remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{x}.xml")
+    except:
+        logger.exception("Removal of metadata leftovers in the DB and XML files of the samples that failed was not successful.")
 
 
 # !!!!! ARE YOU LOOKING FOR prepared_parameters ? Use instead data_source.ncbi_any_virus.settings -> known_settings !!!!

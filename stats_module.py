@@ -47,6 +47,9 @@ class StatsType(ABC):
     def removed_samples(self, *args, **kwargs):
         raise NotImplementedError
 
+    def get_scheduled_not_completed(self):
+        raise NotImplementedError
+
 
 class StatsBasedOnTotals(StatsType):
     def __init__(self, number_of_scheduled_samples: int, virus_db_id: Optional[int] = None, sources: Optional[List[str]] = None):
@@ -68,6 +71,9 @@ class StatsBasedOnTotals(StatsType):
     def removed_samples(self, number):
         with self._number_removed_samples.get_lock():
             self._number_removed_samples.value += number
+
+    def get_scheduled_not_completed(self) -> int:
+        return self._number_scheduled_samples - self._number_completed_samples.value
 
     def check_samples_imported(self):
         # overwrite Value object with int for a simpler handling
@@ -162,6 +168,21 @@ class StatsBasedOnIds(StatsType):
         for i in samples_acc_id:
             self._removed_samples_acc_id.put_nowait(i)
 
+    def get_scheduled_not_completed(self) -> set:
+        completed_queue_copy = Queue()
+        completed_set = set()
+        while not self._completed_samples_acc_id.empty():
+            try:
+                item = self._completed_samples_acc_id.get(False)
+                completed_set.add(item)
+                completed_queue_copy.put_nowait(item)
+            except Empty:
+                continue
+        # reassign completed queue to its copy
+        self._completed_samples_acc_id.close()
+        self._completed_samples_acc_id = completed_queue_copy
+        return set(self._scheduled_samples_acc_id) - completed_set
+
     def check_samples_imported(self):
         if self._completed_samples_acc_id is None:
             logger.error('STATS MODULE: check_samples_imported called before add_samples. Stats cannot be produced.')
@@ -216,7 +237,7 @@ class StatsBasedOnIds(StatsType):
                                f"\tdetail of current duplicated accession_ids: {sorted(list(current_sequences_in_db - Counter(set(current_sequences_in_db))))}\n"
 
                 # check errors in insertions
-                changed_in_db = Counter(removed_samples_acc_id) # this set cannot be retrieved from the database
+                changed_in_db = Counter(removed_samples_acc_id)  # this set cannot be retrieved from the database
                 completed_not_inserted = Counter(completed_samples_acc_id) - inserted_in_db - changed_in_db
                 inserted_not_completed = inserted_in_db - Counter(completed_samples_acc_id) - changed_in_db
                 if sum(completed_not_inserted.values()) > 0:
@@ -261,6 +282,10 @@ def completed_sample(*args, **kwargs):
 
 def removed_samples(*args, **kwargs):
     _stats_type.removed_samples(*args, **kwargs)
+
+
+def get_scheduled_not_completed():
+    return _stats_type.get_scheduled_not_completed()
 
 
 def check_samples_imported(*args, **kwargs):
