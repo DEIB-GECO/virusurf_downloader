@@ -134,8 +134,8 @@ class GISAIDSarsCov2(VirusSource):
                 # if the gisaid id is the same, compare metadata to detect if the sample changed over time
                 if current_sequence_data[0] != new_sequence.strain() \
                         or current_sequence_data[1] != new_sequence.length() \
-                        or current_sequence_data[2] != new_sequence.gc_percent() \
-                        or current_sequence_data[3] != new_sequence.n_percent() \
+                        or float(current_sequence_data[2]) != float(new_sequence.gc_percent()) \
+                        or float(current_sequence_data[3]) != float(new_sequence.n_percent()) \
                         or current_sequence_data[4] != str(new_sequence.collection_date()) \
                         or current_sequence_data[5] != new_sequence.originating_lab() \
                         or str(current_sequence_data[6]) != str(new_sequence.submission_date()) \

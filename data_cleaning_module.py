@@ -7,6 +7,7 @@ from spellchecker import SpellChecker
 
 # CACHE & MANUALLY CURATED SYNONYM RESOLUTION
 spellcheck_cache = {
+    "h. sapiens": "homo sapiens",
     "howo sapiens": "homo sapiens",
     "human": "homo sapiens",
     "ae. aegypti": "aedes aegypti",
