@@ -32,7 +32,8 @@ class NCBIHostSample:
         # remove attributes with not applicable value
         for node in attribute_nodes:
             value = node.text.lower()
-            if 'not' not in value and 'missing' not in value:  # ignore "not applicable" and "missing" values
+            # ignore values like "not applicable"/"not collected"/"restricted access"/"missing" values
+            if 'not' not in value and 'missing' not in value and 'restricted' not in value:
                 attribute_nodes_cleaned.append(node)
         # save attributes ina key-value pairs
         self.attributes = {}
@@ -57,14 +58,11 @@ class NCBIHostSample:
         # print(self.attributes)
 
     def isolation_source(self):
-        source = self._find_in_attributes_(('source', 'tissue'))[1]
-        if source is not None and 'not' in source:  # like 'not collected'
-            source = None
-        return source
+        return self._find_in_attributes_(('tissue', 'source'), use_keyword_priority=True)[1]
 
     def country__region__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
         country: Optional[str] = self._find_in_attributes('country')[1]
-        region: Optional[str] = self._find_in_attributes(self, 'region')[1]
+        region: Optional[str] = self._find_in_attributes('region')[1]
         if country is not None:
             if 'not' in country:  # like 'not collected'
                 country = None
@@ -94,10 +92,7 @@ class NCBIHostSample:
                 return None
 
     def originating_lab(self) -> Optional[str]:
-        lab = self._find_in_attributes('collecting institu')[1]
-        if lab is not None and 'not' in lab:  # like 'not provided'
-            lab = None
-        return lab
+        return self._find_in_attributes('collecting institu')[1]
 
     def collection_date(self) -> Optional[str]:
         return self._find_in_attributes('collection date')[1]
@@ -118,25 +113,18 @@ class NCBIHostSample:
     def host_taxon_name(self) -> Optional[str]:
         host_name = self._find_in_attributes('scientific')[1]
         if not host_name:
-            host_name = self._find_in_attributes('host')[1]
+            host_name = self._find_in_attributes_(('host',), ('disease', 'description'))[1]
         return host_name
 
     def age(self) -> Optional[str]:
-        age_value = self._find_in_attributes_(('age', 'years'), ('coverage', 'stage', 'passage'))[1]
+        age_value = self._find_in_attributes_(('age', 'years'), ('coverage', 'stage', 'passage'), True)[1]
         # parse to int to eliminate possible decimals
         if age_value is not None:
-            if 'not' in age_value:  # like 'not collected'
-                age_value = None
-            else:
-                age_value = self._find_str_of_integers(age_value)
+            age_value = self._find_str_of_integers(age_value)
         return age_value
 
     def gender(self) -> Optional[int]:
-        gender = self._find_in_attributes_(('sex', 'gender'))[1]
-        if gender is not None:
-            if 'not' in gender or 'restricted' in gender:  # like 'not provided' or 'restricted access'
-                gender = None
-        return gender
+        return self._find_in_attributes_(('sex', 'gender'))[1]
 
     @staticmethod
     def _find_str_of_integers(string: str) -> Optional[str]:
@@ -171,7 +159,8 @@ class NCBIHostSample:
         else:
             return None, None
 
-    def _find_in_attributes_(self, include_keywords: Collection[str], exclude_keywords: Optional[Collection[str]] = ()) -> Tuple[Optional[str], Optional[str]]:
+    def _find_in_attributes_(self, include_keywords: Collection[str], exclude_keywords: Optional[Collection[str]] = (),
+                             use_keyword_priority: bool = False) -> Tuple[Optional[str], Optional[str]]:
         # find eligible attribute keys
         eligible_keys_1 = []
         for word in include_keywords:
@@ -190,7 +179,8 @@ class NCBIHostSample:
             if not excluded:
                 eligible_keys_2.append(k)
 
-        if len(eligible_keys_2) == 1:
+        if len(eligible_keys_2) == 1 or (len(eligible_keys_2) > 1 and use_keyword_priority):
+            # eligible_keys are already ordered in the same order as include_keywords
             value = self.attributes[eligible_keys_2[0]].lower()
             return eligible_keys_2[0], value
         elif len(eligible_keys_2) > 1:
