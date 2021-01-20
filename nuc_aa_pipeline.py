@@ -1,3 +1,5 @@
+from typing import Optional
+
 from Bio import SeqIO
 from Bio import Align, Seq, pairwise2
 from Bio.Data import CodonTable
@@ -8,7 +10,9 @@ import os
 import json
 import datetime
 from loguru import logger
+from Bio.SubsMat import MatrixInfo as matlist
 
+nuc_aligner: Optional[Align.PairwiseAligner] = None
 
 class BlastResult:
     def __init__(self, matched_id, lenght, pident):
@@ -186,6 +190,7 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
             aa_seq = None if s[7] == "." else s[7]
             ref_annotations.append(Ann(ann_type, ann_pos, gene, protein, protein_id, aa_seq))
 
+    proteins_not_multiple_of_3 = []
     for annotation in ref_annotations:
 
         gene = annotation.gene
@@ -195,22 +200,26 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
         nuc_start = annotation.ann_pos[0][0]
         nuc_stop = annotation.ann_pos[-1][1]
 
+        # get the nucleotide sequence
         nuc_seq = "".join(
-            [x[1] for x in zip(ref_positions, seq_aligned) if nuc_start <= x[0] and nuc_stop >= x[0]]).replace("-", "")
-
-        #if nuc_seq is not None and aa_seq is None:
-        #    logger.warning('nuc_seq is not None and aa_seq is None (' + gene + ',' + protein + ')')
+            [x[1] for x in zip(ref_positions, seq_aligned) if nuc_start <= x[0] <= nuc_stop]).replace("-", "")
 
 
         list_mutations = []
         if annotation.ann_type == 'mature_protein_region' or annotation.ann_type == 'CDS':
+
+            # dna_ref is the concatenation of the nucleotides of the aligned seq within the range(s) of this protein
+            # with gaps deleted. This string is what is translated in the cell for this protein.
             dna_ref = ''
             for (start, stop) in annotation.ann_pos:
-                dna_ref += "".join([x[1] for x in zip(ref_positions, seq_aligned) if start <= x[0] and stop >= x[0]]).replace("-", "")
+                dna_ref += "".join([x[1] for x in zip(ref_positions, seq_aligned) if start <= x[0] <= stop]).replace("-", "")
 
-            if len(dna_ref)%3 == 0 and len(dna_ref) > 0:
-                aa_seq = Seq._translate_str(dna_ref, table, cds=False).replace("*", "")
+            if len(dna_ref) % 3 == 0 and len(dna_ref) > 0:
+                aa_seq_with_symbols = Seq._translate_str(dna_ref, table, cds=False)
+                # symbols e.g. * that means Ter
+                aa_seq = aa_seq_with_symbols.replace("*", "")
 
+                # annotation.aa_seq is the reference AA sequence from the annotation files for this protein
                 alignment_aa = pairwise2.align.globalms(annotation.aa_seq, aa_seq, 3, -1, -3, -1)
 
                 try:
@@ -325,13 +334,16 @@ def call_annotation_variant(annotation_file, ref_aligned, seq_aligned, ref_posit
                 list_annotations.append(
                     (gene, protein, protein_id, atype, nuc_start, nuc_stop, None, None, []))
 
-            else:
+            else:   # nucleotide sequence not multiple of 3
+                proteins_not_multiple_of_3.append(protein)
                 list_annotations.append(
                     (gene, protein, protein_id, atype, nuc_start, nuc_stop, nuc_seq, None, []))
         elif atype == 'gene':
             list_annotations.append(
                 (gene, protein, protein_id, atype, nuc_start, nuc_stop, nuc_seq, None, []))
-
+    # log frameshift not detectable in the final output
+    if len(proteins_not_multiple_of_3) > 0:
+        logger.warning(f"sequence ID {sequence_id} has proteins of length not multiple of 3 {proteins_not_multiple_of_3}")
     return list_annotations
 
 
@@ -352,9 +364,9 @@ def filter_nuc_variants(nuc_variants):
         impacts = n['annotations']
         impacts_set = set(tuple(values) for values in impacts if not values[0].startswith('GU280'))
         # split substituions into single point mutations + ignore SUBs or INS to 'n'
-        if (variant_type == 'SUB' and variant_length > 1) or seq_alternative.lower()=='n':
+        if (variant_type == 'SUB' and variant_length > 1) or seq_alternative.lower() == 'n':
             for i in range(variant_length):
-                if seq_alternative[i].lower()!= 'n':
+                if seq_alternative[i].lower() != 'n':
                     new_nuc_variants.append({
                         'sequence_original': seq_original[i],
                         'sequence_alternative': seq_alternative[i],
@@ -363,7 +375,7 @@ def filter_nuc_variants(nuc_variants):
                         'variant_length': 1,
                         'variant_type': variant_type,
                         'annotations': impacts_set
-                })
+                    })
         else:
             n['annotations'] = impacts_set
             new_nuc_variants.append(n)
@@ -583,28 +595,72 @@ def choose_alignment(alignments: Align.PairwiseAlignments):
     return ref_aligned, seq_aligned
 
 
-def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file, snpeff_database_name):
+def get_nuc_aligner() -> Align.PairwiseAligner:
+    from Bio.Align.substitution_matrices import Array
     aligner = Align.PairwiseAligner()
     aligner.match_score = 3.0  # the documentation states we can pass the scores in the constructor of PairwiseAligner but it doesn't work
-    aligner.mismatch_score = -2.0
+    aligner.mismatch_score = -2.1
     aligner.open_gap_score = -2.5
     aligner.extend_gap_score = -1
+
     aligner.right_extend_gap_score = 0
     aligner.left_extend_gap_score = 0
     aligner.right_open_gap_score = 0
     aligner.left_open_gap_score = 0
 
-    ref_aligned, seq_aligned = choose_alignment(aligner.align(reference, sequence))
-    ref_positions = np.zeros(len(seq_aligned), dtype=int)
+    match_scores = {1: aligner.match_score,
+                    3: 2,
+                    10: 1.5,
+                    16: 1}
 
+    dd = {
+        "a": "a",
+        "g": "g",
+        "c": "c",
+        "t": "t",
+        # len 3
+        "y": "cty",
+        "r": "agr",
+        "w": "atw",
+        "s": "gcs",
+        "k": "tgk",
+        "m": "cam",
+        # len 10
+        "d": "agtd" + "yrwskm",
+        "v": "acgv" + "yrwskm",
+        "h": "acth" + "yrwskm",
+        "b": "cgtb" + "yrwskm",
+        # len 16
+        "n": "agctyrwskmdvhbnx",
+        "x": "agctyrwskmdvhbnx",
+    }
+    extra_characters = ""
+    all_characters = "".join(dd) + extra_characters
+    matrix = Array(alphabet=all_characters, dims=2,
+                   data=np.ones((len(all_characters), len(all_characters))) * aligner.mismatch_score)
+    for x, chrs in dd.items():
+        score = match_scores[len(chrs)]
+        for y in chrs:
+            matrix[x, y] = matrix[y, x] = score
+    aligner.substitution_matrix = matrix
+    return aligner
+
+def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file, snpeff_database_name):
+    global nuc_aligner
+    if not nuc_aligner:
+        nuc_aligner = get_nuc_aligner()
+
+    ref_aligned, seq_aligned = choose_alignment(nuc_aligner.align(reference, sequence))
+
+    ref_positions = np.zeros(len(seq_aligned), dtype=int)
     pos = 0
     for i in range(len(ref_aligned)):
         if ref_aligned[i] != '-':
             pos += 1
         ref_positions[i] = pos
+    # ref positions are all the positions of the reference (1-based): 1, 2, 3, ..., 29901, 29902, 29903
 
     seq_positions = np.zeros(len(seq_aligned), dtype=int)
-
     pos = 0
     for i in range(len(seq_aligned)):
         if seq_aligned[i] != '-':
@@ -627,7 +683,8 @@ def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file
                                 ref_aligned,
                                 seq_aligned,
                                 ref_positions,
-                                seq_positions
+                                seq_positions,
+                                sequence_id
                                 )
     )
 
