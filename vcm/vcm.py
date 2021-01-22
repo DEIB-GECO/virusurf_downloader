@@ -15,7 +15,6 @@ cache_host_sample = dict()
 cache_experiment_type = dict()
 cache_sequencing_project = dict()
 cache_virus = dict()
-epitope_id_mappings = dict()
 
 cache_typos_corrections = dict()
 
@@ -126,7 +125,7 @@ def create_or_get_host_specie(session, sample: VirusSample) -> int:
     return host_specie_id
 
 
-def create_or_get_host_specie_alt(session, organism_name: str, organism_ncbi_id:int):
+def create_or_get_host_specie_alt(session, organism_name: str, organism_ncbi_id: int):
     global cache_host_specie
 
     host_specie_id = cache_host_specie.get(organism_name)
@@ -352,31 +351,6 @@ def create_nuc_variants_and_impacts(session, sequence_id, args):
     session.flush()
 
 
-def create_epitopes(session, epitopes: List[Tuple], virus_id, _host_specie_id):
-    global epitope_id_mappings
-    epitope_id_mappings = dict()
-    for elem in epitopes:
-        pseudo_epi_id, _virus_taxon_id, _, protein_ncbi_id, _type, hla_restriction, response_frequency, epitope_sequence, \
-        epi_annotation_start, epi_annotation_stop, is_imported, external_link, perdition_process, is_linear = elem
-        epitope = Epitope(virus_id=virus_id,
-                          host_id=_host_specie_id,
-                          protein_ncbi_id=protein_ncbi_id,
-                          epitope_type=_type,
-                          hla_restriction=hla_restriction,
-                          response_frequency=response_frequency,
-                          epitope_sequence=epitope_sequence,
-                          epi_annotation_start=epi_annotation_start,
-                          epi_annotation_stop=epi_annotation_stop,
-                          is_imported=is_imported,
-                          external_link=external_link,
-                          prediction_process=perdition_process,
-                          is_linear=is_linear
-                          )
-        session.add(epitope)
-        session.flush()
-        epitope_id_mappings[pseudo_epi_id] = epitope.epitope_id
-
-
 def create_epitope(session, epitope: Tuple):
     db_virus_id, host_specie_db_id, host_name, host_iri, protein_ncbi_id, cell_type, \
     mhc_class, mhc_allele, response_frequency_positive, assay_type, seq, start, stop, ext_links, \
@@ -390,7 +364,7 @@ def create_epitope(session, epitope: Tuple):
                       cell_type=cell_type,
                       mhc_class=mhc_class,
                       mhc_allele=mhc_allele,
-                      response_frequency_positive=response_frequency_positive,
+                      response_frequency_pos=response_frequency_positive,
                       epitope_sequence=seq,
                       epi_annotation_start=start,
                       epi_annotation_stop=stop,
@@ -411,25 +385,6 @@ def create_epitope_fragment(session, epi_fragment: Tuple):
                                epi_frag_annotation_start=start,
                                epi_frag_annotation_stop=stop)
     session.add(fragment)
-
-
-def create_epitopes_fragments(session, epi_fragments: List[Tuple]):
-    global epitope_id_mappings
-    if not epitope_id_mappings or len(epitope_id_mappings.keys()) == 0:
-        raise ValueError('You should create epitopes rows before calling this method')
-    for elem in epi_fragments:
-        _, epitope_pseudo_id, epi_fragment_sequence, epi_fragment_annot_start, epi_fragment_annot_stop = elem
-        try:
-            real_id = epitope_id_mappings[epitope_pseudo_id]
-        except KeyError as e:
-            logger.error(f'the epitope fragment ID {epitope_pseudo_id} does not appear in the epitope IDs. This epitope fragment'
-                         f' will be not inserted into the DB.')
-            continue
-        fragment = EpitopeFragment(epitope_id=real_id,
-                                   epi_fragment_sequence=epi_fragment_sequence,
-                                   epi_frag_annotation_start=epi_fragment_annot_start,
-                                   epi_frag_annotation_stop=epi_fragment_annot_stop)
-        session.add(fragment)
 
 
 def get_virus(session, a_virus) -> Optional[Virus]:

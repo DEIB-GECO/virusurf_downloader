@@ -15,6 +15,7 @@ log_file_keyword = ""
 ncbi_virus_names = sorted(known_settings.keys())
 wrong_arguments_message = "Accepted parameters:\n" \
                           "\timport <db_name> coguk|gisaid|" + "|".join(ncbi_virus_names) + "\n" \
+                          "\tdownload epitopes" + "\n" \
                           "\tepitopes <db_name> " + "|".join(ncbi_virus_names) + "\n" \
                           "\toverlaps <source1>_<source2> <commit to the DB ?>\n" \
                           "\tlineages <db_name> " + "|".join(ncbi_virus_names) + "\n"
@@ -22,7 +23,7 @@ wrong_arguments_message += 'When action is "import", the source name can be opti
 
 try:
     action = sys.argv[1].lower()
-    if action in ['import', 'epitopes', 'lineages']:     # get database name if action is not 'overlaps'
+    if action in ['import', 'epitopes', 'lineages']:     # get database name if action is not 'overlaps' or 'download'
         db_name = sys.argv[2]
         import_config.set_db_name(db_name)
     if action == 'import':
@@ -46,6 +47,9 @@ try:
     elif 'overlaps' in action:
         _overlap_target = sys.argv[2]
         log_file_keyword = f"overlaps_{_overlap_target}"
+    elif 'download' in action:
+        _what_to_download = sys.argv[2]
+        log_file_keyword = f"download_{_what_to_download}"
     else:
         log_file_keyword = action
 except IndexError:
@@ -58,13 +62,18 @@ setup_logger(log_file_keyword)
 
 #   ###################################     PERFORM <action>       ###############
 try:
-    if 'epitopes' in action:
+    if 'download' in action:
+        _what_to_download = sys.argv[2]
+        if 'epitopes' in _what_to_download:
+            from epitopes import download_epitope_data
+            download_epitope_data()
+    elif 'epitopes' in action:
         from epitopes import import_epitopes
         # noinspection PyUnboundLocalVariable
         virus_import_parameters = known_settings.get(_epitope_target)
         if not virus_import_parameters:
             raise ValueError(f'{_epitope_target} is not recognised as an importable virus')
-        virus_txid = virus_import_parameters[1]
+        virus_txid = virus_import_parameters["virus_taxon_id"]
         import_epitopes(virus_txid)
     elif 'import' in action:
         # noinspection PyUnboundLocalVariable

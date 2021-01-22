@@ -319,7 +319,7 @@ class Epitope(_base):
     cell_type = Column(String)
     mhc_class = Column(String)
     mhc_allele = Column(String)
-    response_frequency_positive = Column(REAL)
+    response_frequency_pos = Column(REAL)
     epitope_sequence = Column(String)
     epi_annotation_start = Column(Integer)
     epi_annotation_stop = Column(Integer)

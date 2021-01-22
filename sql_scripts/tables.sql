@@ -41,7 +41,7 @@ CREATE TABLE public.epitope (
 	protein_ncbi_id varchar NULL,
 	cell_type varchar NULL,
 	mhc_class varchar NULL,
-	response_frequency float4 NULL,
+	response_frequency_pos float4 NULL,
 	epitope_sequence varchar NULL,
 	epi_annotation_start int4 NULL,
 	epi_annotation_stop int4 NULL,
