@@ -47,7 +47,9 @@ def import_epitopes(virus_taxon_id: int):
 
     # write to file
     epitopes_file = open(f'.{sep}epitopes.csv', mode='w')
-    epitopes_file.write('virus_db_id\thost_specie_db_id\thost_name\thost_iri\tprotein_ncbi_id\tcell_type\tmhc_class\tmhc_allele\tresponse_frequency_positive\tassay_type\tseq\tstart\tstop\text_links\tprediction_process\tis_linear\n')
+    epitopes_file.write('virus_db_id\thost_specie_db_id\thost_name\thost_iri\tprotein_ncbi_id\tcell_type\tmhc_class\t'
+                        'mhc_allele\tresponse_frequency_positive\tassay_type\tseq\tstart\tstop\text_links\t'
+                        'prediction_process\tis_linear\n')
     epitopes_fragm_file = open(f'.{sep}epitopes_fragments.csv', mode='w')
     epitopes_fragm_file.write('damianos_epitope_id\tseq\tstart\tstop\n')
 
@@ -112,6 +114,9 @@ def import_epitopes(virus_taxon_id: int):
     database.try_py_function(
         do
     )
+
+    # insert one row for each linear epitope into epitope_fragment table
+    database.run_script(f".{sep}sql_scripts{sep}insert_linear_epitopes_into_epi_fragments.sql")
 
 
 def create_or_get_host_specie_db_id(session: database.Session, organism_ncbi_taxon_id):
