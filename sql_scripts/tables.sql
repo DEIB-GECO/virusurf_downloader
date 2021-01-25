@@ -153,3 +153,9 @@ CREATE TABLE public.aminoacid_variant (
 	variant_aa_length int4 NOT NULL,
 	variant_aa_type varchar NOT NULL
 );
+
+CREATE TABLE public.overlap (
+    sequence_id int4 NOT NULL,
+    overlapping_accession_id varchar NOT NULL,
+    overlapping_source varchar NOT NULL
+);

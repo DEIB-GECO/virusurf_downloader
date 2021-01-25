@@ -65,3 +65,6 @@ ON DELETE NO ACTION;
 ALTER TABLE aminoacid_variant ADD CONSTRAINT aminoacid_variant_annotation_id_fkey FOREIGN KEY (annotation_id) REFERENCES annotation(annotation_id) MATCH SIMPLE
 ON UPDATE NO ACTION
 ON DELETE NO ACTION;
+
+-- OVERLAPS
+ALTER TABLE overlap ADD CONSTRAINT overlpas_pkey PRIMARY KEY(sequence_id, overlapping_accession_id);

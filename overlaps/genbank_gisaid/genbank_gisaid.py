@@ -1,10 +1,12 @@
 import sys
 from typing import Optional, List
-from overlaps.multi_database_manager import config_db_engine, Session, Sequence, SequencingProject, get_session, rollback, HostSample, target_sequences, Virus, user_asked_to_commit
+from overlaps.multi_database_manager import config_db_engine, Session, Sequence, SequencingProject, get_session, \
+    rollback, HostSample, target_sequences, Virus, Overlap, user_asked_to_commit, insert_overlaps_in_db
 from sqlalchemy import func, or_
 from loguru import logger
 from tqdm import tqdm
 from os.path import sep
+from datetime import date
 import db_config.read_db_overlaps_configuration as db_config
 
 # read only values
@@ -23,20 +25,28 @@ gisaid_only_false_tuples = 0
 output_record = []
 
 
-def source_sequences(session, database_source, virus_taxon_name):
+def source_sequences(session, database_source, virus_taxon_name, count_only: Optional[bool] = False):
     assert database_source is not None and virus_taxon_name is not None, \
         'If one between virus_taxon_name and database_source is None, the query extracting the source' \
         ' sequences is wrong'
-    query = session.query(Sequence, HostSample) \
-             .select_from(SequencingProject, Virus, HostSample) \
-             .filter(Sequence.strain_name.isnot(None),
-                     SequencingProject.sequencing_project_id == Sequence.sequencing_project_id,
-                     HostSample.host_sample_id == Sequence.host_sample_id,
-                     Sequence.virus_id == Virus.virus_id,
-                     Virus.taxon_name == virus_taxon_name,
-                     Sequence.strain_name != 'NA',
-                     func.length(Sequence.strain_name) > 1
-                     )
+    if count_only:
+        query = session.query(func.count(Sequence.sequence_id))
+    else:
+        query = session.query(Sequence, HostSample)
+    query = query \
+            .select_from(SequencingProject, Virus, HostSample) \
+            .filter(Sequence.strain_name.isnot(None),
+                    SequencingProject.sequencing_project_id == Sequence.sequencing_project_id,
+                    HostSample.host_sample_id == Sequence.host_sample_id,
+                    Sequence.virus_id == Virus.virus_id,
+                    Virus.taxon_name == virus_taxon_name,
+                    Sequence.strain_name != 'NA',
+                    func.length(Sequence.strain_name) > 1,
+                    Sequence.sequence_id.notin_(
+                        session.query(Overlap.sequence_id)
+                        .filter(Overlap.overlapping_source == target_name)
+                        .distinct())
+                    )
     if len(database_source) == 1:
         query = query.filter(SequencingProject.database_source == database_source[0])
     elif len(database_source) == 2:
@@ -45,7 +55,10 @@ def source_sequences(session, database_source, virus_taxon_name):
         query = query.filter(or_clause)
     else:
         raise NotImplementedError()
-    return query.yield_per(100)
+    if count_only:
+        return query.scalar()
+    else:
+        return query.yield_per(100)
 
 
 def mark_overlaps():
@@ -56,8 +69,14 @@ def mark_overlaps():
     global total_only_strain_1_to_n, total_strain_plus_length_1_to_n, output_record, total_only_strain_1_to_1, total_strain_plus_length_1_to_1, gisaid_only_false_tuples
 
     try:
-        for source_seq, source_host in tqdm(source_sequences(source_session, database_source=source_database_source,
-                                                             virus_taxon_name='Severe acute respiratory syndrome coronavirus 2')):
+        count_source_seq = source_sequences(session=source_session,
+                                            database_source=source_database_source,
+                                            virus_taxon_name='Severe acute respiratory syndrome coronavirus 2',
+                                            count_only=True)
+        for source_seq, source_host in tqdm(total=count_source_seq,
+                                            iterable=source_sequences(session=source_session,
+                                                                      database_source=source_database_source,
+                                                                      virus_taxon_name='Severe acute respiratory syndrome coronavirus 2')):
 
             only_strain = []
             strain_plus_length = []
@@ -122,6 +141,8 @@ def mark_overlaps():
                         #     dest_elem = dest_to_source_matches[g.accession_id]
                         #     dest_elem['GenBank-ids'].append(source_seq.accession_id)
                         #     dest_elem['GenBank-strains'].append(source_seq.strain_name)
+                    insert_overlaps_in_db(source_session, target_session, source_seq, strain_plus_length, source_name,
+                                          target_name)
             elif len(only_strain) > 0:
                 if len(only_strain) > 1 and source_host.country is not None:
                     only_strain = [c for c in only_strain if (source_host.country.lower() in c.strain_name.strip().lower())]
@@ -174,16 +195,23 @@ def mark_overlaps():
                         #     dest_elem = dest_to_source_matches[g.accession_id]
                         #     dest_elem['GenBank-ids'].append(source_seq.accession_id)
                         #     dest_elem['GenBank-strains'].append(source_seq.strain_name)
-
+                    insert_overlaps_in_db(source_session, target_session, source_seq, only_strain, source_name,
+                                          target_name)
 
             target_session.flush()
         logger.debug(f'total number of target sequences changed {len(all_target_ids_changed)}')
         if user_asked_to_commit:
             target_session.commit()
-    except Exception:
+            source_session.commit()
+    except KeyboardInterrupt:
+        rollback(source_session)
+        rollback(target_session)
+        output_record.append("COMPUTATION INTERRUPTED. TOTALS MAY BE INCOMPLETE !!")
+    except Exception as e:
         logger.exception("")
         rollback(source_session)
         rollback(target_session)
+        output_record.append("COMPUTATION INTERRUPTED. TOTALS MAY BE INCOMPLETE !!")
     finally:
         source_session.close()
         target_session.close()
@@ -195,7 +223,10 @@ def mark_overlaps():
 
         logger.info(totals_string)
 
-        output_path = f'.{sep}overlaps{sep}{source_name}_{target_name}{sep}{source_name}_{target_name}_overlaps.txt'.lower()
+        output_path = f'.{sep}overlaps{sep}{source_name}_{target_name}{sep}'
+        output_path += f'{source_name}@{source_db_name}_overlapping_{target_name}@{target_db_name}'
+        output_path += f'_{date.today().strftime("%Y-%b-%d")}.txt'
+        output_path = output_path.lower()
         with open(file=output_path, mode='w') as w:
             for line in output_record:
                 w.write(line + "\n")

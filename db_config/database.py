@@ -347,6 +347,13 @@ class DBMeta(_base):
     date_of_import = Column(Date)
 
 
+class Overlap(_base):
+    __tablename__ = 'overlap'
+
+    sequence_id = Column(Integer, nullable=False, primary_key=True)
+    overlapping_accession_id = Column(String, nullable=False, primary_key=True)
+    overlapping_source = Column(String, nullable=False)
+
 
 #   ###################################     VIEWS       ##################################
 # class View:

@@ -1,11 +1,12 @@
 from typing import Optional
 from overlaps.multi_database_manager import config_db_engine, Sequence, SequencingProject, get_session, rollback, \
-    source_sequences, target_sequences, HostSample, user_asked_to_commit
+    source_sequences, target_sequences, HostSample, user_asked_to_commit, insert_overlaps_in_db
 from loguru import logger
 from tqdm import tqdm
 from vcm.vcm import create_or_get_host_sample, create_or_get_sequencing_project
 from time import sleep
 from os.path import sep
+from datetime import date
 import db_config.read_db_overlaps_configuration as db_config
 
 # read only values
@@ -136,7 +137,14 @@ def mark_overlaps():
         total_strain_plus_length_final, total_only_strain_1_to_1, total_strain_plus_length_1_to_1
 
     try:
-        for source_seq in tqdm(source_sequences(source_session, database_source=source_database_source)):
+        count_source_seq = source_sequences(session=source_session,
+                                            database_source=source_database_source,
+                                            for_overlaps_with_target_source=target_name,
+                                            count_only=True)
+        for source_seq in tqdm(total=count_source_seq,
+                               iterable=source_sequences(session=source_session,
+                                                         database_source=source_database_source,
+                                                         for_overlaps_with_target_source=target_name)):
         # for coguk_id in tqdm(read_coguk_overlapping_ids_from_file()):
         #     source_seq = source_session.query(Sequence).filter(Sequence.accession_id == coguk_id).one_or_none()
         #     if source_seq is None:
@@ -168,6 +176,7 @@ def mark_overlaps():
                 for x in strain_plus_length:
                     x.gisaid_only = False
                     target_session.merge(x)
+                insert_overlaps_in_db(source_session, target_session, source_seq, strain_plus_length, 'COG-UK', target_name)
             elif len(only_strain) > 0:
                 ids = [i.accession_id for i in only_strain]
                 composed_string = f'{source_seq.accession_id} matches with {target_name} strain only on {ids}.'
@@ -181,19 +190,21 @@ def mark_overlaps():
                 put_gisaid_metadata_into_coguk(source_session, source_seq.accession_id, target_session, only_strain[0].accession_id)
                 for x in only_strain:
                     x.gisaid_only = False
+                insert_overlaps_in_db(source_session, target_session, source_seq, only_strain, 'COG-UK', target_name)
 
         if user_asked_to_commit:
             source_session.commit()
             target_session.commit()
     except KeyboardInterrupt:
-        logger.info("rollback of changes")
         rollback(source_session)
         rollback(target_session)
-    except Exception:
+        output_record.append("COMPUTATION INTERRUPTED. TOTALS MAY BE INCOMPLETE !!")
+    except Exception as e:
         logger.exception("")
         logger.info("rollback of changes")
         rollback(source_session)
         rollback(target_session)
+        output_record.append("COMPUTATION INTERRUPTED. TOTALS MAY BE INCOMPLETE !!")
     finally:
         source_session.close()
         target_session.close()
@@ -205,7 +216,10 @@ def mark_overlaps():
                         f'strain+length: {total_strain_plus_length_final} -- only strain {total_only_strain_final}\n'
         logger.info(totals_string)
 
-        output_path = f'.{sep}overlaps{sep}{source_name}_{target_name}{sep}{source_name}_{target_name}_overlaps.txt'.lower()
+        output_path = f'.{sep}overlaps{sep}{source_name}_{target_name}{sep}'
+        output_path += f'{source_name}@{source_db_name}_overlapping_{target_name}@{target_db_name}'
+        output_path += f'_{date.today().strftime("%Y-%b-%d")}.txt'
+        output_path = output_path.lower()
         with open(file=output_path, mode='w') as w:
             for line in output_record:
                 w.write(line + "\n")

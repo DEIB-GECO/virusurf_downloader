@@ -7,7 +7,7 @@ from typing import Optional, List
 from sqlalchemy import or_, func
 from sqlalchemy import create_engine
 from db_config.database import Rollback, RollbackAndRaise, CommitAndRaise, rollback, \
-    Sequence, SequencingProject, Virus, HostSample, ExperimentType
+    Sequence, SequencingProject, Virus, HostSample, ExperimentType, Overlap
 
 _db_engine: Engine
 _base = declarative_base()
@@ -88,9 +88,15 @@ def try_py_function(db_name: str, func, *args, **kwargs):
         session.close()
 
 
-def source_sequences(session, database_source: Optional[List[str]] = None, virus_taxon_name: Optional[str] = None):
+# The following method provides the Sequence objects to be checked for overlaps in all pairs of
+# sources, except for genbank-gisaid which has its own function
+def source_sequences(session, database_source: Optional[List[str]] = None, virus_taxon_name: Optional[str] = None,
+                     for_overlaps_with_target_source: Optional[str] = None, count_only: Optional[bool] = False):
     # select
-    query = session.query(Sequence)
+    if count_only:
+        query = session.query(func.count(Sequence.sequence_id))
+    else:
+        query = session.query(Sequence)
     # choose tables to join
     tables_in_from = [Sequence]
     if database_source:
@@ -113,7 +119,17 @@ def source_sequences(session, database_source: Optional[List[str]] = None, virus
                              Virus.taxon_name == virus_taxon_name)
     # ensure to take only sequence with a strain value otherwise we cannot compare anything with the target sequences
     query = query.filter(Sequence.strain_name.isnot(None))
-    return query.yield_per(100)
+
+    # exclude sequences checked in previous runs
+    if for_overlaps_with_target_source:
+        query = query.filter(Sequence.sequence_id.notin_(
+            session.query(Overlap.sequence_id).filter(Overlap.overlapping_source == for_overlaps_with_target_source)
+            .distinct())
+        )
+    if count_only:
+        return query.scalar()
+    else:
+        return query.yield_per(100)
 
 
 def target_sequences(session, matching_strain:str, database_source: Optional[List[str]] = None, virus_taxon_name: Optional[str] = None) -> List:
@@ -146,3 +162,20 @@ def target_sequences(session, matching_strain:str, database_source: Optional[Lis
     query = query.filter(Sequence.strain_name.isnot(None),
                          func.lower(Sequence.strain_name).contains(matching_strain.strip().lower()))
     return query.all()
+
+
+def insert_overlaps_in_db(source_session: Session, target_session: Session, source_sequence: Sequence,
+                          list_target_sequences: List[Sequence], source_name: str, target_name: str):
+    if not list_target_sequences:
+        return
+    overlaps_4_source = \
+        [Overlap(sequence_id=source_sequence.sequence_id,
+                 overlapping_accession_id=ov_seq.accession_id,
+                 overlapping_source=target_name) for ov_seq in list_target_sequences]
+    source_session.add_all(overlaps_4_source)
+
+    overlaps_4_target = \
+        [Overlap(sequence_id=ov_seq.sequence_id,
+                 overlapping_accession_id=source_sequence.accession_id,
+                 overlapping_source=source_name) for ov_seq in list_target_sequences]
+    target_session.add_all(overlaps_4_target)

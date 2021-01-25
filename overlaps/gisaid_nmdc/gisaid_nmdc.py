@@ -1,9 +1,9 @@
-from typing import Optional, List
-from overlaps.multi_database_manager import config_db_engine, Session, Sequence, SequencingProject, get_session, rollback, Virus, source_sequences, target_sequences, user_asked_to_commit
-from sqlalchemy import func, or_
+from overlaps.multi_database_manager import config_db_engine, Session, Sequence, SequencingProject, get_session, \
+    rollback, Virus, source_sequences, target_sequences, user_asked_to_commit, insert_overlaps_in_db
 from loguru import logger
 from tqdm import tqdm
 from os.path import sep
+from datetime import date
 import db_config.read_db_overlaps_configuration as db_config
 
 # read only values
@@ -28,7 +28,12 @@ def mark_overlaps():
     global total_only_strain_1_to_n, total_strain_plus_length_1_to_n, output_record, total_only_strain_1_to_1, total_strain_plus_length_1_to_1
 
     try:
-        for source_seq in tqdm(source_sequences(source_session)):
+        count_source_seq = source_sequences(session=source_session,
+                                            for_overlaps_with_target_source=target_name,
+                                            count_only=True)
+        for source_seq in tqdm(total=count_source_seq,
+                               iterable=source_sequences(session=source_session,
+                                                         for_overlaps_with_target_source=target_name)):
 
             only_strain = []
             strain_plus_length = []
@@ -39,9 +44,9 @@ def mark_overlaps():
 
             for target_seq in target_seq_query:
                 if target_seq.length == source_seq.length:
-                    strain_plus_length.append(target_seq.accession_id)
+                    strain_plus_length.append(target_seq)
                 else:
-                    only_strain.append(target_seq.accession_id)
+                    only_strain.append(target_seq)
 
             if len(strain_plus_length) > 0:
                 if len(strain_plus_length) > 1:
@@ -49,23 +54,34 @@ def mark_overlaps():
                     total_strain_plus_length_1_to_n += 1
                 else:
                     total_strain_plus_length_1_to_1 += 1
-                output_record.append(f'{source_seq.accession_id} matches with {target_name} strain+length on {strain_plus_length}')
+                acc_ids = [s.accession_id for s in strain_plus_length]
+                output_record.append(f'{source_seq.accession_id} matches with {target_name} strain+length on {acc_ids}')
                 source_seq.gisaid_only = False
+                insert_overlaps_in_db(source_session, target_session, source_seq, strain_plus_length, source_name,
+                                      target_name)
             elif len(only_strain) > 0:
                 if len(only_strain) > 1:
                     output_record.append('\t\tWARN\t\t')
                     total_only_strain_1_to_n += 1
                 else:
                     total_only_strain_1_to_1 += 1
-                output_record.append(f'{source_seq.accession_id} matches with {target_name} strain on {only_strain}')
+                acc_ids = [s.accession_id for s in strain_plus_length]
+                output_record.append(f'{source_seq.accession_id} matches with {target_name} strain on {acc_ids}')
                 source_seq.gisaid_only = False
+                insert_overlaps_in_db(source_session, target_session, source_seq, only_strain, source_name, target_name)
 
         if user_asked_to_commit:
             source_session.commit()
-    except Exception:
+            target_session.commit()
+    except KeyboardInterrupt:
+        rollback(source_session)
+        rollback(target_session)
+        output_record.append("COMPUTATION INTERRUPTED. TOTALS MAY BE INCOMPLETE !!")
+    except Exception as e:
         logger.exception("")
         rollback(source_session)
         rollback(target_session)
+        output_record.append("COMPUTATION INTERRUPTED. TOTALS MAY BE INCOMPLETE !!")
     finally:
         source_session.close()
         target_session.close()
@@ -75,7 +91,10 @@ def mark_overlaps():
                         f'1-N MATCHES: strain+length: {total_strain_plus_length_1_to_n} -- only strain {total_only_strain_1_to_n} (search "WARN" to find \'em)\n'
         logger.info(totals_string)
 
-        output_path = f'.{sep}overlaps{sep}{source_name}_{target_name}{sep}{source_name}_{target_name}_overlaps.txt'.lower()
+        output_path = f'.{sep}overlaps{sep}{source_name}_{target_name}{sep}'
+        output_path += f'{source_name}@{source_db_name}_overlapping_{target_name}@{target_db_name}'
+        output_path += f'_{date.today().strftime("%Y-%b-%d")}.txt'
+        output_path = output_path.lower()
         with open(file=output_path, mode='w') as w:
             for line in output_record:
                 w.write(line + "\n")
