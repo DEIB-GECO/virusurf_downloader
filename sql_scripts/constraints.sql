@@ -67,4 +67,4 @@ ON UPDATE NO ACTION
 ON DELETE NO ACTION;
 
 -- OVERLAPS
-ALTER TABLE overlap ADD CONSTRAINT overlpas_pkey PRIMARY KEY(sequence_id, overlapping_accession_id);
+ALTER TABLE overlap ADD CONSTRAINT overlap_pkey PRIMARY KEY(sequence_id, overlapping_accession_id);
