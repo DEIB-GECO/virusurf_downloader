@@ -11,8 +11,8 @@ from os.path import abspath
 from loguru import logger
 
 
-
-def generate_fasta(virus_taxon_id: int, virus_folder_name:str, generated_file_name:str) -> str:
+def generate_fasta(virus_taxon_id: int, virus_folder_name: str, generated_file_name: str,
+                   only_null_lineages: bool = False) -> str:
     """
     Generates a multi fasta file containing all the sequences of the given virus.
 
@@ -28,21 +28,21 @@ def generate_fasta(virus_taxon_id: int, virus_folder_name:str, generated_file_na
                         f'virus associated with taxon {virus_taxon_id}')
 
     def get_acc_ids_and_sequences_from_db(session: database.Session) -> Generator[Tuple, None, None]:
-        query_result = session.query(database.Sequence.accession_id,
+        query = session.query(database.Sequence.accession_id,
                                      database.NucleotideSequence.nucleotide_sequence)\
             .filter(database.Sequence.virus_id == virus_db_id,
-                    database.Sequence.sequence_id == database.NucleotideSequence.sequence_id) \
-            .all()
-        for pair in query_result:
+                    database.Sequence.sequence_id == database.NucleotideSequence.sequence_id)
+        if only_null_lineages:
+            query = query.filter(database.Sequence.lineage == None)
+        for pair in query.all():
             yield pair[0], pair[1]
 
     def get_total_acc_ids_from_db(session: database.Session) -> int:
-        return session.query(
-                func.count(database.Sequence.accession_id)) \
-            .filter(
-            database.Sequence.virus_id == virus_db_id
-            ) \
-            .first()[0]
+        query = session.query(func.count(database.Sequence.accession_id)) \
+            .filter(database.Sequence.virus_id == virus_db_id)
+        if only_null_lineages:
+            query = query.filter(database.Sequence.lineage == None)
+        return query.first()[0]
 
     target_file_path = get_local_folder_for(virus_folder_name, FileType.Fasta) + generated_file_name
     logger.info(f"Generating fasta...")

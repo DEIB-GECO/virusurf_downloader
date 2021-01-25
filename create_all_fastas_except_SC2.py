@@ -1,10 +1,9 @@
-
-
 from generate_fasta import generate_fasta
 from data_sources.ncbi_any_virus.settings import known_settings
 from db_config.read_db_import_configuration import set_db_name
 from os import mkdir
 from os.path import sep
+from datetime import date
 import sys
 from time import sleep
 
@@ -29,6 +28,7 @@ for _fasta_target, virus_import_parameters in known_settings.items():
 
     virus_txid = virus_import_parameters["virus_taxon_id"]
     virus_folder = virus_import_parameters["generated_dir_name"]
-    fasta_path = generate_fasta(virus_txid, virus_folder, f'{_fasta_target}.fasta')
+    fasta_name = f'{_fasta_target}_all_{date.today().strftime("%Y-%b-%d")}.fasta'
+    fasta_path = generate_fasta(virus_txid, virus_folder, fasta_name)
     print(f'fasta generated for {_fasta_target} at path\n '
           f'{fasta_path}')

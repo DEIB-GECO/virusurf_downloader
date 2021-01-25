@@ -18,7 +18,7 @@ wrong_arguments_message = "Accepted parameters:\n" \
                           "\tdownload epitopes" + "\n" \
                           "\tepitopes <db_name> " + "|".join(ncbi_virus_names) + "\n" \
                           "\toverlaps <source1>_<source2> <commit to the DB ?>\n" \
-                          "\tlineages <db_name> " + "|".join(ncbi_virus_names) + "\n"
+                          "\tlineages <db_name> " + "|".join(ncbi_virus_names) + "all|only_new_sequences" + "\n"
 wrong_arguments_message += 'When action is "import", the source name can be optionally followed by a range of samples to import as <min> (included) <max> (excluded).\n'
 
 try:
@@ -43,6 +43,7 @@ try:
         log_file_keyword = f"epi_{_epitope_target}"
     elif 'lineages' in action:
         _fasta_target = sys.argv[3]
+        _method = sys.argv[4]
         log_file_keyword = f"lineages_{_fasta_target}"
     elif 'overlaps' in action:
         _overlap_target = sys.argv[2]
@@ -90,8 +91,10 @@ try:
         else:
             logger.error(f'the argument {source} is not recognised.\n'+wrong_arguments_message)
     elif 'lineages' in action:
+        _method = sys.argv[4]
         logger.warning('This action requires pangolin to be installed in a pangolin environment.')
         from generate_fasta import generate_fasta
+        from datetime import date
         from db_config.read_db_import_configuration import get_database_config_params
         # noinspection PyUnboundLocalVariable
         virus_import_parameters = known_settings.get(_fasta_target)
@@ -99,7 +102,8 @@ try:
             raise ValueError(f'{_fasta_target} is not recognised as an importable virus')
         virus_txid = virus_import_parameters["virus_taxon_id"]
         virus_folder = virus_import_parameters["generated_dir_name"]
-        fasta_path = generate_fasta(virus_txid, virus_folder, f'{_fasta_target}.fasta')
+        fasta_name = f'{_fasta_target}_{_method}_{date.today().strftime("%Y-%b-%d")}.fasta'
+        fasta_path = generate_fasta(virus_txid, virus_folder, fasta_name, _method == 'only_new_sequences')
         # the following script runs pangolin and loads the result into the database
         db_user = get_database_config_params()["db_user"]
         db_name = get_database_config_params()["db_name"]
