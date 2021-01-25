@@ -1,12 +1,13 @@
 import json
 import os
-
+from os.path import exists, sep
+from locations import get_local_folder_for, FileType, remove_file
+from datetime import date
 from json import JSONDecodeError
 from typing import Generator
-
 from loguru import logger
 from tqdm import tqdm
-
+import bz2
 from data_sources.gisaid_sars_cov_2.sample import GISAIDSarsCov2Sample
 from data_sources.virus import VirusSource
 from db_config.database import try_py_function, Sequence, HostSample, SequencingProject
@@ -17,12 +18,14 @@ from db_config.database import try_py_function, Sequence, HostSample, Sequencing
 
 class GISAIDSarsCov2(VirusSource):
 
-    name = 'GISAID_sars_cov_2'
-    data_path = f'.{os.path.sep}..{os.path.sep}GISAID{os.path.sep}export.json'
+    name = 'gisaid_sars_cov_2'
+    data_path = get_local_folder_for(name, FileType.SequenceOrSampleData) + 'export.json'
+    credentials_path = f'.{sep}data_sources{sep}gisaid_sars_cov_2{sep}credentials_gisaid.csv'
 
     def __init__(self):
         super().__init__()
         logger.info(f'importing virus {GISAIDSarsCov2.name}')
+        self.update_source_data()
 
     def taxon_id(self):
         return 2697049
@@ -59,26 +62,42 @@ class GISAIDSarsCov2(VirusSource):
             num_lines = sum(1 for line in input_file)
         return num_lines
 
-    # def virus_samples(self, virus_id: int, from_sample: Optional[int] = None, to_sample: Optional[int] = None):
-    #     num_lines = self.count_sequences_in_file()
-    #     with open(self.data_path, mode='r') as input_file:
-    #         lines_read = 0
-    #         lines_to_read = num_lines if (from_sample is None or to_sample is None) else to_sample - from_sample
-    #         progress = tqdm(total=lines_to_read)
-    #         stats_module.schedule_samples(stats_module.StatsBasedOnTotals(lines_to_read, virus_id, ['GISAID']))
-    #         for line in input_file:
-    #             if from_sample is not None and to_sample is not None:
-    #                 if lines_read < from_sample:
-    #                     lines_read += 1
-    #                     continue    # read line without action
-    #                 elif lines_read >= to_sample:
-    #                     return      # terminate loop
-    #             try:
-    #                 lines_read += 1
-    #                 progress.update()
-    #                 yield GISAIDSarsCov2Sample(json.loads(line))
-    #             except JSONDecodeError:
-    #                 pass
+    def update_source_data(self):
+        logger.info("Downloading updates from source...")
+        # read user credentials
+        if not os.path.exists(self.credentials_path):
+            with open(self.credentials_path, mode='w') as credentials_file:
+                credentials_file.write("# Lines starting with # are comments.\n"
+                                       "# Write in the following line <username>,<password> to use for downloading "
+                                       "updated sequence data from GISAID.")
+            raise AssertionError(f"No GISAID credentials provided. Please update the file at path {self.credentials_path}")
+        with open(self.credentials_path, mode='r') as credentials_file:
+            for line in credentials_file.readlines():
+                if line.startswith("#"):
+                    continue
+                try:
+                    username, psw = line.split(",")
+                    username = username.strip().rstrip()
+                    psw = psw.strip().rstrip()
+                except Exception as e:
+                    logger.error(f"Error encountered while parsing GISAID credentials file at path {self.credentials_path}")
+                    raise e
+            if not username or not psw:
+                raise AssertionError(f"No GISAID credentials provided. Please update the file at path {self.credentials_path}")
+        # download updated data from source
+        download_path = get_local_folder_for(self.name, FileType.SequenceOrSampleData)
+        download_path += "export_" + date.today().strftime("%Y-%b-%d") + ".json.bz2"
+        remove_file(download_path)
+        remove_file(self.data_path)
+        os.system(f"wget --user {username} --password {psw} -O {download_path} ***REMOVED***")
+        if not exists(download_path):
+            raise ValueError("download of ***REMOVED*** with username "
+                             f"'{username}' and password '{psw}' failed.")
+        # extract archive to self.data_path
+        with bz2.open(filename=download_path, mode='rt') as compressed_file:
+            with open(file=self.data_path, mode="w") as decompressed_file:
+                for line in compressed_file:
+                    decompressed_file.write(line)
 
     def get_sequences_in_current_data(self) -> dict:
         def do(session):
