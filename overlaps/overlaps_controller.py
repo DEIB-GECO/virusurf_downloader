@@ -18,7 +18,7 @@ def run():
         from overlaps.genbank_nmdc.genbank_nmdc import run
         run()
     elif inp == 'gisaid_nmdc':
-        from overlaps.gisaid_nmdc.gisaid_nmdc import run
+        from overlaps.nmdc_gisaid.nmdc_gisaid import run
         run()
     elif inp == 'coguk_nmdc':
         from overlaps.coguk_nmdc.coguk_nmdc import run
