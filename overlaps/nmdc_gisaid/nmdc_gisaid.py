@@ -8,11 +8,11 @@ import db_config.read_db_overlaps_configuration as db_config
 
 # read only values
 source_db_name = ''
-source_name = 'GISAID'
-source_database_source = None
+source_name = 'NMDC'
+source_database_source = ['NMDC']
 target_db_name = ''
-target_name = 'NMDC'
-target_database_source = ['NMDC']
+target_name = 'GISAID'
+target_database_source = None
 
 
 total_only_strain_1_to_n = 0
@@ -29,18 +29,19 @@ def mark_overlaps():
 
     try:
         count_source_seq = source_sequences(session=source_session,
+                                            database_source=source_database_source,
                                             for_overlaps_with_target_source=target_name,
                                             count_only=True)
         for source_seq in tqdm(total=count_source_seq,
                                iterable=source_sequences(session=source_session,
+                                                         database_source=source_database_source,
                                                          for_overlaps_with_target_source=target_name)):
 
             only_strain = []
             strain_plus_length = []
 
-            target_seq_query = target_sequences(target_session,
-                                                matching_strain=source_seq.strain_name,
-                                                database_source=target_database_source)
+            target_seq_query = target_sequences(session=target_session,
+                                                matching_strain=source_seq.strain_name)
 
             for target_seq in target_seq_query:
                 if target_seq.length == source_seq.length:
@@ -56,7 +57,11 @@ def mark_overlaps():
                     total_strain_plus_length_1_to_1 += 1
                 acc_ids = [s.accession_id for s in strain_plus_length]
                 output_record.append(f'{source_seq.accession_id} matches with {target_name} strain+length on {acc_ids}')
-                source_seq.gisaid_only = False
+                if len(strain_plus_length) < 10:
+                    for x in strain_plus_length:
+                        x.gisaid_only = False
+                else:
+                    output_record.append("1-N match of order > 10. gisaid_only was not set.")
                 insert_overlaps_in_db(source_session, target_session, source_seq, strain_plus_length, source_name,
                                       target_name)
             elif len(only_strain) > 0:
@@ -65,9 +70,13 @@ def mark_overlaps():
                     total_only_strain_1_to_n += 1
                 else:
                     total_only_strain_1_to_1 += 1
-                acc_ids = [s.accession_id for s in strain_plus_length]
+                acc_ids = [s.accession_id for s in only_strain]
                 output_record.append(f'{source_seq.accession_id} matches with {target_name} strain on {acc_ids}')
-                source_seq.gisaid_only = False
+                if len(only_strain) < 10:
+                    for x in only_strain:
+                        x.gisaid_only = False
+                else:
+                    output_record.append("1-N match of order > 10. gisaid_only was not set.")
                 insert_overlaps_in_db(source_session, target_session, source_seq, only_strain, source_name, target_name)
 
         if user_asked_to_commit:
@@ -102,8 +111,8 @@ def mark_overlaps():
 
 
 def run():
-    source_db = db_config.get_import_params_for("gisaid")
-    target_db = db_config.get_import_params_for("nmdc")
+    source_db = db_config.get_import_params_for("nmdc")
+    target_db = db_config.get_import_params_for("gisaid")
     global source_db_name, target_db_name
     source_db_name = source_db["db_name"]
     target_db_name = target_db["db_name"]

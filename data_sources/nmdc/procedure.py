@@ -151,7 +151,8 @@ class NMDCVirusSample:
         return self.gisa_id()
 
     def strain(self):
-        return self.metadata.get('isolate')
+        strain = self.metadata.get('isolate')
+        return strain if strain else None
 
     @staticmethod
     def is_reference():
