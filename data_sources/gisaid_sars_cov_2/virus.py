@@ -160,7 +160,7 @@ class GISAIDSarsCov2(VirusSource):
                         or str(current_sequence_data[6]) != str(new_sequence.submission_date()) \
                         or current_sequence_data[7] != new_sequence.sequencing_lab() \
                         or (current_sequence_data[8], current_sequence_data[9]) != new_sequence.country__region__geo_group()[:2] \
-                        or current_sequence_data[9] != new_sequence.isolation_source():
+                        or current_sequence_data[10] != new_sequence.isolation_source():
                     acc_id_changed.append(acc_id)
             except KeyError:
                 pass  # the accession id is not present in current data. it's a new sequence
