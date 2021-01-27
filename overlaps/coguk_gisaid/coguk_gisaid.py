@@ -1,6 +1,6 @@
 from typing import Optional
 from overlaps.multi_database_manager import config_db_engine, Sequence, SequencingProject, get_session, rollback, \
-    source_sequences, target_sequences, HostSample, user_asked_to_commit, insert_overlaps_in_db
+    source_sequences, target_sequences, HostSample, user_asked_to_commit, insert_overlaps_in_db, cleanup_overlap_tables
 from loguru import logger
 from tqdm import tqdm
 from vcm.vcm import create_or_get_host_sample, create_or_get_sequencing_project
@@ -133,6 +133,7 @@ def put_gisaid_metadata_into_coguk(coguk_db_session, coguk_seq_id, gisaid_db_ses
 def mark_overlaps():
     source_session = get_session(source_db_name)
     target_session = get_session(target_db_name)
+    cleanup_overlap_tables(source_session, target_session)
     global total_only_strain_1_to_n, total_strain_plus_length_1_to_n, output_record, total_only_strain_final, \
         total_strain_plus_length_final, total_only_strain_1_to_1, total_strain_plus_length_1_to_1
 

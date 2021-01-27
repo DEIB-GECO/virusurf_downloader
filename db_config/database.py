@@ -1,3 +1,5 @@
+from typing import Optional
+
 import sqlalchemy
 from sqlalchemy import Column, select, join, Index, column, REAL
 from sqlalchemy import String, Integer, Boolean, Float, Date, BigInteger
@@ -351,6 +353,7 @@ class Overlap(_base):
     __tablename__ = 'overlap'
 
     sequence_id = Column(Integer, nullable=False, primary_key=True)
+    accession_id = Column(String, nullable=False)
     overlapping_accession_id = Column(String, nullable=False, primary_key=True)
     overlapping_source = Column(String, nullable=False)
 
@@ -592,11 +595,14 @@ def disambiguate_chimera_sequences():
     _db_engine.execute(stmt)
 
 
-def run_script(path: str):
+def run_script(path: str, use_session: Optional[Session] = None):
     # Create an empty command string
     sql_command = ''
 
-    session = get_session()
+    if use_session is None:
+        session = get_session()
+    else:
+        session = use_session
 
     try:
         with open(path, mode='r') as sql_file:
@@ -604,20 +610,22 @@ def run_script(path: str):
                 # Ignore commented lines
                 if not line.startswith('--') and line.strip('\n'):
                     # Append line to the command string
-                    sql_command += line.strip('\n')
+                    sql_command += " " + line.strip('\n')
 
                     # If the command string ends with ';', it is a full statement
                     if sql_command.endswith(';'):
                         # Try to execute statement and commit it
                         try:
-                            session.execute(text(sql_command))
+                            result = session.execute(text(sql_command))
                             session.commit()
+                            return result
                         # Assert in case of error
                         except Exception as e:
                             logger.exception(f'SQL command:\n{sql_command}\n Failed to execute. ')
                             rollback(session)
     finally:
-        session.close()
+        if use_session is None:
+            session.close()
 
 
 

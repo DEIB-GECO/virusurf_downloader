@@ -7,7 +7,7 @@ from typing import Optional, List
 from sqlalchemy import or_, func
 from sqlalchemy import create_engine
 from db_config.database import Rollback, RollbackAndRaise, CommitAndRaise, rollback, \
-    Sequence, SequencingProject, Virus, HostSample, ExperimentType, Overlap
+    Sequence, SequencingProject, Virus, HostSample, ExperimentType, Overlap, run_script
 
 _db_engine: Engine
 _base = declarative_base()
@@ -170,12 +170,101 @@ def insert_overlaps_in_db(source_session: Session, target_session: Session, sour
         return
     overlaps_4_source = \
         [Overlap(sequence_id=source_sequence.sequence_id,
+                 accession_id=source_sequence.accession_id,
                  overlapping_accession_id=ov_seq.accession_id,
                  overlapping_source=target_name) for ov_seq in list_target_sequences]
     source_session.add_all(overlaps_4_source)
 
     overlaps_4_target = \
         [Overlap(sequence_id=ov_seq.sequence_id,
+                 accession_id=ov_seq.accession_id,
                  overlapping_accession_id=source_sequence.accession_id,
                  overlapping_source=source_name) for ov_seq in list_target_sequences]
     target_session.add_all(overlaps_4_target)
+
+
+def cleanup_overlap_tables(source_session: Session, target_session: Optional[Session] = None) -> None:
+    """
+    When a sequence is deleted from the sequence table, its reference in the overlap table is not deleted
+    automatically. This function cleans the overlap table by removing rows that point to sequences that do
+    not exist anymore. The cleanup is performed with respect to any sequence of any source.
+
+    :param source_session: session of the source database
+    :param target_session: session of the target database (if different from the previous one)
+    :return: None
+    """
+    logger.info("Removing overlaps of deleted sequences...")
+    outdated_overlaps_in_source = source_session \
+        .query(Overlap.sequence_id, Overlap.accession_id,
+               Overlap.overlapping_accession_id, Overlap.overlapping_source) \
+        .filter(Overlap.sequence_id.notin_(source_session.query(Sequence.sequence_id))) \
+        .all()
+    outdated_overlaps_in_source = list(outdated_overlaps_in_source)
+    source_sequence_ids = list(set([_[0] for _ in outdated_overlaps_in_source]))
+    source_accession_ids = list(set([_[1] for _ in outdated_overlaps_in_source]))
+
+    # delete overlaps that go from the missing source sequences to any target source
+    # (a.k.a. forward references)
+    source_session.query(Overlap) \
+        .filter(Overlap.sequence_id.in_(source_sequence_ids)) \
+        .delete(synchronize_session=False)
+
+    # delete overlaps that go from any target source to the missing source sequences in the same database
+    # (a.k.a. backward references)
+    source_session.query(Overlap) \
+        .filter(Overlap.overlapping_accession_id.in_(source_accession_ids)) \
+        .delete(synchronize_session=False)
+
+    # backward references can exist also in another database as well
+    if target_session is not None:
+        target_session.query(Overlap)\
+            .filter(Overlap.overlapping_accession_id.in_(source_accession_ids))\
+            .delete(synchronize_session=False)
+
+    if outdated_overlaps_in_source:
+        logger.debug(f"The overlaps (to/from) concerning the following sequences will be deleted: "
+                     f"({len(outdated_overlaps_in_source)} overlaps)\n"
+                     f"{outdated_overlaps_in_source}")
+
+    if target_session is not None:
+        # repeat whole process to clean up overlaps of sequences that have been deleted in the target database
+        outdated_overlaps_in_target = target_session \
+            .query(Overlap.sequence_id, Overlap.accession_id,
+                   Overlap.overlapping_accession_id, Overlap.overlapping_source) \
+            .filter(Overlap.sequence_id.notin_(target_session.query(Sequence.sequence_id))) \
+            .all()
+        outdated_overlaps_in_target = list(outdated_overlaps_in_target)
+        target_sequence_ids = list(set([_[0] for _ in outdated_overlaps_in_target]))
+        target_accession_ids = list(set([_[1] for _ in outdated_overlaps_in_target]))
+
+        # forward references
+        target_session.query(Overlap) \
+            .filter(Overlap.sequence_id.in_(target_sequence_ids)) \
+            .delete(synchronize_session=False)
+
+        # backward references in target database
+        target_session.query(Overlap) \
+            .filter(Overlap.overlapping_accession_id.in_(target_accession_ids)) \
+            .delete(synchronize_session=False)
+
+        # backward references in source database
+        source_session.query(Overlap) \
+            .filter(Overlap.overlapping_accession_id.in_(target_accession_ids)) \
+            .delete(synchronize_session=False)
+
+        if outdated_overlaps_in_target:
+            logger.debug(f"The overlaps (to/from) concerning the following sequences will be deleted: "
+                         f"({len(outdated_overlaps_in_target)} overlaps)\n"
+                         f"{outdated_overlaps_in_target}")
+
+    if user_asked_to_commit:
+        source_session.commit()
+        if target_session is not None:
+            target_session.commit()
+    else:
+        source_session.rollback()
+        if target_session is not None:
+            target_session.rollback()
+
+
+

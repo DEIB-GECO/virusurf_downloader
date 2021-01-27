@@ -156,6 +156,7 @@ CREATE TABLE public.aminoacid_variant (
 
 CREATE TABLE public.overlap (
     sequence_id int4 NOT NULL,
+    accession_id varchar NOT NULL,
     overlapping_accession_id varchar NOT NULL,
     overlapping_source varchar NOT NULL
 );
