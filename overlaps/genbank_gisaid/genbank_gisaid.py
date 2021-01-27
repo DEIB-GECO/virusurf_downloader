@@ -42,7 +42,7 @@ def source_sequences(session, database_source, virus_taxon_name, count_only: Opt
                     Sequence.virus_id == Virus.virus_id,
                     Virus.taxon_name == virus_taxon_name,
                     Sequence.strain_name != 'NA',
-                    func.length(Sequence.strain_name) > 1,
+                    func.length(Sequence.strain_name) > 2,
                     Sequence.sequence_id.notin_(
                         session.query(Overlap.sequence_id)
                         .filter(Overlap.overlapping_source == target_name)
