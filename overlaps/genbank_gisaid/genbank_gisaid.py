@@ -1,7 +1,8 @@
 import sys
 from typing import Optional, List
 from overlaps.multi_database_manager import config_db_engine, Session, Sequence, SequencingProject, get_session, \
-    rollback, HostSample, target_sequences, Virus, Overlap, user_asked_to_commit, insert_overlaps_in_db
+    rollback, HostSample, target_sequences, Virus, Overlap, user_asked_to_commit, insert_overlaps_in_db, \
+    cleanup_overlap_tables
 from sqlalchemy import func, or_
 from loguru import logger
 from tqdm import tqdm
@@ -64,6 +65,7 @@ def source_sequences(session, database_source, virus_taxon_name, count_only: Opt
 def mark_overlaps():
     source_session = get_session(source_db_name)
     target_session = get_session(target_db_name)
+    cleanup_overlap_tables(source_session, target_session)
     all_target_ids_changed = set()
     # dest_to_source_matches = {}
     global total_only_strain_1_to_n, total_strain_plus_length_1_to_n, output_record, total_only_strain_1_to_1, total_strain_plus_length_1_to_1, gisaid_only_false_tuples

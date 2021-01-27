@@ -34,8 +34,8 @@ def run():
         genbank_gisaid.run()
         from overlaps.genbank_nmdc import genbank_nmdc
         genbank_nmdc.run()
-        from overlaps.gisaid_nmdc import gisaid_nmdc
-        gisaid_nmdc.run()
+        from overlaps.nmdc_gisaid import nmdc_gisaid
+        nmdc_gisaid.run()
         from overlaps.coguk_nmdc import coguk_nmdc
         coguk_nmdc.run()
         from overlaps.coguk_gisaid import coguk_gisaid

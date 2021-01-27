@@ -1,6 +1,6 @@
 from typing import Optional, List
 from overlaps.multi_database_manager import config_db_engine, get_session, rollback, source_sequences, target_sequences, \
-    user_asked_to_commit, insert_overlaps_in_db
+    user_asked_to_commit, insert_overlaps_in_db, cleanup_overlap_tables
 from loguru import logger
 from tqdm import tqdm
 from os.path import sep
@@ -23,6 +23,7 @@ output_record = []
 
 def mark_overlaps():
     session = get_session(db_name)
+    cleanup_overlap_tables(session)
     global total_only_strain_1_to_n, total_strain_plus_length_1_to_n, output_record, total_only_strain_1_to_1, total_strain_plus_length_1_to_1
 
     try:
