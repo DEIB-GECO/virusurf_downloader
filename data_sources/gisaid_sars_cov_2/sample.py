@@ -218,6 +218,7 @@ class GISAIDSarsCov2Sample(VirusSample):
                     if variant_search:
                         original_aa = variant_search.group(1)
                         start_pos = variant_search.group(2)
+                        start_pos = int(start_pos) if start_pos is not None else None
                         alternative_aa = variant_search.group(3)
 
                         if original_aa.lower() == 'ins':
@@ -229,7 +230,7 @@ class GISAIDSarsCov2Sample(VirusSample):
                         else:
                             _type = 'SUB'
 
-                        length = max(len(original_aa), len(alternative_aa))
+                        length = max(len(original_aa), len(alternative_aa)) if alternative_aa != 'stop' else len(original_aa)
 
                         # if annotation with this product doesn't exists, add it
                         try:

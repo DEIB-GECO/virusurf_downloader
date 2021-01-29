@@ -130,12 +130,15 @@ def filter_ann_and_variants(annotations_w_aa_variants):
     Transforms SUBs and DELs so that they're all of length 1
     Removes
     - substitutions whose alternative sequence is X (aligner error)
+    - variants with NULL start coordinate
     """
     new_annotations_w_aa_variants = []
     for gene_name, product, protein_id, feature_type, start, stop, nuc_seq, amino_acid_seq, aa_variants in annotations_w_aa_variants:
         # filter variants
         new_aa_variants = []
         for gene, protein_name, protein_code, mutpos, ref, alt, mut_type in aa_variants:
+            if mutpos is None:
+                continue
             # transform variants
             if mut_type == 'DEL':
                 for i in range(len(ref)):
