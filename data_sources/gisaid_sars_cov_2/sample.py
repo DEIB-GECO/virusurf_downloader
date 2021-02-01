@@ -1,6 +1,8 @@
 import re
+import math
+from decimal import Decimal, ROUND_UP
 from datetime import datetime
-from typing import Tuple, Callable, Generator, Optional
+from typing import Tuple, Callable, Generator, Optional, Union
 from dateutil.parser import parse
 import data_cleaning_module
 from data_sources.ncbi_services import host_taxon_id_from_ncbi_taxon_name
@@ -86,20 +88,23 @@ class GISAIDSarsCov2Sample(VirusSample):
         except KeyError:
             return None
 
-    def length(self):
+    def length(self) -> Optional[int]:
         try:
-            return self.sequence_dict['sequence_length']
+            return int(self.sequence_dict['sequence_length'])
         except KeyError:
             return None
 
-    def gc_percent(self):
+    def gc_percent(self) -> Optional[float]:
         try:
-            return self.sequence_dict['gc_content']
+            return round_(self.sequence_dict['gc_content'], 2)
         except KeyError:
             return None
 
-    def n_percent(self):
-        return self.sequence_dict.get('n_content')
+    def n_percent(self) -> Optional[float]:
+        try:
+            return round_(self.sequence_dict.get('n_content'), 2)
+        except KeyError:
+            return None
 
     def lineage(self):
         try:
@@ -127,7 +132,7 @@ class GISAIDSarsCov2Sample(VirusSample):
     def coverage(self):
         return None
 
-    def collection_date(self):
+    def collection_date(self) -> Optional[str]:
         collection_date = self.sequence_dict.get('covv_collection_date')
         if collection_date:
             collection_date = parse(collection_date, default=self.default_datetime).strftime('%Y-%m-%d')
@@ -159,7 +164,7 @@ class GISAIDSarsCov2Sample(VirusSample):
             pass
         return strip_or_none(country), strip_or_none(region), strip_or_none(geo_group)
 
-    def submission_date(self):
+    def submission_date(self) -> Optional[str]:
         submission_date = self.sequence_dict.get('covv_subm_date')
         if submission_date:
             submission_date = parse(submission_date, default=self.default_datetime).strftime('%Y-%m-%d')
@@ -264,3 +269,33 @@ def strip_or_none(string_or_none: Optional[str]):
         return string_or_none.strip()
     else:
         return None
+
+
+def round_(number: Union[str, float, int], n_decimals: int) -> float:
+    """
+    float() are expressed with its closest representation achievable by floating point arithmentic. Sometimes this
+    representation introduces strange behaviors, such as when the stored number differs from its string representation,
+    or when the rounding is incorrect. To overcome this, python has the Decimal library which instead uses a fixed-point
+    arithmetic. Here we use the Decimal class to correctly round a real number, and then we convert it back to float
+    in order to restore the expected behavior of a normal equivalence check (this is important when comparing against
+    the real values used in a database)
+    :param number: the number to round
+    :param n_decimals: the decimal precision
+    :return: a float correctly rounded
+    """
+    return float(Decimal(number).quantize(Decimal(str(1 / pow(10, n_decimals))), rounding=ROUND_UP))
+
+
+def truncate(number, decimals=0):
+    """
+    Returns a value truncated to a specific number of decimal places.
+    """
+    if not isinstance(decimals, int):
+        raise TypeError("decimal places must be an integer.")
+    elif decimals < 0:
+        raise ValueError("decimal places has to be 0 or more.")
+    elif decimals == 0:
+        return math.trunc(number)
+
+    factor = 10.0 ** decimals
+    return math.trunc(number * factor) / factor

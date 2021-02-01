@@ -61,7 +61,7 @@ def config_db_engine(db_name, db_user, db_psw, db_port, recreate_db_from_scratch
         logger.error('DB connection not available')
         raise e
 
-    _session_factory = sessionmaker(_db_engine)
+    _session_factory = sessionmaker(bind=_db_engine, autocommit=False)
     logger.info('db configured')
 
 
@@ -102,6 +102,7 @@ def try_py_function(func, *args, **kwargs):
     :return: the return value of your function.
     """
     session: Session = _session_factory()
+    # when the sessionmaker.autocommit flag is False, there is no need to begin a transaction with session.begin()
     try:
         result = func(session, *args, **kwargs)
         session.commit()

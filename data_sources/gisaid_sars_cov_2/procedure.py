@@ -25,9 +25,27 @@ class Sequential:
         vcm.create_annotation_and_aa_variants(session, sample, sequence, None)
         stats_module.completed_sample(sample.primary_accession_number())
 
+    def update_virus_sample(self, session: Session, sample: VirusSample, changes: dict):
+        host_sample_id = None
+        sequencing_project_id = None
+        sequence = None
+        if changes["host_sample"] is True:
+            host_specie_id = vcm.create_or_get_host_specie(session, sample)
+            host_sample_id = vcm.create_or_get_host_sample(session, sample, host_specie_id)
+        if changes["sequencing_project"] is True:
+            sequencing_project_id = vcm.create_or_get_sequencing_project(session, sample)
+        if changes["sequence"] is True or changes["host_sample"] is True or changes["sequencing_project"] is True:
+            sequence = vcm.update_and_get_sequence(session, sample,
+                                                   experiment_id=None,
+                                                   host_sample_id=host_sample_id,
+                                                   sequencing_project_id=sequencing_project_id)
+        if changes["annotations"] is True:
+            if sequence is None:
+                sequence = vcm.get_sequence(session, sample, self.virus_id) # need the sequence_id
+            vcm.create_annotation_and_aa_variants(session, sample, sequence, None)
+
     def tear_down(self):
         pass
-
 
 # class Parallel:
 #
@@ -128,24 +146,14 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     db_params: dict = import_config.get_database_config_params()
     database.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
 
-    def import_virus(session: Session, virus: GISAIDSarsCov2):
-        return vcm.create_or_get_virus(session, virus)
-
-    def try_import_virus_sample(sample: VirusSample):
-        nonlocal successful_imports, import_method, progress
-        try:
-            database.try_py_function(import_method.import_virus_sample, sample)
-            successful_imports += 1
-        except:
-            logger.exception(f'exception occurred while working on virus sample {sample.internal_id()}')
-
     # IMPORT VIRUS TAXON DATA
     virus = GISAIDSarsCov2()
-    virus_id = database.try_py_function(import_virus, virus)
+    virus_id = database.try_py_function(vcm.create_or_get_virus, virus)
     database.try_py_function(vcm.update_db_metadata, virus_id, 'GISAID')
 
     # COMPUTE DELTAS
-    acc_ids_sequences_to_remove, acc_id_sequences_to_import = virus.deltas()
+    acc_ids_sequences_to_remove, acc_id_sequences_to_import, sequences_to_update = virus.deltas()
+    acc_ids_sequences_to_update = sequences_to_update.keys()
     logger.warning('Check deltas.. The program will resume in 30 seconds.')
     sleep(30)
 
@@ -170,14 +178,28 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     # IMPORT NEW/CHANGED SEQUENCES
     logger.info(f'Importing virus sequences and related tables...')
     import_method = Sequential(virus_id)
-    successful_imports = 0
 
-    progress = tqdm(total=len(acc_id_sequences_to_import))
-    for sequence in virus.get_sequences_of_updated_source():
-        if sequence.primary_accession_number() in acc_id_sequences_to_import:
-            try_import_virus_sample(sequence)
-            progress.update()
+    progress = tqdm(total=len(acc_id_sequences_to_import)+len(acc_ids_sequences_to_update))
+    for sample in virus.get_sequences_of_updated_source():
+        sample_accession_id = sample.primary_accession_number()
+        try:
+            if sample_accession_id in acc_id_sequences_to_import:
+                # import sample from scratch
+                database.try_py_function(import_method.import_virus_sample, sample)
+                progress.update()
+            elif sample_accession_id in acc_ids_sequences_to_update:
+                # update values inside the database
+                changes_in_sequence = sequences_to_update[sample_accession_id]
+                database.try_py_function(import_method.update_virus_sample, sample, changes_in_sequence)
+                progress.update()
+        except KeyboardInterrupt:
+            logger.info("main loop interrupted by the user")
+            break
+        except:
+            logger.exception(f'exception occurred while working on virus sample {sample.internal_id()}')
 
-    logger.info('main process completed')
+    logger.info('main loop completed')
     import_method.tear_down()
-    logger.info(f'successfully imported sequences: {successful_imports}')
+
+    logger.info('Removal of unused database objects...')
+    database.try_py_function(vcm.clean_objects_unreachable_from_sequences)
