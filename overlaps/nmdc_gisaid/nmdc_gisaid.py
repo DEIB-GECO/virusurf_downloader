@@ -24,6 +24,11 @@ output_record = []
 
 
 def mark_overlaps():
+    """
+    These overlaps involve the attributes:
+    strain, length from NMDC (table Sequence)
+    strain, length from GISAID (table Sequence)
+    """
     source_session = get_session(source_db_name)
     target_session = get_session(target_db_name)
     cleanup_overlap_tables(source_session, target_session)

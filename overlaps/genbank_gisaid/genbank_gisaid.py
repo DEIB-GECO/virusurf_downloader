@@ -63,6 +63,11 @@ def source_sequences(session, database_source, virus_taxon_name, count_only: Opt
 
 
 def mark_overlaps():
+    """
+    These overlaps involve the attributes:
+    strain, length, country from GenBank (tables Sequence and HostSample)
+    strain, length from GISAID (table Sequence)
+    """
     source_session = get_session(source_db_name)
     target_session = get_session(target_db_name)
     cleanup_overlap_tables(source_session, target_session)
@@ -130,7 +135,6 @@ def mark_overlaps():
                         gisaid_only_false_tuples += 1
                         g.gisaid_only = False
                         all_target_ids_changed.add(g.accession_id)
-                        target_session.merge(g)
 
                         # UPDATE DEST TO SOURCE RELATION
                         # if not dest_to_source_matches.get(g.accession_id):
@@ -184,7 +188,6 @@ def mark_overlaps():
                         gisaid_only_false_tuples += 1
                         all_target_ids_changed.add(g.accession_id)
                         g.gisaid_only = False
-                        target_session.merge(g)
 
                         # UPDATE DEST TO SOURCE RELATION
                         # if not dest_to_source_matches.get(g.accession_id):
@@ -200,7 +203,6 @@ def mark_overlaps():
                     insert_overlaps_in_db(source_session, target_session, source_seq, only_strain, source_name,
                                           target_name)
 
-            target_session.flush()
         logger.debug(f'total number of target sequences changed {len(all_target_ids_changed)}')
         if user_asked_to_commit:
             target_session.commit()
