@@ -1,6 +1,7 @@
 from typing import List, Tuple
 from db_config.database import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
-    VariantImpact, AminoAcidVariant, Epitope, EpitopeFragment, HostSpecie, DBMeta, NucleotideSequence, AnnotationSequence
+    VariantImpact, AminoAcidVariant, Epitope, EpitopeFragment, HostSpecie, DBMeta, NucleotideSequence, AnnotationSequence, \
+    Session
 from locations import *
 from data_sources.virus_sample import VirusSample
 from xml_helper import *
@@ -238,6 +239,83 @@ def create_and_get_sequence(session, virus_sample: VirusSample, virus_id, experi
                                                         nucleotide_sequence=nucleotide_sequence)
         session.add(nucleotide_sequence_db_obj)
     return sequence, nucleotide_sequence_db_obj
+
+
+def update_and_get_sequence(session, virus_sample: VirusSample, experiment_id: Optional[int],
+                            host_sample_id: Optional[int], sequencing_project_id: Optional[int]) -> Sequence:
+    """
+    Finds the sequence having the same accession_id as this sample and updates the columns that differ from the sample.
+    """
+    # data from sample
+    accession_id = virus_sample.primary_accession_number()
+    strain_name = virus_sample.strain()
+    is_reference = virus_sample.is_reference()
+    is_complete = virus_sample.is_complete()
+    strand = virus_sample.strand()
+    length = virus_sample.length()
+    gc_percentage = virus_sample.gc_percent()
+    n_percentage = virus_sample.n_percent()
+    lineage = virus_sample.lineage()
+    clade = virus_sample.clade()
+
+    # find sequence to update
+    sequence_from_db: Sequence = session.query(Sequence).filter(Sequence.accession_id == accession_id).one_or_none()
+    if not sequence_from_db:
+        raise AssertionError(f"sequence {accession_id} is supposed to be present in the DB but it's not there!")
+    if sequence_from_db.strain_name != strain_name:
+        sequence_from_db.strain_name = strain_name
+    if sequence_from_db.is_reference != is_reference:
+        sequence_from_db.is_reference = is_reference
+    if sequence_from_db.is_complete != is_complete:
+        sequence_from_db.is_complete = is_complete
+    if sequence_from_db.strand != strand:
+        sequence_from_db.strand = strand
+    if sequence_from_db.length != length:
+        sequence_from_db.length = length
+    if sequence_from_db.gc_percentage != gc_percentage:
+        sequence_from_db.gc_percentage = gc_percentage
+    if sequence_from_db.n_percentage != n_percentage:
+        sequence_from_db.n_percentage = n_percentage
+    if sequence_from_db.lineage != lineage:
+        sequence_from_db.lineage = lineage
+    if sequence_from_db.clade != sequence_from_db.clade:
+        sequence_from_db.clade = clade
+    # update references
+    if experiment_id is not None and sequence_from_db.experiment_type_id != experiment_id:
+        sequence_from_db.experiment_type_id = experiment_id
+    if host_sample_id is not None and sequence_from_db.host_sample_id != host_sample_id:
+        sequence_from_db.host_sample_id = host_sample_id
+    if sequencing_project_id is not None and sequence_from_db.sequencing_project_id != sequencing_project_id:
+        sequence_from_db.sequencing_project_id = sequencing_project_id
+
+    return sequence_from_db
+
+
+def update_sequence(session, accession_id: str, update_content: dict, experiment_id: Optional[int],
+                    host_sample_id: Optional[int], sequencing_project_id: Optional[int]) -> None:
+    """
+    Finds the sequence having the same accession_id as this sample and updates the columns that differ from the sample.
+    This more efficient than the similar method update_and_get_sequence, but, in turns, it does not return a Sequence
+    and does not update the in-memory representation of the Sequence. Thus, subsequence queries to this Sequence before
+     a commit may not reflect the new values assigned in this method. This way of updating Sequence is suggested only
+     if no other method needs to read the updated values of this Sequence. The values sequence_id, accession_id and
+    alternative_accession_id are not supposed to change and won't be changed in this method.
+    """
+    # update references
+    if experiment_id is not None:
+        update_content["experiment_type_id"] = experiment_id
+    if host_sample_id is not None:
+        update_content["host_sample_id"] = host_sample_id
+    if sequencing_project_id is not None:
+        update_content["sequencing_project_id"] = sequencing_project_id
+
+    # this is like an UPDATE sequence SET ...
+    updated_rows = session\
+        .query(Sequence)\
+        .filter(Sequence.accession_id == accession_id)\
+        .update(update_content, synchronize_session=False)
+
+    assert updated_rows == 1, f'Update of sequence {accession_id} failed: sequence not found.'
 
 
 def create_annotation_and_aa_variants(session, sample: VirusSample, sequence: Sequence, reference_sample: VirusSample):
@@ -567,4 +645,78 @@ def update_db_metadata(session, virus_db_id: int, database_source: str):
         session.add(meta)
     else:
         last_update.date_of_import = current_date
-        session.merge(last_update)
+
+
+def clean_objects_unreachable_from_sequences(session: Session):
+    # find unused annotations
+    unused_annotations_id = session\
+        .query(Annotation.annotation_id) \
+        .filter(Annotation.sequence_id.notin_(
+            session.query(Sequence.sequence_id).distinct()
+        )).all()
+    # delete amino acid variants (those in unused annotations + those unlinked from annoatations)
+    session\
+        .query(AminoAcidVariant)\
+        .filter(
+            (AminoAcidVariant.annotation_id.notin_(session.query(Annotation.annotation_id).distinct())) |
+            (AminoAcidVariant.annotation_id.in_(unused_annotations_id))
+        ).delete(synchronize_session=False)
+    # delete annotation sequence
+    session\
+        .query(AnnotationSequence)\
+        .filter(AnnotationSequence.annotation_id.in_(
+            unused_annotations_id
+        )).delete(synchronize_session=False)
+    # delete annotations
+    session\
+        .query(Annotation)\
+        .filter(Annotation.annotation_id.in_(
+            unused_annotations_id
+        )).delete(synchronize_session=False)
+    # find unused nucleotide variants
+    unused_nuc_variants_id = session\
+        .query(NucleotideVariant.nucleotide_variant_id) \
+        .filter(NucleotideVariant.sequence_id.notin_(
+            session.query(Sequence.sequence_id).distinct()
+        )).all()
+    # delete variant impacts (those in unused nucleotide variants + those unlinked from nucleotide variants)
+    session\
+        .query(VariantImpact) \
+        .filter(
+            (VariantImpact.nucleotide_variant_id.notin_(
+                session.query(NucleotideVariant.nucleotide_variant_id).distinct()
+            )) |
+            (VariantImpact.nucleotide_variant_id.in_(unused_nuc_variants_id))
+        ).delete(synchronize_session=False)
+    # nucleotide variants
+    session\
+        .query(NucleotideVariant) \
+        .filter(NucleotideVariant.nucleotide_variant_id.in_(
+            unused_nuc_variants_id
+        ))\
+        .delete(synchronize_session=False)
+    # sequencing project
+    session\
+        .query(SequencingProject) \
+        .filter(SequencingProject.sequencing_project_id.notin_(
+            session.query(Sequence.sequencing_project_id)
+        )).delete(synchronize_session=False)
+    # experiment type
+    session\
+        .query(ExperimentType) \
+        .filter(ExperimentType.experiment_type_id.notin_(
+            session.query(Sequence.experiment_type_id)
+        )).delete(synchronize_session=False)
+    # host sample
+    session\
+        .query(HostSample) \
+        .filter(HostSample.host_sample_id.notin_(
+            session.query(Sequence.host_sample_id)
+        )).delete(synchronize_session=False)
+    # host specie
+    session\
+        .query(HostSpecie) \
+        .filter(
+            (HostSpecie.host_id.notin_(session.query(HostSample.host_id))) &
+            (HostSpecie.host_id.notin_(session.query(Epitope.host_id)))
+        ).delete(synchronize_session=False)

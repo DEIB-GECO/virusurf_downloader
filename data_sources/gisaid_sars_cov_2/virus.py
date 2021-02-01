@@ -4,13 +4,13 @@ from os.path import exists, sep
 from locations import get_local_folder_for, FileType, remove_file
 from datetime import date
 from json import JSONDecodeError
-from typing import Generator
+from typing import Generator, List, Tuple
 from loguru import logger
 from tqdm import tqdm
 import bz2
-from data_sources.gisaid_sars_cov_2.sample import GISAIDSarsCov2Sample
+from data_sources.gisaid_sars_cov_2.sample import GISAIDSarsCov2Sample, round_
 from data_sources.virus import VirusSource
-from db_config.database import try_py_function, Sequence, HostSample, SequencingProject
+from db_config.database import try_py_function, Sequence, HostSample, SequencingProject, Annotation, AminoAcidVariant
 
 
 # noinspection PyMethodMayBeStatic
@@ -108,10 +108,11 @@ class GISAIDSarsCov2(VirusSource):
                                               Sequence.sequencing_project_id == SequencingProject.sequencing_project_id) \
                                       .yield_per(100):
                 source_seq, source_host, source_prj = db_items
-                all_sequences[source_seq.accession_id] = (source_seq.strain_name, source_seq.length,
+                all_sequences[source_seq.accession_id] = (source_seq.strain_name, int(source_seq.length),
                                                           source_seq.gc_percentage, source_seq.n_percentage,
                                                           source_host.collection_date, source_host.originating_lab,
-                                                          source_prj.submission_date, source_prj.sequencing_lab,
+                                                          str(source_prj.submission_date) if source_prj.submission_date is not None else None,
+                                                          source_prj.sequencing_lab,
                                                           source_host.country, source_host.region,
                                                           source_host.isolation_source)
             return all_sequences
@@ -126,6 +127,60 @@ class GISAIDSarsCov2(VirusSource):
                 except JSONDecodeError:
                     pass
 
+    # ### COMPARE ANNOTATIONS AND AMINO ACID VARIANTS ### #
+    # It's far more efficient to download the annotations of a group of sequences altogether instead of
+    # downloading them for each sequence at a time
+    def collect_aa_variants_from_db(self, sample_acc_ids: list):
+        all_db_annotations = dict()     # acc_id -> [(aa_var1), (aa_var_2), ...]
+
+        def do(session):
+            nonlocal all_db_annotations
+            all_aa_variants = session \
+                .query(Sequence.accession_id, Annotation.start, Annotation.stop, Annotation.gene_name,
+                       Annotation.feature_type, Annotation.product,
+                       AminoAcidVariant.start_aa_original, AminoAcidVariant.sequence_aa_original,
+                       AminoAcidVariant.sequence_aa_alternative) \
+                .select_from(Annotation, AminoAcidVariant, Sequence) \
+                .filter(Annotation.annotation_id == AminoAcidVariant.annotation_id,
+                        Annotation.sequence_id == Sequence.sequence_id,
+                        Sequence.accession_id.in_(sample_acc_ids)) \
+                .order_by(Sequence.accession_id, Annotation.start, AminoAcidVariant.start_aa_original) \
+                .all()
+            for acc_id, ann_start, ann_stop, gene_name, feature_type, product, \
+                start_aa_original, sequence_aa_original,sequence_aa_alternative in all_aa_variants:
+                # group aa_variants by accession id into a map
+                try:
+                    seq_annotations = all_db_annotations[acc_id]
+                except KeyError:
+                    seq_annotations = list()
+                    all_db_annotations[acc_id] = seq_annotations
+                content = (ann_start, ann_stop, gene_name, feature_type, product,
+                           start_aa_original, sequence_aa_original, sequence_aa_alternative)
+                seq_annotations.append(content)
+
+        try_py_function(do)
+        return all_db_annotations
+
+    def annotations_changed(self, local_annotations_list: List[Tuple], sample: GISAIDSarsCov2Sample):
+        local_ann = set(local_annotations_list)
+        updated_ann = set(self.collect_aa_variants_from_file(sample))
+        annotations_in_db_not_in_file = local_ann - updated_ann
+        annotations_in_file_not_in_db = updated_ann - local_ann
+
+        if annotations_in_db_not_in_file or annotations_in_file_not_in_db:
+            return True
+        else:
+            return False
+
+    def collect_aa_variants_from_file(self, sample: GISAIDSarsCov2Sample):
+        formatted_annotations = []
+        for start, stop, feature_type, gene_name, product, db_xref_merged, amino_acid_sequence, _mutations in sample.annotations_and_amino_acid_variants():
+            for mut in _mutations:
+                original_aa, alternative_aa, start_pos, length, _type = mut
+                content = (start, stop, gene_name, feature_type, product, start_pos, original_aa, alternative_aa)
+                formatted_annotations.append(content)
+        return formatted_annotations
+
     def deltas(self):
         """
         Returns the set of Sequence.accession_id to remove from current database, and the set of Sequence.accession_id
@@ -134,7 +189,7 @@ class GISAIDSarsCov2(VirusSource):
          insert the new ones.
          """
         acc_id_remote = set([x.primary_accession_number() for x in self.get_sequences_of_updated_source()])  # all the sequences from remote
-        logger.info('Collecting current sequences...')
+        logger.info('Collecting current metadata...')
         current_data = self.get_sequences_in_current_data()
         acc_id_current = set(current_data.keys())
 
@@ -142,45 +197,73 @@ class GISAIDSarsCov2(VirusSource):
         acc_id_missing_in_current = acc_id_remote - acc_id_current
 
         acc_id_present_in_current_and_remote = acc_id_current & acc_id_remote
-        acc_id_changed = []
+        acc_id_changed_updatable = dict()
+        acc_id_changed_not_updatable = []
 
+        # collect annotations from DB only for sequences that can have changes
+        logger.info('Collecting current annotations...')
+        aa_variants_local = self.collect_aa_variants_from_db(list(acc_id_present_in_current_and_remote))
         # to compare sequences present in both, have to scan the file of remote sequences
         logger.info('Comparing current data with updated source data')
-        for new_sequence in tqdm(self.get_sequences_of_updated_source()):
+        for new_sequence in tqdm(self.get_sequences_of_updated_source(), total=self.count_sequences_in_file()):
             acc_id = new_sequence.primary_accession_number()
             try:
                 current_sequence_data = current_data[acc_id]
                 # if the gisaid id is the same, compare metadata to detect if the sample changed over time
+
+                # if strain or length changes, overlaps of this sequene become invalid, otherwise they can be kept
                 if current_sequence_data[0] != new_sequence.strain() \
-                        or current_sequence_data[1] != new_sequence.length() \
-                        or float(current_sequence_data[2]) != float(new_sequence.gc_percent()) \
-                        or float(current_sequence_data[3]) != float(new_sequence.n_percent()) \
-                        or current_sequence_data[4] != str(new_sequence.collection_date()) \
-                        or current_sequence_data[5] != new_sequence.originating_lab() \
-                        or str(current_sequence_data[6]) != str(new_sequence.submission_date()) \
-                        or current_sequence_data[7] != new_sequence.sequencing_lab() \
-                        or (current_sequence_data[8], current_sequence_data[9]) != new_sequence.country__region__geo_group()[:2] \
-                        or current_sequence_data[10] != new_sequence.isolation_source():
-                    acc_id_changed.append(acc_id)
+                        or current_sequence_data[1] != new_sequence.length():
+                    acc_id_changed_not_updatable.append(acc_id)
+                else:
+                    # detect which tables have changes
+                    changes = {
+                        "sequence": False,
+                        "host_sample": False,
+                        "sequencing_project": False,
+                        "annotations": False
+                    }
+                    # changes in sequence table (implies a likely change in the sequence and variants too)
+                    if current_sequence_data[2] != new_sequence.gc_percent() \
+                            or current_sequence_data[3] != new_sequence.n_percent():
+                        changes["sequence"] = True
+                    if self.annotations_changed(aa_variants_local[acc_id], new_sequence):
+                        changes["annotations"] = True
+                    # changes in host sample table
+                    if current_sequence_data[4] != new_sequence.collection_date() \
+                            or current_sequence_data[5] != new_sequence.originating_lab() \
+                            or (current_sequence_data[8], current_sequence_data[9]) != \
+                                new_sequence.country__region__geo_group()[:2] \
+                            or current_sequence_data[10] != new_sequence.isolation_source():
+                        changes["host_sample"] = True
+                    # changes in sequencing project table
+                    if current_sequence_data[6] != new_sequence.submission_date() \
+                            or current_sequence_data[7] != new_sequence.sequencing_lab():
+                        changes["sequencing_project"] = True
+
+                    if True in changes.values():
+                        acc_id_changed_updatable[acc_id] = changes
             except KeyError:
                 pass  # the accession id is not present in current data. it's a new sequence
 
         # compute additional sets
-        acc_id_changed = set(acc_id_changed)
-        acc_id_unchanged = acc_id_present_in_current_and_remote - acc_id_changed
+        acc_id_changed_not_updatable = set(acc_id_changed_not_updatable)
+        acc_id_unchanged = acc_id_present_in_current_and_remote - acc_id_changed_updatable.keys() - acc_id_changed_not_updatable
 
-        acc_id_to_remove = acc_id_missing_in_remote | acc_id_changed
-        acc_id_to_import = acc_id_missing_in_current | acc_id_changed
+        acc_id_to_remove = acc_id_missing_in_remote | acc_id_changed_not_updatable
+        acc_id_to_import = acc_id_missing_in_current | acc_id_changed_not_updatable
 
         logger.info(f'\n'
                     f'# Sequences from remote source: {len(acc_id_remote)}. Of which\n'
                     f'# {len(acc_id_unchanged)} present also locally and unchanged\n'
                     f'# {len(acc_id_missing_in_current)} never seen before.\n'
-                    f'# {len(acc_id_changed)} have different attributes in the remote source\n'
+                    f'# {len(acc_id_changed_not_updatable)} have changes in the remote source that impact overlaps (strain/length)\n'  # TODO temporary info
+                    f"# {len(acc_id_changed_updatable)} have changes that don't affect overlaps\n"
                     f'# Sequences from local source: {len(acc_id_current)}. Of which\n'
                     f'# {len(acc_id_missing_in_remote)} are missing from remote and must be removed from local.\n'
-                    f'# In conclusion: {len(acc_id_to_remove)} sequences will be removed because missing or changed in remote\n'
-                    f'# and {len(acc_id_to_import)} sequences will be imported because novel or changed in remote.')
+                    f'# In conclusion: {len(acc_id_to_remove)} sequences will be removed because missing or changed strain/length in remote\n'
+                    f'# {len(acc_id_to_import)} sequences will be imported because novel or changed strain/length in remote\n'
+                    f'# {len(acc_id_changed_updatable)} sequence will be updated with changes from remote.')
 
-        return acc_id_to_remove, acc_id_to_import
+        return acc_id_to_remove, acc_id_to_import, acc_id_changed_updatable
 
