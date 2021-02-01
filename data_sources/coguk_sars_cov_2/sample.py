@@ -82,30 +82,30 @@ class COGUKSarsCov2Sample(VirusSample):
     def strand(self):
         return 'positive'
 
-    def length(self):
+    def length(self) -> int:
         return len(self.nucleotide_sequence())
 
-    def gc_percent(self):
+    def gc_percent(self) -> float:
         c = Counter(self.nucleotide_sequence().lower())
         count_known_nucleotides = (c['g'] + c['c'] + c['a'] + c['t'] + c['u'])
         if count_known_nucleotides != 0:
             gc_percentage = (c['g'] + c['c']) / count_known_nucleotides * 100
             gc_percentage = Decimal(gc_percentage)
             gc_percentage = round(gc_percentage, 2)
-            return gc_percentage
+            return float(gc_percentage)
         else:
-            return 0
+            return 0.0
 
-    def n_percent(self):
+    def n_percent(self) -> float:
         length = self.length()
         if length != 0:
             c = Counter(self.nucleotide_sequence().lower())
             n_percentage = (c['n']) / length * 100
             n_percentage = Decimal(n_percentage)
             n_percentage = round(n_percentage, 2)
-            return n_percentage
+            return float(n_percentage)
         else:
-            return 0
+            return 0.0
 
     def lineage(self):
         return self.sample_dict.get(self.LINEAGE)
@@ -122,7 +122,7 @@ class COGUKSarsCov2Sample(VirusSample):
     def coverage(self):
         return None
 
-    def collection_date(self):
+    def collection_date(self) -> Optional[str]:
         return self.sample_dict.get(self.COLLECTION_DATE)
 
     def isolation_source(self):
