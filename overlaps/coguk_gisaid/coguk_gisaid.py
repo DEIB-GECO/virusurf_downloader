@@ -131,6 +131,11 @@ def put_gisaid_metadata_into_coguk(coguk_db_session, coguk_seq_id, gisaid_db_ses
 
 
 def mark_overlaps():
+    """
+    These overlaps involve the attributes:
+    strain, length from COG-UK (table Sequence)
+    strain, length from GISAID (table Sequence)
+    """
     source_session = get_session(source_db_name)
     target_session = get_session(target_db_name)
     cleanup_overlap_tables(source_session, target_session)
@@ -176,7 +181,6 @@ def mark_overlaps():
                 put_gisaid_metadata_into_coguk(source_session, source_seq.accession_id, target_session, strain_plus_length[0].accession_id)
                 for x in strain_plus_length:
                     x.gisaid_only = False
-                    target_session.merge(x)
                 insert_overlaps_in_db(source_session, target_session, source_seq, strain_plus_length, 'COG-UK', target_name)
             elif len(only_strain) > 0:
                 ids = [i.accession_id for i in only_strain]
