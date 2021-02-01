@@ -184,11 +184,11 @@ class COGUKSarsCov2:
                 current_sequence_data = current_data[acc_id]
                 # if the gisaid id is the same, compare metadata to detect if the sample changed over time
                 if current_sequence_data[0] != new_sequence.length() \
-                        or float(current_sequence_data[1]) != float(new_sequence.gc_percent()) \
-                        or float(current_sequence_data[2]) != float(new_sequence.n_percent()) \
+                        or current_sequence_data[1] != new_sequence.gc_percent() \
+                        or current_sequence_data[2] != new_sequence.n_percent() \
                         or current_sequence_data[3] != new_sequence.collection_date() \
-                        or (current_sequence_data[4], current_sequence_data[5]) != new_sequence.country__region__geo_group()[:2]\
-                        or current_sequence_data[6] != new_sequence.nucleotide_sequence():
+                        or (current_sequence_data[4], current_sequence_data[5]) \
+                        != new_sequence.country__region__geo_group()[:2]:
                     acc_id_changed.append(acc_id)
             except KeyError:
                 pass  # the accession id is not present in current data. it's a new sequence
@@ -221,7 +221,8 @@ class COGUKSarsCov2:
     #      insert the new ones.
     #      """
     #     logger.info("Reading updated data...")
-    #     acc_id_remote = set([x.primary_accession_number() for x in self.get_sequences_of_updated_source()])  # all the sequences from remote
+    #     acc_id_remote = set([x.primary_accession_number() for x in
+    #                          self.get_sequences_of_updated_source()])  # all the sequences from remote
     #     logger.info('Reading current data...')
     #     current_data = self.get_sequences_in_current_data()
     #     acc_id_current = set(current_data.keys())
@@ -232,33 +233,42 @@ class COGUKSarsCov2:
     #     acc_id_present_in_current_and_remote = acc_id_current & acc_id_remote
     #     acc_id_changed = []
     #     acc_id_changed_sequence = []
+    #     counter = 0
     #
     #     # to compare sequences present in both, have to scan the file of remote sequences
     #     logger.info('Comparing current data with that from source...')
-    #     for new_sequence in self.get_sequences_of_updated_source(filter_accession_ids=acc_id_present_in_current_and_remote):
+    #     for new_sequence in self.get_sequences_of_updated_source(
+    #             filter_accession_ids=acc_id_present_in_current_and_remote):
     #         acc_id = new_sequence.primary_accession_number()
+    #         if counter > 10:
+    #             break
     #         try:
     #             current_sequence_data = current_data[acc_id]
     #             # if the gisaid id is the same, compare metadata to detect if the sample changed over time
     #             if current_sequence_data[0] != new_sequence.length() \
-    #                     or float(current_sequence_data[1]) != float(new_sequence.gc_percent()) \
-    #                     or float(current_sequence_data[2]) != float(new_sequence.n_percent()) \
+    #                     or current_sequence_data[1] != new_sequence.gc_percent() \
+    #                     or current_sequence_data[2] != new_sequence.n_percent() \
     #                     or current_sequence_data[3] != new_sequence.collection_date() \
-    #                     or (current_sequence_data[4], current_sequence_data[5]) != new_sequence.country__region__geo_group()[:2]:
+    #                     or (current_sequence_data[4], current_sequence_data[5]) \
+    #                     != new_sequence.country__region__geo_group()[:2]:
     #                 acc_id_changed.append(acc_id)
+    #                 counter += 1
     #
-    #                 logger.trace(f"current data of {acc_id}: {current_sequence_data[0]}, {float(current_sequence_data[1])}, {float(current_sequence_data[2])}, {current_sequence_data[3]}, {current_sequence_data[4]}, {current_sequence_data[5]}")
-    #                 logger.trace(f"updated data of {acc_id}: {new_sequence.length()}, {float(new_sequence.gc_percent())}, {float(new_sequence.n_percent())}, {new_sequence.collection_date()}, {new_sequence.country__region__geo_group()[0]}, {new_sequence.country__region__geo_group()[1]}")
+    #                 logger.trace(
+    #                     f"current data of {acc_id}: {current_sequence_data[0]}, {current_sequence_data[1]}, {current_sequence_data[2]}, {current_sequence_data[3]}, {current_sequence_data[4]}, {current_sequence_data[5]}")
+    #                 logger.trace(
+    #                     f"updated data of {acc_id}: {new_sequence.length()}, {new_sequence.gc_percent()}, {new_sequence.n_percent()}, {new_sequence.collection_date()}, {new_sequence.country__region__geo_group()[0]}, {new_sequence.country__region__geo_group()[1]}")
     #
     #                 if current_sequence_data[0] != new_sequence.length():
     #                     logger.trace("is length")
-    #                 elif float(current_sequence_data[1]) != float(new_sequence.gc_percent()):
+    #                 elif current_sequence_data[1] != new_sequence.gc_percent():
     #                     logger.trace("is gc percent")
-    #                 elif float(current_sequence_data[2]) != float(new_sequence.n_percent()):
+    #                 elif current_sequence_data[2] != new_sequence.n_percent():
     #                     logger.trace("is n percent")
     #                 elif current_sequence_data[3] != new_sequence.collection_date():
     #                     logger.trace("is coll date")
-    #                 elif [current_sequence_data[4], current_sequence_data[5]] != new_sequence.country__region__geo_group()[:2]:
+    #                 elif [current_sequence_data[4],
+    #                       current_sequence_data[5]] != new_sequence.country__region__geo_group()[:2]:
     #                     logger.trace("is country or region")
     #
     #             elif current_sequence_data[6] != new_sequence.nucleotide_sequence():

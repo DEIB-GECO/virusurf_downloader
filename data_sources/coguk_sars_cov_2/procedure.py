@@ -49,7 +49,11 @@ def main_pipeline_part_3(session: database.Session, sample, db_sequence_id):
             vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
         stats_module.completed_sample(sample.primary_accession_number())
     except Exception as e:
-        logger.exception(f'exception occurred during pipeline_part_3 of sample {sample.primary_accession_number()}. '
+        if str(e).endswith("sequence contains letters not in the alphabet"):
+            logger.warning(f"sample {sample.primary_accession_number()} skipped because sequence contains letter not in "
+                           f"the alphabet")
+        else:
+            logger.exception(f'exception occurred during pipeline_part_3 of sample {sample.primary_accession_number()}. '
                          f'Doing rollback of insertion of variants and annotations + deletion of cache')
         remove_file(file_path)
         raise e
