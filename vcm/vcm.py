@@ -432,9 +432,11 @@ def create_nuc_variants_and_impacts(session, sequence_id, args):
 def create_epitope(session, epitope: Tuple):
     db_virus_id, host_specie_db_id, host_name, host_iri, protein_ncbi_id, cell_type, \
     mhc_class, mhc_allele, response_frequency_positive, assay_type, seq, start, stop, ext_links, \
-    prediction_process, is_linear = epitope
+    prediction_process, is_linear, epitope_iri, iedb_epitope_id = epitope
 
     epitope = Epitope(virus_id=db_virus_id,
+                      epitope_iri=epitope_iri,
+                      iedb_epitope_id=iedb_epitope_id,
                       host_id=host_specie_db_id,
                       source_host_name=host_name,
                       source_host_iri=host_iri,

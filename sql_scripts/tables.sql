@@ -36,6 +36,8 @@ CREATE TABLE public.virus (
 
 CREATE TABLE public.epitope (
 	epitope_id serial primary key,
+	epitope_iri varchar NULL,
+	iedb_epitope_id int4 NULL,
 	virus_id int4 NOT NULL,
 	host_id int4 NOT NULL,
 	protein_ncbi_id varchar NULL,

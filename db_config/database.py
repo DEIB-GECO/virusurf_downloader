@@ -314,7 +314,9 @@ class Epitope(_base):
     __tablename__ = 'epitope'
 
     epitope_id = Column(Integer, primary_key=True, autoincrement=True)
-    virus_id = Column(Integer, nullable=False)
+    epitope_iri = Column(String)
+    iedb_epitope_id = Column(Integer)
+    virus_id = Column(String, nullable=False)
     host_id = Column(Integer, nullable=False)
     source_host_name = Column(String)
     source_host_iri = Column(String)
