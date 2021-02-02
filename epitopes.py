@@ -49,7 +49,7 @@ def import_epitopes(virus_taxon_id: int):
     epitopes_file = open(f'.{sep}epitopes.csv', mode='w')
     epitopes_file.write('virus_db_id\thost_specie_db_id\thost_name\thost_iri\tprotein_ncbi_id\tcell_type\tmhc_class\t'
                         'mhc_allele\tresponse_frequency_positive\tassay_type\tseq\tstart\tstop\text_links\t'
-                        'prediction_process\tis_linear\n')
+                        'prediction_process\tis_linear\tepitope_iri\tiedb_epitope_id\n')
     epitopes_fragm_file = open(f'.{sep}epitopes_fragments.csv', mode='w')
     epitopes_fragm_file.write('damianos_epitope_id\tseq\tstart\tstop\n')
 
@@ -60,7 +60,7 @@ def import_epitopes(virus_taxon_id: int):
                 # get contained values
                 damianos_epitope_id, virus_taxon_id, host_iri, host_name, host_taxon_id, protein_ncbi_id, cell_type, \
                 mhc_class, mhc_allele, response_frequency_positive, assay_type, seq, start, stop, ext_links, \
-                prediction_process, is_linear = epitope
+                prediction_process, is_linear, epitope_iri, iedb_epitope_id = epitope
 
                 # put host specie foreign key
                 host_specie_db_id = create_or_get_host_specie_db_id(session, host_taxon_id)
@@ -68,7 +68,7 @@ def import_epitopes(virus_taxon_id: int):
                 # insert epitope in the DB
                 epitope = (virus_db_id, host_specie_db_id, host_name, host_iri, protein_ncbi_id, cell_type,
                            mhc_class, mhc_allele, response_frequency_positive, assay_type, seq, start, stop, ext_links,
-                           prediction_process, is_linear)
+                           prediction_process, is_linear, epitope_iri, iedb_epitope_id)
 
                 # write to file
                 types = (str(type(i)) for i in epitope)

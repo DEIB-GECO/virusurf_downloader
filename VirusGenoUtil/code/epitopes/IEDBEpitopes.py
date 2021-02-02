@@ -1,4 +1,6 @@
 import urllib
+from typing import Tuple, Optional
+from loguru import logger
 from VirusGenoUtil.code.utils import is_fasta_file_extension, create_dir
 from VirusGenoUtil.code.epitopes.Protein import Protein
 from VirusGenoUtil.code.epitopes.Epitope import Epitope
@@ -6,7 +8,7 @@ from VirusGenoUtil.code.epitopes.EpitopeFragment import EpitopeFragment
 from os.path import join, splitext, isfile, exists, isdir, abspath
 from pathlib import Path
 from os import scandir
-from pandas import read_csv, unique, concat
+from pandas import read_csv, unique, concat, DataFrame
 from math import isnan, sqrt
 import requests
 import time
@@ -173,7 +175,9 @@ class IEDBEpitopes:
 							 parse_to_int_or_none(epi_attributes["region_stop"]),
 							 ",".join(epi_attributes["external_links"]),
 							 parse_to_string_or_none(epi_attributes["prediction_process"]),
-							 epi_attributes["is_linear"]])
+							 epi_attributes["is_linear"],
+							 epi_attributes["epitope_iri"],
+							 epi_attributes["iedb_epitope_id"]])
 			epitopes.append(epitope)
 		return epitopes
 
@@ -220,7 +224,8 @@ class IEDBEpitopes:
 					 str(epi_attributes["assay_types"]), epi_seq,
 					 str(epi_attributes["region_start"]), str(epi_attributes["region_stop"]),
 					 ",".join(epi_attributes["external_links"]),
-					 str(epi_attributes["prediction_process"]), str(epi_attributes["is_linear"])])
+					 str(epi_attributes["prediction_process"]), str(epi_attributes["is_linear"]),
+					 epi_attributes["epitope_iri"], epi_attributes["iedb_epitope_id"]])
 				epitopes_out.write(epitope_row + "\n")
 		print("====")
 
@@ -838,13 +843,15 @@ class IEDBEpitopes:
 								"iedb frag:{}, ncbi prot:{}, iedb epitope link(s): {}".format(normalized, ncbi_prot_epi,
 								                                                              " ".join(external_links)))
 
+						epitope_iri, iedb_epitope_id = find_epitope_iri_and_id(mhc_current_protein, normalized.rstrip(','))
+
 						# create epitope object for the two possible types of assay, if are found in the data
 						epitope = Epitope(self.current_virus_taxon_id, protein.get_ncbi_id(), host_iri, host_name,
 						                  host_ncbi_id, "MHC Ligand",
 						                  normalized2allele[normalized], normalized2rf_info[normalized],
 						                  str(normalized),
 						                  reg_start, reg_end,
-						                  external_links, prediction_process, is_linear)
+						                  external_links, prediction_process, is_linear, epitope_iri, iedb_epitope_id)
 						self.current_virus_epitopes.append(epitope)
 					all_attributes = self.current_virus_epitopes[-1].get_all_attributes()
 					print(all_attributes)
@@ -928,13 +935,16 @@ class IEDBEpitopes:
 					else:
 						print("{} is a linear epitope without start and end".format(normalized))
 						continue
+
+					epitope_iri, iedb_epitope_id = find_epitope_iri_and_id(bcells_current_protein, normalized.rstrip(','))
+
 					external_links = normalized2external_links[normalized]
 					epitope = Epitope(self.current_virus_taxon_id, protein.get_ncbi_id(), host_iri,
 					                  host_name, host_ncbi_id, "B cell",
 					                  normalized2allele[normalized], normalized2rf_info[normalized],
 					                  str(normalized),
 					                  reg_start, reg_end,
-					                  external_links, prediction_process, is_linear)
+					                  external_links, prediction_process, is_linear, epitope_iri, iedb_epitope_id)
 					self.current_virus_epitopes.append(epitope)
 					if not is_linear:
 						self.current_virus_epi_fragments = self.current_virus_epi_fragments + epitope.get_fragments()
@@ -1269,13 +1279,15 @@ class IEDBEpitopes:
 								"iedb frag:{}, ncbi prot:{}, iedb epitope link(s): {}".format(normalized, ncbi_prot_epi,
 								                                                              " ".join(external_links)))
 
+						epitope_iri, iedb_epitope_id = find_epitope_iri_and_id(tcells_current_protein, normalized.rstrip(','))
+
 						# create epitope object for the two possible types of assay, if are found in the data
 						epitope = Epitope(self.current_virus_taxon_id, protein.get_ncbi_id(), host_iri,
 						                  host_name, host_ncbi_id, "T cell",
 						                  normalized2allele[normalized], normalized2rf_info[normalized],
 						                  str(normalized),
 						                  reg_start, reg_end,
-						                  external_links, prediction_process, is_linear)
+						                  external_links, prediction_process, is_linear, epitope_iri, iedb_epitope_id)
 						self.current_virus_epitopes.append(epitope)
 				all_attributes = self.current_virus_epitopes[-1].get_all_attributes()
 				print(all_attributes)
@@ -1301,3 +1313,19 @@ def parse_to_float_or_none(input):
 		return float(input)
 	else:
 		return None
+
+
+def find_epitope_iri_and_id(protein_dataset: DataFrame, epi_sequence_or_description: str)\
+		-> Tuple[Optional[str], Optional[int]]:
+	try:
+		epitope_iri = protein_dataset \
+			.loc[protein_dataset['Description'] == epi_sequence_or_description, ["Epitope IRI"]]
+		if not epitope_iri.empty:
+			epitope_iri = epitope_iri.head(1).values[0][0]
+			return epitope_iri, int(epitope_iri[epitope_iri.rfind("/")+1:].strip())
+		else:
+			logger.error(f"NO TCELL EPITOPE IRI FOUND FOR DESCRIPTION {epi_sequence_or_description}")
+			return None, None
+	except:
+		logger.exception("attempt to find the epitope IRI and ID failed")
+		return None, None

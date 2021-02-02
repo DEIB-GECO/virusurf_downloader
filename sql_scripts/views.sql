@@ -34,7 +34,7 @@ AS SELECT nucleotide_variant.*
   WHERE nucleotide_variant.variant_length <= 20;
 
 
-DROP MATERIALIZED VIEW IF EXISTS nucleotide_variant_annotated;
+DROP MATERIALIZED VIEW IF EXISTS public.nucleotide_variant_annotated;
 CREATE MATERIALIZED VIEW public.nucleotide_variant_annotated
 WITH (
     FILLFACTOR = 100
