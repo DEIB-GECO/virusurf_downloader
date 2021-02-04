@@ -1,6 +1,7 @@
 from typing import Optional
 from overlaps.multi_database_manager import config_db_engine, Sequence, SequencingProject, get_session, rollback, \
-    source_sequences, target_sequences, HostSample, user_asked_to_commit, insert_overlaps_in_db, cleanup_overlap_tables
+    source_sequences, target_sequences, HostSample, user_asked_to_commit, insert_overlaps_in_db, cleanup_overlap_tables, \
+    set_gisaid_only_based_on_overlap_table
 from loguru import logger
 from tqdm import tqdm
 from vcm.vcm import create_or_get_host_sample, create_or_get_sequencing_project
@@ -179,8 +180,6 @@ def mark_overlaps():
                 output_record.append(composed_string)
                 total_strain_plus_length_final += 1
                 put_gisaid_metadata_into_coguk(source_session, source_seq.accession_id, target_session, strain_plus_length[0].accession_id)
-                for x in strain_plus_length:
-                    x.gisaid_only = False
                 insert_overlaps_in_db(source_session, target_session, source_seq, strain_plus_length, 'COG-UK', target_name)
             elif len(only_strain) > 0:
                 ids = [i.accession_id for i in only_strain]
@@ -193,13 +192,17 @@ def mark_overlaps():
                 output_record.append(composed_string)
                 total_only_strain_final += 1
                 put_gisaid_metadata_into_coguk(source_session, source_seq.accession_id, target_session, only_strain[0].accession_id)
-                for x in only_strain:
-                    x.gisaid_only = False
                 insert_overlaps_in_db(source_session, target_session, source_seq, only_strain, 'COG-UK', target_name)
 
         if user_asked_to_commit:
             source_session.commit()
             target_session.commit()
+
+        # set gisaid_only
+        set_gisaid_only_based_on_overlap_table(target_session)
+        if user_asked_to_commit:
+            target_session.commit()
+
     except KeyboardInterrupt:
         rollback(source_session)
         rollback(target_session)

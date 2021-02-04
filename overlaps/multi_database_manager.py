@@ -267,4 +267,17 @@ def cleanup_overlap_tables(source_session: Session, target_session: Optional[Ses
             target_session.rollback()
 
 
-
+def set_gisaid_only_based_on_overlap_table(gisaid_db_session: Session):
+    # reset flag
+    gisaid_db_session \
+        .query(Sequence) \
+        .update({
+            "gisaid_only": True
+        }, synchronize_session=False)
+    # set False where appropriate
+    gisaid_db_session\
+        .query(Sequence)\
+        .filter(Sequence.accession_id.in_(gisaid_db_session.query(Overlap.accession_id).distinct()))\
+        .update({
+            "gisaid_only": False
+        }, synchronize_session=False)
