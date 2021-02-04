@@ -2,7 +2,7 @@ import sys
 from typing import Optional, List
 from overlaps.multi_database_manager import config_db_engine, Session, Sequence, SequencingProject, get_session, \
     rollback, HostSample, target_sequences, Virus, Overlap, user_asked_to_commit, insert_overlaps_in_db, \
-    cleanup_overlap_tables
+    cleanup_overlap_tables, set_gisaid_only_based_on_overlap_table
 from sqlalchemy import func, or_
 from loguru import logger
 from tqdm import tqdm
@@ -133,7 +133,6 @@ def mark_overlaps():
                         logger.error(f'mismatch of {difference}')
                     for g in strain_plus_length:
                         gisaid_only_false_tuples += 1
-                        g.gisaid_only = False
                         all_target_ids_changed.add(g.accession_id)
 
                         # UPDATE DEST TO SOURCE RELATION
@@ -187,7 +186,6 @@ def mark_overlaps():
                     for g in only_strain:
                         gisaid_only_false_tuples += 1
                         all_target_ids_changed.add(g.accession_id)
-                        g.gisaid_only = False
 
                         # UPDATE DEST TO SOURCE RELATION
                         # if not dest_to_source_matches.get(g.accession_id):
@@ -207,6 +205,11 @@ def mark_overlaps():
         if user_asked_to_commit:
             target_session.commit()
             source_session.commit()
+
+        # set gisaid_only
+        set_gisaid_only_based_on_overlap_table(target_session)
+        if user_asked_to_commit:
+            target_session.commit()
     except KeyboardInterrupt:
         rollback(source_session)
         rollback(target_session)

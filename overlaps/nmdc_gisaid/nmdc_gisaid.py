@@ -1,6 +1,6 @@
 from overlaps.multi_database_manager import config_db_engine, Session, Sequence, SequencingProject, get_session, \
     rollback, Virus, source_sequences, target_sequences, user_asked_to_commit, insert_overlaps_in_db, \
-    cleanup_overlap_tables
+    cleanup_overlap_tables, set_gisaid_only_based_on_overlap_table
 from loguru import logger
 from tqdm import tqdm
 from os.path import sep
@@ -64,11 +64,8 @@ def mark_overlaps():
                     total_strain_plus_length_1_to_1 += 1
                 acc_ids = [s.accession_id for s in strain_plus_length]
                 output_record.append(f'{source_seq.accession_id} matches with {target_name} strain+length on {acc_ids}')
-                if len(strain_plus_length) < 10:
-                    for x in strain_plus_length:
-                        x.gisaid_only = False
-                else:
-                    output_record.append("1-N match of order > 10. gisaid_only was not set.")
+                if len(strain_plus_length) > 10:
+                    output_record.append("1-N match of order > 10!")
                 insert_overlaps_in_db(source_session, target_session, source_seq, strain_plus_length, source_name,
                                       target_name)
             elif len(only_strain) > 0:
@@ -79,15 +76,17 @@ def mark_overlaps():
                     total_only_strain_1_to_1 += 1
                 acc_ids = [s.accession_id for s in only_strain]
                 output_record.append(f'{source_seq.accession_id} matches with {target_name} strain on {acc_ids}')
-                if len(only_strain) < 10:
-                    for x in only_strain:
-                        x.gisaid_only = False
-                else:
-                    output_record.append("1-N match of order > 10. gisaid_only was not set.")
+                if len(only_strain) > 10:
+                    output_record.append("1-N match of order > 10!")
                 insert_overlaps_in_db(source_session, target_session, source_seq, only_strain, source_name, target_name)
 
         if user_asked_to_commit:
             source_session.commit()
+            target_session.commit()
+
+        # set gisaid_only
+        set_gisaid_only_based_on_overlap_table(target_session)
+        if user_asked_to_commit:
             target_session.commit()
     except KeyboardInterrupt:
         rollback(source_session)
