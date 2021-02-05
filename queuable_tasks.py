@@ -102,7 +102,7 @@ class TaskManager:
         # consumed.
 
         while not self._queue.empty():  # not bullet-proof as empty() and qsize() return approx. values, but it helps
-            print(f"jobs waiting to be completed: {self._queue.qsize()}")
+            print(f"jobs waiting to be assigned: {self._queue.qsize()}")
             sleep(1)
         for _ in self._workers:
             self._queue.put(None, block=True, timeout=None)

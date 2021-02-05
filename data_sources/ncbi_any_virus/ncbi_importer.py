@@ -495,8 +495,17 @@ class AnyNCBIVNucSample:
         return 'RefSeq' if self.is_reference() else 'GenBank'
 
     def bioproject_id(self):
-        return text_at_node(self.sample_xml, './/INSDXref[./INSDXref_dbname/text() = "BioProject"]/INSDXref_id',
-                            mandatory=False)
+        bioproject_id = self.sample_xml.xpath('.//INSDXref[./INSDXref_dbname/text() = "BioProject"]')
+        # xpath returns a list also for single nodes
+        first_id = text_at_node(bioproject_id[0], './INSDXref_id', False)
+        if len(bioproject_id) > 1:
+            # check if they are equal
+            for other_node in bioproject_id[1:]:
+                other_id = text_at_node(other_node, './INSDXref_id', False)
+                if other_id != first_id:
+                    raise AssertionError(f'Multiple distinct bioproject ID found at path '
+                                         f'.//INSDXref[./INSDXref_dbname/text() = "BioProject"]')
+        return first_id
 
     @classmethod
     def _structured_comment(cls, el, key):
@@ -829,8 +838,11 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
             _sample.remove_external_host_data_file()
             remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
             raise database.Rollback()
-        except AssertionError:
-            logger.exception(f"Sample {_sample.internal_id()} may have a corrupted XML. Sample won't be imported. Sample and host files will be deleted.")
+        except AssertionError as e:
+            if str(e).endswith('distinct bioproject ID found at path .//INSDXref[./INSDXref_dbname/text() = "BioProject"]'):
+                logger.warning(f"Sample {_sample.internal_id()} has >1 bioprojects ID. Sample won't be imported. Sample and host files will be deleted.")
+            else:
+                logger.exception(f"Sample {_sample.internal_id()} may have a corrupted XML. Sample won't be imported. Sample and host files will be deleted.")
             _sample.remove_external_host_data_file()
             remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
             raise database.Rollback()
