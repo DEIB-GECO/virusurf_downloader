@@ -80,7 +80,7 @@ class Sequential:
 
 class Parallel:
 
-    MAX_PROCESSES = max_number_of_workers(50)
+    MAX_PROCESSES = max_number_of_workers(12)
 
     def __init__(self):
         # empty job queue

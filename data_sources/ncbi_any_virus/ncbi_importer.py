@@ -764,7 +764,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
     db_params: dict = db_import_config.get_database_config_params()
     database.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
     # prepare multiprocessor
-    task_manager = TaskManager(70, 70, TheWorker)
+    task_manager = TaskManager(20, 12, TheWorker)
 
     def check_user_query():
         """
