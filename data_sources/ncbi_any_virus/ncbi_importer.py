@@ -497,15 +497,18 @@ class AnyNCBIVNucSample:
     def bioproject_id(self):
         bioproject_id = self.sample_xml.xpath('.//INSDXref[./INSDXref_dbname/text() = "BioProject"]')
         # xpath returns a list also for single nodes
-        first_id = text_at_node(bioproject_id[0], './INSDXref_id', False)
-        if len(bioproject_id) > 1:
-            # check if they are equal
-            for other_node in bioproject_id[1:]:
-                other_id = text_at_node(other_node, './INSDXref_id', False)
-                if other_id != first_id:
-                    raise AssertionError(f'Multiple distinct bioproject ID found at path '
-                                         f'.//INSDXref[./INSDXref_dbname/text() = "BioProject"]')
-        return first_id
+        if len(bioproject_id) > 0:
+            first_id = text_at_node(bioproject_id[0], './INSDXref_id', False)
+            if len(bioproject_id) > 1:
+                # check if they are equal
+                for other_node in bioproject_id[1:]:
+                    other_id = text_at_node(other_node, './INSDXref_id', False)
+                    if other_id != first_id:
+                        raise AssertionError(f'Multiple distinct bioproject ID found at path '
+                                             f'.//INSDXref[./INSDXref_dbname/text() = "BioProject"]')
+            return first_id
+        else:
+            return None
 
     @classmethod
     def _structured_comment(cls, el, key):
