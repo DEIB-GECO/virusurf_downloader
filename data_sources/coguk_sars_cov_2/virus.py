@@ -14,6 +14,7 @@ from db_config.database import Sequence, HostSample, SequencingProject, try_py_f
 from locations import get_local_folder_for, FileType, remove_file
 from xml_helper import text_at_node
 from urllib.request import Request, urlopen
+import nuc_aa_pipeline
 
 
 class COGUKSarsCov2:
@@ -126,6 +127,7 @@ class COGUKSarsCov2:
         accession_ids_of_interest = filter_accession_ids if filter_accession_ids else meta.keys()
 
         # scan the multi-fasta file
+        nuc_sequences_with_errors = 0
         with open(self.sequence_file_path, mode='r') as seq_file:
             progress = tqdm(total=len(accession_ids_of_interest))
             while True:
@@ -142,9 +144,13 @@ class COGUKSarsCov2:
                         continue
                     else:
                         progress.update()
+                        sample_sequence = sample_sequence.rstrip().replace("-", "x").replace("?", "x")
+                        if not nuc_aa_pipeline.is_valid_sequence(sample_sequence):
+                            nuc_sequences_with_errors += 1
+                            continue
                         sample = {
                             COGUKSarsCov2Sample.STRAIN_NAME: sample_key,
-                            COGUKSarsCov2Sample.NUC_SEQUENCE: sample_sequence.rstrip()
+                            COGUKSarsCov2Sample.NUC_SEQUENCE: sample_sequence
                         }
                         try:
                             sample[COGUKSarsCov2Sample.METADATA_RAW_STRING] = meta[sample_key]
@@ -156,6 +162,10 @@ class COGUKSarsCov2:
                         except:
                             logger.exception(
                                 f"Sample {sample_key} skipped due to an error while parsing the input data.")
+            if nuc_sequences_with_errors > 0:
+                logger.warning(f"{nuc_sequences_with_errors} were rejected because they include one of the following "
+                               f"invalid characters: {nuc_aa_pipeline.not_allowed_chars}")
+            logger.debug(f"known nucleotides observed in this set of sequences: {nuc_aa_pipeline.used_characters}")
 
     def deltas(self):
         """
