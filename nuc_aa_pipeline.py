@@ -13,6 +13,21 @@ from loguru import logger
 from Bio.SubsMat import MatrixInfo as matlist
 
 nuc_aligner: Optional[Align.PairwiseAligner] = None
+allowed_nucleotide_characters = {"a", "g", "c", "t", "y", "r", "w", "s", "k", "m", "d", "v", "h", "b", "n", "x"}
+not_allowed_chars = set()
+used_characters = set()
+
+
+def is_valid_sequence(test_string):
+    test_set = set(test_string.lower())
+    unkown_chars = test_set - allowed_nucleotide_characters
+    used_characters.update(test_set & allowed_nucleotide_characters)
+    if len(unkown_chars) > 0:
+        not_allowed_chars.update(unkown_chars)
+        return False
+    else:
+        return True
+
 
 class BlastResult:
     def __init__(self, matched_id, lenght, pident):
