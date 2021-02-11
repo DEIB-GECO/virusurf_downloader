@@ -1,6 +1,3 @@
-from typing import Optional, List
-
-from overlaps.coguk_gisaid.coguk_gisaid_2 import source_session
 from overlaps.multi_database_manager import config_db_engine, Session, Sequence, SequencingProject, get_session, \
     rollback, Virus, source_sequences, target_sequences, user_asked_to_commit, insert_overlaps_in_db, \
     cleanup_overlap_tables
@@ -26,7 +23,7 @@ output_record = []
 
 def mark_overlaps():
     session = get_session(db_name)
-    cleanup_overlap_tables(source_session)
+    cleanup_overlap_tables(session)
     global total_only_strain_1_to_n, total_strain_plus_length_1_to_n, output_record, total_only_strain_1_to_1, total_strain_plus_length_1_to_1
 
     try:
