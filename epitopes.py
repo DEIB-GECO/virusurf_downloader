@@ -46,12 +46,12 @@ def import_epitopes(virus_taxon_id: int):
     epitopes, fragments = epitopes_for_virus_taxon(virus_taxon_id)
 
     # write to file
-    epitopes_file = open(f'.{sep}epitopes.csv', mode='w')
-    epitopes_file.write('virus_db_id\thost_specie_db_id\thost_name\thost_iri\tprotein_ncbi_id\tcell_type\tmhc_class\t'
-                        'mhc_allele\tresponse_frequency_positive\tassay_type\tseq\tstart\tstop\text_links\t'
-                        'prediction_process\tis_linear\tepitope_iri\tiedb_epitope_id\n')
-    epitopes_fragm_file = open(f'.{sep}epitopes_fragments.csv', mode='w')
-    epitopes_fragm_file.write('damianos_epitope_id\tseq\tstart\tstop\n')
+    # epitopes_file = open(f'.{sep}epitopes.csv', mode='w')
+    # epitopes_file.write('virus_db_id\thost_specie_db_id\thost_name\thost_iri\tprotein_ncbi_id\tcell_type\tmhc_class\t'
+    #                     'mhc_allele\tresponse_frequency_positive\tassay_type\tseq\tstart\tstop\text_links\t'
+    #                     'prediction_process\tis_linear\tepitope_iri\tiedb_epitope_id\n')
+    # epitopes_fragm_file = open(f'.{sep}epitopes_fragments.csv', mode='w')
+    # epitopes_fragm_file.write('damianos_epitope_id\tseq\tstart\tstop\n')
 
     def do(session: database.Session):
         global epitope_id_mappings
@@ -71,11 +71,11 @@ def import_epitopes(virus_taxon_id: int):
                            prediction_process, is_linear, epitope_iri, iedb_epitope_id)
 
                 # write to file
-                types = (str(type(i)) for i in epitope)
-                items = (str(i) for i in epitope)
-                for i in zip(items, types):
-                    epitopes_file.write(f'{i[0], i[1]}\t')
-                epitopes_file.write('\n')
+                # types = (str(type(i)) for i in epitope)
+                # items = (str(i) for i in epitope)
+                # for i in zip(items, types):
+                #     epitopes_file.write(f'{i[0], i[1]}\t')
+                # epitopes_file.write('\n')
 
                 epitope_db_id = vcm.create_epitope(session, epitope)
                 # bind epitope ids from Damianos with the ones returned from database
@@ -96,20 +96,20 @@ def import_epitopes(virus_taxon_id: int):
                 fragment = (epitope_db_id, seq, start, stop)
 
                 # write to file
-                types = (str(type(i)) for i in fragment)
-                items = (str(i) for i in fragment)
-                for i in zip(items, types):
-                    epitopes_fragm_file.write(f'{i[0], i[1]}\t')
-                epitopes_fragm_file.write('\n')
+                # types = (str(type(i)) for i in fragment)
+                # items = (str(i) for i in fragment)
+                # for i in zip(items, types):
+                #     epitopes_fragm_file.write(f'{i[0], i[1]}\t')
+                # epitopes_fragm_file.write('\n')
 
                 vcm.create_epitope_fragment(session, fragment)
 
         except Exception as e:
             logger.exception('Exception occurred while computing and importing epitopes. Epitopes won\'t be inserted into the DB.')
             raise database.RollbackAndRaise(e)
-        finally:
-            epitopes_file.close()
-            epitopes_fragm_file.close()
+        # finally:
+            # epitopes_file.close()
+            # epitopes_fragm_file.close()
 
     database.try_py_function(
         do
