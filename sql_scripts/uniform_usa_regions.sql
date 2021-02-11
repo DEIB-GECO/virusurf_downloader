@@ -1,3 +1,7 @@
+-- corrects some typos
+UPDATE host_sample SET region = 'California' where region ilike 'californi';
+
+-- remove county acronyms
 -- select country, region,
 update host_sample
 set region =
