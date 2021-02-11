@@ -144,7 +144,7 @@ class COGUKSarsCov2:
                         continue
                     else:
                         progress.update()
-                        sample_sequence = sample_sequence.rstrip().replace("-", "x").replace("?", "x")
+                        sample_sequence = sample_sequence.rstrip().replace("?", "x")
                         if not nuc_aa_pipeline.is_valid_sequence(sample_sequence):
                             nuc_sequences_with_errors += 1
                             continue
