@@ -42,6 +42,7 @@ class Sequential:
         if changes["annotations"] is True:
             if sequence is None:
                 sequence = vcm.get_sequence(session, sample, self.virus_id) # need the sequence_id
+            vcm.remove_annoations_and_aa_variants(session=session, sequence_id=sequence.sequence_id)
             vcm.create_annotation_and_aa_variants(session, sample, sequence, None)
 
     def tear_down(self):
