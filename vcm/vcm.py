@@ -668,6 +668,33 @@ def remove_sequence_and_meta_list(session, primary_sequence_accession_id: Option
             (HostSpecie.host_id.notin_(session.query(Epitope.host_id)))).delete(synchronize_session=False)
 
 
+def remove_annoations_and_aa_variants(session, sequence_id: Optional[int],
+                                      primary_sequence_accession_id: Optional[str] = None,
+                                      alternative_sequence_accession_id: Optional[str] = None):
+
+    if not sequence_id:
+        query = session.query(Sequence.sequence_id)
+        if primary_sequence_accession_id:
+            query = query \
+                .filter(Sequence.accession_id == primary_sequence_accession_id)
+        elif alternative_sequence_accession_id:
+            query = query \
+                .filter(Sequence.alternative_accession_id == alternative_sequence_accession_id)
+        else:
+            raise ValueError(
+                'one between sequence_id, primary_sequence_accession_id and alternative_sequence_accession_id arguments '
+                'must be specified')
+        sequence_id = query.one()
+
+    # delete aa variants and annotations
+    annotation_ids = session.query(Annotation.annotation_id).filter(Annotation.sequence_id == sequence_id).all()
+    annotation_ids = [_[0] for _ in annotation_ids]
+    if annotation_ids:
+        session.query(AminoAcidVariant).filter(AminoAcidVariant.annotation_id.in_(annotation_ids)).delete(synchronize_session=False)
+    session.query(AnnotationSequence).filter(AnnotationSequence.sequence_id == sequence_id).delete(synchronize_session=False)
+    session.query(Annotation).filter(Annotation.sequence_id == sequence_id).delete(synchronize_session=False)
+
+
 def check_existence_epitopes(session, virus_id):
     one_epitope = session.query(Epitope).filter(Epitope.virus_id == virus_id).first()
     return one_epitope is not None

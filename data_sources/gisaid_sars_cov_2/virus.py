@@ -11,6 +11,7 @@ import bz2
 from data_sources.gisaid_sars_cov_2.sample import GISAIDSarsCov2Sample, round_
 from data_sources.virus import VirusSource
 from db_config.database import try_py_function, Sequence, HostSample, SequencingProject, Annotation, AminoAcidVariant
+from collections import Counter
 
 
 # noinspection PyMethodMayBeStatic
@@ -162,12 +163,12 @@ class GISAIDSarsCov2(VirusSource):
         return all_db_annotations
 
     def annotations_changed(self, local_annotations_list: List[Tuple], sample: GISAIDSarsCov2Sample):
-        local_ann = set(local_annotations_list)
-        updated_ann = set(self.collect_aa_variants_from_file(sample))
+        local_ann = Counter(local_annotations_list)
+        updated_ann = Counter(self.collect_aa_variants_from_file(sample))
         annotations_in_db_not_in_file = local_ann - updated_ann
         annotations_in_file_not_in_db = updated_ann - local_ann
 
-        if annotations_in_db_not_in_file or annotations_in_file_not_in_db:
+        if sum(annotations_in_db_not_in_file.values()) > 0 or sum(annotations_in_file_not_in_db.values()) > 0:
             return True
         else:
             return False
@@ -200,6 +201,13 @@ class GISAIDSarsCov2(VirusSource):
         acc_id_changed_updatable = dict()
         acc_id_changed_not_updatable = []
 
+        changes_distribution = {
+            "sequence": 0,
+            "host_sample": 0,
+            "sequencing_project": 0,
+            "annotations": 0
+        }
+
         # collect annotations from DB only for sequences that can have changes
         logger.info('Collecting current annotations...')
         aa_variants_local = self.collect_aa_variants_from_db(list(acc_id_present_in_current_and_remote))
@@ -227,8 +235,10 @@ class GISAIDSarsCov2(VirusSource):
                     if current_sequence_data[2] != new_sequence.gc_percent() \
                             or current_sequence_data[3] != new_sequence.n_percent():
                         changes["sequence"] = True
+                        changes_distribution["sequence"] = changes_distribution["sequence"] + 1
                     if self.annotations_changed(aa_variants_local[acc_id], new_sequence):
                         changes["annotations"] = True
+                        changes_distribution["annotations"] = changes_distribution["annotations"] + 1
                     # changes in host sample table
                     if current_sequence_data[4] != new_sequence.collection_date() \
                             or current_sequence_data[5] != new_sequence.originating_lab() \
@@ -236,10 +246,12 @@ class GISAIDSarsCov2(VirusSource):
                                 new_sequence.country__region__geo_group()[:2] \
                             or current_sequence_data[10] != new_sequence.isolation_source():
                         changes["host_sample"] = True
+                        changes_distribution["host_sample"] = changes_distribution["host_sample"] + 1
                     # changes in sequencing project table
                     if current_sequence_data[6] != new_sequence.submission_date() \
                             or current_sequence_data[7] != new_sequence.sequencing_lab():
                         changes["sequencing_project"] = True
+                        changes_distribution["sequencing_project"] = changes_distribution["sequencing_project"] + 1
 
                     if True in changes.values():
                         acc_id_changed_updatable[acc_id] = changes
@@ -264,6 +276,8 @@ class GISAIDSarsCov2(VirusSource):
                     f'# In conclusion: {len(acc_id_to_remove)} sequences will be removed because missing or changed strain/length in remote\n'
                     f'# {len(acc_id_to_import)} sequences will be imported because novel or changed strain/length in remote\n'
                     f'# {len(acc_id_changed_updatable)} sequence will be updated with changes from remote.')
+
+        logger.info(f"distribution of updates: {changes_distribution}")
 
         return acc_id_to_remove, acc_id_to_import, acc_id_changed_updatable
 
