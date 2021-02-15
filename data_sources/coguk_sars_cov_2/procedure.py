@@ -217,14 +217,17 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     logger.info(f'importing virus sequences and related tables')
     import_method = Parallel()
 
+    vcm.DBCache.commit_changes()
     for s in virus.get_sequences_of_updated_source(filter_accession_ids=id_new_sequences):
         if not s.nucleotide_sequence():
             logger.info(f'sample {s.primary_accession_number()} skipped because nucleotide sequence is empty or null')
             continue
         try:
             database.try_py_function(import_method.import_virus_sample, s)
+            vcm.DBCache.commit_changes()
         except:
             logger.exception(f'exception occurred while working on virus sample {s.primary_accession_number()}')
+            vcm.DBCache.rollback_changes()
 
     logger.info('main process completed')
     import_method.tear_down()

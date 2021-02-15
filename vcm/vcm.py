@@ -11,21 +11,66 @@ from datetime import datetime
 Set of methods that create the corresponding rows in the Virus Conceptual Model database tables
 """
 
-cache_host_specie = dict()
-cache_host_sample = dict()
-cache_experiment_type = dict()
-cache_sequencing_project = dict()
-cache_virus = dict()
 
-cache_typos_corrections = dict()
+class DBCache:
+    class CacheTemplate:
+
+        def __init__(self):
+            self.stable_cache = dict()
+            self.temp_cache = dict()
+
+        def get_or_none(self, key):
+            # search in stable_cache first as it is generally bigger than the temporary one
+            return self.stable_cache.get(key) or self.temp_cache.get(key)
+
+        def add_temporarily(self, key, value):
+            self.temp_cache[key] = value
+
+        def commit_changes(self):
+            self.stable_cache = {
+                **self.temp_cache,
+                **self.stable_cache  # in case of repeated keys, mappings of stable cache overwrite those of temp cache
+            }
+            self.temp_cache = dict()
+
+        def rollback_changes(self):
+            self.temp_cache = dict()
+
+    # class attributes (no need to instantiate and manage a DBCache instance)
+    host_sample = CacheTemplate()
+    host_specie = CacheTemplate()
+    sequencing_project = CacheTemplate()
+    experiment_type = CacheTemplate()
+    virus = CacheTemplate()
+
+    @staticmethod
+    def rollback_changes():
+        DBCache.host_sample.rollback_changes()
+        DBCache.host_specie.rollback_changes()
+        DBCache.sequencing_project.rollback_changes()
+        DBCache.experiment_type.rollback_changes()
+        DBCache.virus.rollback_changes()
+
+    @staticmethod
+    def commit_changes():
+        DBCache.host_sample.commit_changes()
+        DBCache.host_specie.commit_changes()
+        DBCache.sequencing_project.commit_changes()
+        DBCache.experiment_type.commit_changes()
+        DBCache.virus.commit_changes()
+
+
+cache_host_specie = DBCache.host_specie
+cache_host_sample = DBCache.host_sample
+cache_experiment_type = DBCache.experiment_type
+cache_sequencing_project = DBCache.sequencing_project
+cache_virus = DBCache.virus
 
 
 #   #############################    VCM    ############################
 def create_or_get_virus(session, a_virus):
-    global cache_virus
-
     virus_key = (a_virus.taxon_id(), a_virus.taxon_name(), a_virus.family(), a_virus.sub_family(), a_virus.genus(), a_virus.species(), a_virus.equivalent_names(), a_virus.molecule_type(), a_virus.is_single_stranded(), a_virus.is_positive_stranded())
-    virus_id = cache_virus.get(virus_key)
+    virus_id = cache_virus.get_or_none(virus_key)
 
     if not virus_id:
         virus = session.query(Virus).filter(Virus.taxon_id == a_virus.taxon_id()).one_or_none()
@@ -44,19 +89,17 @@ def create_or_get_virus(session, a_virus):
             session.add(virus)
             session.flush()
         virus_id = virus.virus_id
-        cache_virus[virus_key] = virus_id
+        cache_virus.add_temporarily(virus_key, virus_id)
     return virus_id
 
 
 def create_or_get_experiment(session, sample: VirusSample):
-    global cache_experiment_type
-
     sequencing_technology = sample.sequencing_technology()
     assembly_method = sample.assembly_method()
     coverage = sample.coverage()
 
     exp_key = (sequencing_technology, assembly_method, coverage)
-    experiment_id = cache_experiment_type.get(exp_key)
+    experiment_id = cache_experiment_type.get_or_none(exp_key)
 
     if not experiment_id:
         experiment = session.query(ExperimentType).filter(
@@ -71,20 +114,18 @@ def create_or_get_experiment(session, sample: VirusSample):
             session.add(experiment)
             session.flush()
         experiment_id = experiment.experiment_type_id
-        cache_experiment_type[exp_key] = experiment_id
+        cache_experiment_type.add_temporarily(exp_key, experiment_id)
     return experiment_id
 
 
 def create_or_get_sequencing_project(session, sample: VirusSample):
-    global cache_sequencing_project
-
     submission_date = sample.submission_date()
     sequencing_lab = sample.sequencing_lab()
     bioproject_id = sample.bioproject_id()
     database_source = sample.database_source()
 
     project_key = (submission_date, sequencing_lab, bioproject_id, database_source)
-    sequencing_project_id = cache_sequencing_project.get(project_key)
+    sequencing_project_id = cache_sequencing_project.get_or_none(project_key)
 
     if not sequencing_project_id:
         sequencing_project = session.query(SequencingProject).filter(SequencingProject.sequencing_lab == sequencing_lab,
@@ -100,20 +141,18 @@ def create_or_get_sequencing_project(session, sample: VirusSample):
             session.add(sequencing_project)
             session.flush()
         sequencing_project_id = sequencing_project.sequencing_project_id
-        cache_sequencing_project[project_key] = sequencing_project_id
+        cache_sequencing_project.add_temporarily(project_key, sequencing_project_id)
     return sequencing_project_id
 
 
 def create_or_get_host_specie(session, sample: VirusSample) -> int:
-    global cache_host_specie
-
     host_taxon_name = sample.host_taxon_name()
     if host_taxon_name:
         host_taxon_name = host_taxon_name.lower()
     host_taxon_id = sample.host_taxon_id()
 
     host_specie_key = host_taxon_name
-    host_specie_id = cache_host_specie.get(host_specie_key)
+    host_specie_id = cache_host_specie.get_or_none(host_specie_key)
     if not host_specie_id:
         host_specie = session.query(HostSpecie).filter(HostSpecie.host_taxon_name == host_taxon_name).one_or_none()
         if not host_specie:
@@ -122,14 +161,12 @@ def create_or_get_host_specie(session, sample: VirusSample) -> int:
             session.add(host_specie)
             session.flush()
         host_specie_id = host_specie.host_id
-        cache_host_specie[host_specie_key] = host_specie_id
+        cache_host_specie.add_temporarily(host_specie_key, host_specie_id)
     return host_specie_id
 
 
 def create_or_get_host_specie_alt(session, organism_name: str, organism_ncbi_id: int):
-    global cache_host_specie
-
-    host_specie_id = cache_host_specie.get(organism_name)
+    host_specie_id = cache_host_specie.get_or_none(organism_name)
     if not host_specie_id:
         host_specie = session.query(HostSpecie).filter(HostSpecie.host_taxon_name == organism_name).one_or_none()
         if not host_specie:
@@ -138,13 +175,11 @@ def create_or_get_host_specie_alt(session, organism_name: str, organism_ncbi_id:
             session.add(host_specie)
             session.flush()
         host_specie_id = host_specie.host_id
-        cache_host_specie[organism_name] = host_specie_id
+        cache_host_specie.add_temporarily(organism_name, host_specie_id)
     return host_specie_id
 
 
 def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int) -> int:
-    global cache_host_sample
-
     originating_lab = sample.originating_lab()
     collection_date = sample.collection_date()
     isolation_source = sample.isolation_source()
@@ -156,9 +191,8 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
 
     host_sample_key = (host_specie_id, gender, age, originating_lab, collection_date, isolation_source, country, region, geo_group)
 
-    if host_sample_key in cache_host_sample:
-        host_sample_id = cache_host_sample[host_sample_key]
-    else:
+    host_sample_id = cache_host_sample.get_or_none(host_sample_key)
+    if not host_sample_id:
         host_sample = session.query(HostSample).filter(HostSample.host_id == host_specie_id,
                                                        HostSample.collection_date == collection_date,
                                                        HostSample.isolation_source == isolation_source,
@@ -185,7 +219,7 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
             session.add(host_sample)
             session.flush()
         host_sample_id = host_sample.host_sample_id
-        cache_host_sample[host_sample_key] = host_sample_id
+        cache_host_sample.add_temporarily(host_sample_key, host_sample_id)
     return host_sample_id
 
 
@@ -474,12 +508,12 @@ def get_virus(session, a_virus) -> Optional[Virus]:
 def get_specie_id(session, organism_taxon_id:int):
     global cache_host_specie
 
-    host_specie_id = cache_host_specie.get(organism_taxon_id)
+    host_specie_id = cache_host_specie.get_or_none(organism_taxon_id)
     if not host_specie_id:
         host_specie = session.query(HostSpecie).filter(HostSpecie.host_taxon_id == organism_taxon_id).one_or_none()
         if host_specie:
             host_specie_id = host_specie.host_id
-            cache_host_specie[organism_taxon_id] = host_specie_id
+            cache_host_specie.add_temporarily(organism_taxon_id, host_specie_id)
     return host_specie_id
 
 

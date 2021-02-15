@@ -473,12 +473,14 @@ def import_samples_into_vcm():
             host_sample_id = vcm.create_or_get_host_sample(session, a_sample, host_specie_id)
             sequencing_project_id = vcm.create_or_get_sequencing_project(session, a_sample)
             sequence, nucleotide_seq = vcm.create_and_get_sequence(session, a_sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
+            vcm.DBCache.commit_changes()
             return sequence.sequence_id
         except Exception as e:
             if str(e).startswith('duplicate key value violates unique constraint "sequence_accession_id_key"'):
                 logger.error(f'exception occurred while working on virus sample {a_sample}: {str(e)}')
             else:
                 logger.exception(f'exception occurred while working on virus sample {a_sample}')
+            vcm.DBCache.rollback_changes()
             raise database.Rollback()
 
     def nucleotide__annotations__pipeline(session: database.Session, a_sample: NMDCVirusSample, db_sequence_id):
@@ -516,6 +518,7 @@ def import_samples_into_vcm():
             raise database.Rollback()
 
     logger.info('begin import of selected records')
+    vcm.DBCache.commit_changes()
     total_sequences_imported = 0
     total_sequences_skipped = 0
     log_of_gisaid_id_path = f"{get_local_folder_for('NMDC', FileType.Logs)}{os.path.sep}gisa_ids.txt"
@@ -550,6 +553,7 @@ def import_samples_into_vcm():
             if virus_id not in imported_viruses:
                 imported_viruses.add(virus_id)
                 database.try_py_function(vcm.update_db_metadata, virus_id, 'NMDC')
+                vcm.DBCache.commit_changes()
             if virus_id:
                 gisa_id = sample.gisa_id()
                 if gisa_id:
@@ -557,6 +561,7 @@ def import_samples_into_vcm():
 
                 # import sample
                 sequence_id = database.try_py_function(metadata_pipeline, sample)
+                vcm.DBCache.commit_changes()
                 if sequence_id:
                     database.try_py_function(nucleotide__annotations__pipeline, sample, sequence_id)
                 total_sequences_imported += 1
