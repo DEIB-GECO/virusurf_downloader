@@ -176,6 +176,7 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     stats_module.removed_samples(acc_ids_sequences_to_remove)
 
     # IMPORT NEW/CHANGED SEQUENCES
+    vcm.DBCache.commit_changes()
     logger.info(f'Importing virus sequences and related tables...')
     import_method = Sequential(virus_id)
 
@@ -186,17 +187,20 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
             if sample_accession_id in acc_id_sequences_to_import:
                 # import sample from scratch
                 database.try_py_function(import_method.import_virus_sample, sample)
+                vcm.DBCache.commit_changes()
                 progress.update()
             elif sample_accession_id in acc_ids_sequences_to_update:
                 # update values inside the database
                 changes_in_sequence = sequences_to_update[sample_accession_id]
                 database.try_py_function(import_method.update_virus_sample, sample, changes_in_sequence)
+                vcm.DBCache.commit_changes()
                 progress.update()
         except KeyboardInterrupt:
             logger.info("main loop interrupted by the user")
             break
         except:
             logger.exception(f'exception occurred while working on virus sample {sample.internal_id()}')
+            vcm.DBCache.rollback_changes()
 
     logger.info('main loop completed')
     import_method.tear_down()

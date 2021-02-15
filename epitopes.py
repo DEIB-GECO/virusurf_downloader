@@ -103,9 +103,10 @@ def import_epitopes(virus_taxon_id: int):
                 # epitopes_fragm_file.write('\n')
 
                 vcm.create_epitope_fragment(session, fragment)
-
+            vcm.DBCache.commit_changes()
         except Exception as e:
             logger.exception('Exception occurred while computing and importing epitopes. Epitopes won\'t be inserted into the DB.')
+            vcm.DBCache.rollback_changes()
             raise database.RollbackAndRaise(e)
         # finally:
             # epitopes_file.close()

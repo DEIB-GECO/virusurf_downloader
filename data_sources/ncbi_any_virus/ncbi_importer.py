@@ -832,6 +832,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
             host_sample_id = vcm.create_or_get_host_sample(session, _sample, host_specie_id)
             sequencing_project_id = vcm.create_or_get_sequencing_project(session, _sample)
             sequence, nucleotide_seq = vcm.create_and_get_sequence(session, _sample, virus_id, experiment_id, host_sample_id, sequencing_project_id)
+            vcm.DBCache.commit_changes()
             return sequence.sequence_id
         except ValueError as e:
             if str(e).endswith('missing nucleotide seq.'):
@@ -840,6 +841,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
                 logger.exception(f"exception occurred while working on virus sample {_sample.internal_id()}. Sample won't be imported. Sample import skipped. Sample and host files will be deleted.")
             _sample.remove_external_host_data_file()
             remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
+            vcm.DBCache.rollback_changes()
             raise database.Rollback()
         except AssertionError as e:
             if str(e).endswith('distinct bioproject ID found at path .//INSDXref[./INSDXref_dbname/text() = "BioProject"]'):
@@ -848,6 +850,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
                 logger.exception(f"Sample {_sample.internal_id()} may have a corrupted XML. Sample won't be imported. Sample and host files will be deleted.")
             _sample.remove_external_host_data_file()
             remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
+            vcm.DBCache.rollback_changes()
             raise database.Rollback()
         except KeyboardInterrupt as e:
             logger.info(f"import of sample {_sample.internal_id()} interrupted. Sample won't be imported")
@@ -856,6 +859,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
             logger.exception(f"exception occurred while working on virus sample {_sample.internal_id()}. Sample won't be imported. Sample and host files will be deleted.")
             _sample.remove_external_host_data_file()
             remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{_sample.alternative_accession_number()}.xml")
+            vcm.DBCache.rollback_changes()
             raise database.Rollback()
 
     check_user_query()
@@ -892,6 +896,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
     database.re_config_db_engine(False)
 
     logger.info('begin importing new sequences')
+    vcm.DBCache.commit_changes()
     try:
         for sample in _download_as_sample_object(id_new_sequences, SampleWrapperClass):
             sequence_id = database.try_py_function(
