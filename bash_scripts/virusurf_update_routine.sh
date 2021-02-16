@@ -49,10 +49,6 @@ check_exit_code() {    # expects exit status code as argument
     exit
   fi
 }
-backup_db() { # expect the full_path of the backup to be created.
-  echo "* Backup of DB overwriting file $1. PSQL OUTPUT BELOW" | tee -a $log_file_path
-  pg_dump -U geco -hlocalhost ${database_name} > $1 | tee -a $log_file_path
-}
 
 
 ############################################################################
@@ -62,10 +58,10 @@ if test -f "$ongoing_update_or_error_file_path"; then
     msg="* $(timestamp) virusurf self-update routine: A previous update routine was left incomplete or encountered
     an error. Update interrupted."
     echo "$msg" | tee -a $log_file_path
-    echo "" | tee -a $log_file_path
-    echo "" | tee -a $log_file_path
-    echo "" | tee -a $log_file_path
     notify_me "$msg"
+    echo "" | tee -a $log_file_path
+    echo "" | tee -a $log_file_path
+    echo "" | tee -a $log_file_path
     exit
 fi
 
@@ -159,7 +155,7 @@ python main.py lineages ${database_name} sars_cov_2 only_new_sequences
 check_exit_code "$?"
 
 # # correct USA countries
-echo "* Refresh of materialized view ${database_name}.nucleotide_variant_annotated at $(timestamp)" | tee -a $log_file_path
+echo "* Correcting USA countries at $(timestamp)" | tee -a $log_file_path
 psql -U geco -hlocalhost -d ${database_name} -f sql_scripts/uniform_usa_regions.sql | tee -a $log_file_path
 check_exit_code "$?"
 
