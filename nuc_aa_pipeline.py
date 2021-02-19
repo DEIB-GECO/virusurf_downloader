@@ -1,3 +1,4 @@
+from subprocess import call
 from typing import Optional
 
 from Bio import SeqIO
@@ -565,9 +566,19 @@ def call_nucleotide_variants(sequence_id, reference, sequence, ref_aligned, seq_
             f.write(m + '\n')
 
     if variants:
-        os.system("java -jar ./tmp_snpeff/snpEff/snpEff.jar  {}  {} > ./tmp_snpeff/output_{}.vcf".format(snpeff_database_name,
-                                                                                                         variant_file,
-                                                                                                         sequence_id))
+        shell_cmd = "java -jar ./tmp_snpeff/snpEff/snpEff.jar  {}  {} > ./tmp_snpeff/output_{}.vcf" \
+            .format(snpeff_database_name, variant_file, sequence_id)
+        # shell_cmd = "java -jar -Xmx64m ./tmp_snpeff/snpEff/snpEff.jar  {}  {} > ./tmp_snpeff/output_{}.vcf" \
+        #     .format(snpeff_database_name, variant_file, sequence_id)  # TODO delete this line
+        try:
+            ret_code = call(shell_cmd, shell=True)  # exceptions are caught externally
+        except OSError as e:
+            logger.error(f"the process running snpEff raised an exception")
+            raise e
+        if ret_code < 0:
+            raise ChildProcessError(f"the process running snpEff was terminated by signal {-ret_code}")
+        elif ret_code != 0:
+            raise ChildProcessError(f"the process running snpEff returned with non-zero exit code ({ret_code})")
 
         try:
             with open("./tmp_snpeff/output_{}.vcf".format(sequence_id)) as f:
