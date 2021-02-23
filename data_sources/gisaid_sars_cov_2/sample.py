@@ -229,13 +229,15 @@ class GISAIDSarsCov2Sample(VirusSample):
                         if original_aa.lower() == 'ins':
                             original_aa = '-'
                             _type = 'INS'
+                            alternative_aa = alternative_aa.replace('stop', '*')
                         elif alternative_aa.lower() == 'del':
                             alternative_aa = '-'
                             _type = 'DEL'
                         else:
                             _type = 'SUB'
+                            alternative_aa = alternative_aa.replace('stop', '*')
 
-                        length = max(len(original_aa), len(alternative_aa)) if alternative_aa != 'stop' else len(original_aa)
+                        length = max(len(original_aa), len(alternative_aa))
 
                         # if annotation with this product doesn't exists, add it
                         try:
