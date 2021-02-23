@@ -46,7 +46,7 @@ check_exit_code() {    # expects exit status code as argument
     echo "" | tee -a $log_file_path
     echo "" | tee -a $log_file_path
     echo "" | tee -a $log_file_path
-    exit
+    exit 1
   fi
 }
 
@@ -62,7 +62,7 @@ if test -f "$ongoing_update_or_error_file_path"; then
     echo "" | tee -a $log_file_path
     echo "" | tee -a $log_file_path
     echo "" | tee -a $log_file_path
-    exit
+    exit 1
 fi
 
 # create update_or_error_flag
