@@ -50,7 +50,7 @@ check_exit_code() {    # expects exit status code as argument
     echo "" | tee -a $log_file_path
     echo "" | tee -a $log_file_path
     mv "$db_overlaps_configuration_path" "$db_overlaps_configuration_temp_path"
-    exit
+    exit 1
   fi
 }
 
@@ -66,7 +66,7 @@ if test -f "$ongoing_update_or_error_file_path" || test -f "$ongoing_overlap_or_
     echo "" | tee -a $log_file_path
     echo "" | tee -a $log_file_path
     echo "" | tee -a $log_file_path
-    exit
+    exit 1
 fi
 
 # create update_or_error_flag
@@ -116,14 +116,6 @@ python main.py overlaps gisaid_nmdc True
 check_exit_code "$?"
 
 
-
-echo "* Script terminated normally at $(timestamp)" | tee -a $log_file_path
-echo "" | tee -a $log_file_path
-echo "" | tee -a $log_file_path
-echo "" | tee -a $log_file_path
-
-
-
 # restore db_overlaps_config JSON
 cd $virusurf_dir
 echo "* Restore of db_overlaps_config JSON at $(timestamp)" | tee -a $log_file_path
@@ -131,6 +123,12 @@ python find_n_replace_in_file.py "$db_overlaps_configuration_path" "${database_n
 check_exit_code "$?"
 python find_n_replace_in_file.py "$db_overlaps_configuration_path" "${database_name}" "vcm_du"
 check_exit_code "$?"
+
+
+echo "* Script terminated normally at $(timestamp)" | tee -a $log_file_path
+echo "" | tee -a $log_file_path
+echo "" | tee -a $log_file_path
+echo "" | tee -a $log_file_path
 
 
 # remove update_or_error_flag (this happens if the script terminated successfully)
