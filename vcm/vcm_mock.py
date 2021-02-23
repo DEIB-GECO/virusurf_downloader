@@ -2,7 +2,7 @@ from typing import List, Tuple
 
 import sqlalchemy
 from sqlalchemy import cast
-
+from vcm.vcm import DBCache
 from data_sources.virus_sample import VirusSample
 from db_config.database import AminoAcidVariant, ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, \
     Epitope, HostSpecie, EpitopeFragment, NucleotideSequence, AnnotationSequence
@@ -16,6 +16,11 @@ logger.warning('You are using a mocked version of the VCM: You can use it to tes
                'SQLAlchemy ORM objects but no data is actually inserted into the configured DB.\n'
                'If you want to insert data, import vcm.py instead.')
 
+cache_host_specie = DBCache.host_specie
+cache_host_sample = DBCache.host_sample
+cache_experiment_type = DBCache.experiment_type
+cache_sequencing_project = DBCache.sequencing_project
+cache_virus = DBCache.virus
 
 #   #############################    VCM    ############################
 def create_or_get_virus(session, a_virus):
@@ -82,8 +87,7 @@ def create_or_get_host_specie(session, sample: VirusSample) -> int:
     host_specie = HostSpecie(host_taxon_id=host_taxon_id,
                              host_taxon_name=host_taxon_name)
 
-    # logger.info(f'ACC.ID: {sample.primary_accession_number()} - {sample.alternative_accession_number()}')
-    # logger.info(f'HOST_SPECIE: {host_taxon_name} - {host_taxon_id}')
+    logger.info(f'ACC.ID: {sample.primary_accession_number()} - {sample.alternative_accession_number()} HOST_SPECIE: {host_taxon_name} - {host_taxon_id}')
     return 1
 
 
