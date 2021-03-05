@@ -23,6 +23,9 @@ class DBCache:
             # search in stable_cache first as it is generally bigger than the temporary one
             return self.stable_cache.get(key) or self.temp_cache.get(key)
 
+        def printable_cache_status(self):
+            return f"stable: {self.stable_cache} - temp: {self.temp_cache}"
+
         def add_temporarily(self, key, value):
             self.temp_cache[key] = value
 
