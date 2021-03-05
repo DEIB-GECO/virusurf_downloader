@@ -129,7 +129,8 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
                              gender=gender,
                              )
     host_sample.host_sample_id = 1
-    # logger.info(f'HOST_SAMPLE: {collection_date} - {isolation_source} - {originating_lab} - {country} - {region} - {geo_group} - {age} - {gender}')
+    logger.info(f'HOST_SAMPLE: coll_date:{collection_date} - isol_s:{isolation_source} - orig_lab:{originating_lab} - '
+                f'country:{country} - reg:{region} - geo_g:{geo_group} - age:{age} - gend:{gender}')
     return host_sample.host_sample_id
 
 

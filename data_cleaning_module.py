@@ -3,6 +3,7 @@ from typing import List
 import numpy as np
 import sklearn.cluster
 import distance
+from loguru import logger
 from spellchecker import SpellChecker
 
 # CACHE & MANUALLY CURATED SYNONYM RESOLUTION
@@ -167,4 +168,108 @@ def _just_a_test():
         print(f"{correct}\t\ttime: {datetime.now()-start}")
     total_time_end = datetime.now()
     print(f'total time: {total_time_end- total_time_start}\t\taverage time: {(total_time_end-total_time_start)/len(my_words)}')
+
+
+#   ############################### CORRECT USA REGIONS  #################################
+
+USA_state_postal_codes = {
+        'AL': 'Alabama',
+        'AK': 'Alaska',
+        'AZ': 'Arizona',
+        'AR': 'Arkansas',
+        'CA': 'California',
+        'CO': 'Colorado',
+        'CT': 'Connecticut',
+        'DE': 'Delaware',
+        'FL': 'Florida',
+        'GA': 'Georgia',
+        'HI': 'Hawaii',
+        'ID': 'Idaho',
+        'IL': 'Illinois',
+        'IN': 'Indiana',
+        'IA': 'Iowa',
+        'KS': 'Kansas',
+        'KY': 'Kentucky',
+        'LA': 'Louisiana',
+        'ME': 'Maine',
+        'MD': 'Maryland',
+        'MA': 'Massachusetts',
+        'MI': 'Michigan',
+        'MN': 'Minnesota',
+        'MS': 'Mississippi',
+        'MO': 'Missouri',
+        'MT': 'Montana',
+        'NE': 'Nebraska',
+        'NV': 'Nevada',
+        'NH': 'New Hampshire',
+        'NJ': 'New Jersey',
+        'NM': 'New Mexico',
+        'NY': 'New York',
+        'NC': 'North Carolina',
+        'ND': 'North Dakota',
+        'OH': 'Ohio',
+        'OK': 'Oklahoma',
+        'OR': 'Oregon',
+        'PA': 'Pennsylvania',
+        'RI': 'Rhode Island',
+        'SC': 'South Carolina',
+        'SD': 'South Dakota',
+        'TN': 'Tennessee',
+        'TX': 'Texas',
+        'UT': 'Utah',
+        'VT': 'Vermont',
+        'VA': 'Virginia',
+        'WA': 'Washington',
+        'WV': 'West Virginia',
+        'WI': 'Wisconsin',
+        'WY': 'Wyoming',
+        'AS': 'American Samoa',
+        'DC': 'District of Columbia',
+        'FM': 'Federated States of Micronesia',
+        'GU': 'Guam',
+        'MH': 'Marshall Islands',
+        'MP': 'Northern Mariana Islands',
+        'PW': 'Palau',
+        'PR': 'Puerto Rico',
+        'VI': 'Virgin Islands'
+}
+USA_state_names_upper_case = {v.upper(): v for v in USA_state_postal_codes.values()}    # still a dictionary
+
+
+def correct_usa_regions(region: str):
+    if not region:
+        return None
+    region_parts_upper_case = [x.strip().upper() for x in region.split(',', maxsplit=1)]   # REGION PARTS ARE UPPER CASE
+
+    if len(region_parts_upper_case) == 1:  # no comma in region
+        # it may be a postal code
+        state_name = USA_state_postal_codes.get(region_parts_upper_case[0])
+
+        # it could be one of the special cases
+        if state_name is None:
+            state_name = {
+                # special cases
+                'CALIFORNI': 'California',
+                'SLIDELL LA': 'Lousiana',
+            }.get(region_parts_upper_case[0])
+        return state_name or region
+
+    elif len(region_parts_upper_case) == 2:   # one comma
+        # check left hand side of comma
+
+        # one of the parts could be the state name
+        state_name = USA_state_names_upper_case.get(region_parts_upper_case[0])
+        if not state_name:
+            state_name = USA_state_names_upper_case.get(region_parts_upper_case[1])
+
+        # one of the parts could be the postal code of the state
+        if not state_name:
+            state_name = USA_state_postal_codes.get(region_parts_upper_case[0])
+        if not state_name:
+            state_name = USA_state_postal_codes.get(region_parts_upper_case[1])
+        return state_name or region_parts_upper_case[0].capitalize()
+
+    else:
+        logger.warning(f"Correction of USA country names. Region '{region}' is not handled")
+        return region
 

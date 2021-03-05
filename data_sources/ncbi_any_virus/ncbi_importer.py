@@ -131,7 +131,12 @@ class AnyNCBIVNucSample:
         self._external_host_data = None
 
     def __str__(self):
-        return f'{self.internal_id()}.xml'
+        """Used when calling print or similar on this class"""
+        return f'AnyNCBIVNucSample:{self.internal_id()}.xml'
+
+    def __repr__(self):
+        """Used in stacktraces"""
+        return f'AnyNCBIVNucSample:{self.internal_id()}.xml'
 
     def internal_id(self):
         """
@@ -359,6 +364,8 @@ class AnyNCBIVNucSample:
         geo_group = geo_groups.get(country.lower()) if country else None
         if not country and not region and self.external_host_data() is not None:
             country, region, geo_group = self.external_host_data().country__region__geo_group()
+        if country.strip().upper() == 'USA':
+            region = data_cleaning_module.correct_usa_regions(region)
         return country, region, geo_group
 
     def _init_and_get_journal(self):
@@ -837,6 +844,8 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
         except ValueError as e:
             if str(e).endswith('missing nucleotide seq.'):
                 logger.warning(f'Sample {_sample.internal_id()} is given without nucleotide sequence. Sample import skipped. Sample and host files will be deleted.')
+            elif str(e).startswith(f"can't find the biosample numeric id for biosample"):
+                logger.warning(f'Sample {_sample.internal_id()} is given with invalid external host information. Sample import skipped. Sample and host files will be deleted.')
             else:
                 logger.exception(f"exception occurred while working on virus sample {_sample.internal_id()}. Sample won't be imported. Sample import skipped. Sample and host files will be deleted.")
             _sample.remove_external_host_data_file()
@@ -854,6 +863,8 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
             raise database.Rollback()
         except KeyboardInterrupt as e:
             logger.info(f"import of sample {_sample.internal_id()} interrupted. Sample won't be imported")
+            vcm.DBCache.rollback_changes()
+            database.rollback(session)
             raise e  # i.e. it is handled outside but I don't want it to be logged as an unexpected error
         except Exception as e:
             logger.exception(f"exception occurred while working on virus sample {_sample.internal_id()}. Sample won't be imported. Sample and host files will be deleted.")

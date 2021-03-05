@@ -154,10 +154,6 @@ echo "* Begin computing new lineages at $(timestamp)" | tee -a $log_file_path
 python main.py lineages ${database_name} sars_cov_2 only_new_sequences
 check_exit_code "$?"
 
-# # correct USA countries
-echo "* Correcting USA countries at $(timestamp)" | tee -a $log_file_path
-psql -U geco -hlocalhost -d ${database_name} -f sql_scripts/uniform_usa_regions.sql | tee -a $log_file_path
-check_exit_code "$?"
 
 
 # # Refresh materialized views (only 1)
