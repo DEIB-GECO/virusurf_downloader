@@ -1,0 +1,14 @@
+### MERS ###
+For a given virus, 
+
+Go to NCBI GenBank file:
+https://www.ncbi.nlm.nih.gov/nuccore/<ncbi_taxon_id>?report=graph
+
+Go to uniprot website https://www.uniprot.org/uniprot/ and query the virus name, then
+select the proteoeme
+
+Hover on each protein from GenBank:
+1. take note of the NCBI GI-id, then download the protein fasta
+ (.fa extension). 
+2. open it, prepend gi|<GI-ID> after the ">"
+3. save it with the Uniprot ID and extension ".fa"
