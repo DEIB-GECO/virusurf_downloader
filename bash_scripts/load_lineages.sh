@@ -34,7 +34,7 @@ check_exit_code() {    # expects exit status code as argument
 #Install pangolin (https://github.com/cov-lineages/pangolin#install-pangolin):
 
 echo "Running pangolin on file ${input_fasta_path}. Output will be saved in file ${pangolin_output_file_path}"
-source ~/miniconda3/etc/profile.d/conda.sh  # finds command conda
+source ~/anaconda3_new/etc/profile.d/conda.sh  # finds command conda
 check_exit_code "$?"
 conda activate pangolin
 check_exit_code "$?"
