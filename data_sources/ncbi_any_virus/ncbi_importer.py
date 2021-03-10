@@ -490,7 +490,7 @@ class AnyNCBIVNucSample:
         host = self._init_and_get_host_values()
         age = None
         if host:
-            age = next(filter(lambda x: 'age' in x, host), None)
+            age = next(filter(lambda x: 'age' in x and 'sewage' not in x.lower(), host), None)
             if age:
                 age = int(''.join(filter(lambda x: x.isdigit(), age)))
                 # age = int(next(filter(lambda x: x.isdigit(), age.split()), None))
