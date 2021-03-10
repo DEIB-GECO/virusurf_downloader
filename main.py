@@ -105,11 +105,8 @@ try:
         fasta_name = f'{_fasta_target}_{_method}_{date.today().strftime("%Y-%b-%d")}.fasta'
         fasta_path = generate_fasta(virus_txid, virus_folder, fasta_name, _method == 'only_new_sequences')
         # the following script runs pangolin and loads the result into the database
-        db_user = get_database_config_params()["db_user"]
         db_name = get_database_config_params()["db_name"]
-        db_psw = get_database_config_params()["db_psw"]
-        db_port = get_database_config_params()["db_port"]
-        os.system(f"bash .{sep}bash_scripts{sep}load_lineages.sh {fasta_path} {db_name} {db_user} {db_psw} {db_port}")
+        os.system(f"bash .{sep}bash_scripts{sep}load_lineages.sh {fasta_path} {db_name}")
     elif 'overlaps' in action:
         from overlaps import overlaps_controller
         overlaps_controller.run()
