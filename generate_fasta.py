@@ -63,3 +63,28 @@ def generate_fasta(virus_taxon_id: int, virus_folder_name: str, generated_file_n
     target_file_path = abspath(target_file_path)
     logger.info(f"Fasta file generated at {target_file_path}")
     return target_file_path
+
+
+if __name__ == '__main__':
+    import sys
+    from time import sleep
+
+    print('Arguments:\n'
+          '- db_name\n'
+          '- virus_taxon_id\n'
+          '- virus dir name\n'
+          '- output fasta name\n'
+          '- inlcude only sequences with null lineage ?')
+
+    db_name = sys.argv[1]
+    v_taxon_id = int(sys.argv[2])
+    v_dir_name = str(sys.argv[3])
+    generated_file_name = str(sys.argv[4])
+    include_only_null_lineages = True if str(sys.argv[5]).lower() in ('true', 'yes', 'only_new') else False
+
+    print('ARGUMENTS:')
+    print(db_name, v_taxon_id, v_dir_name, generated_file_name, include_only_null_lineages)
+    sleep(10)
+
+    import_config.set_db_name(db_name)
+    generate_fasta(v_taxon_id, v_dir_name, generated_file_name, include_only_null_lineages)
