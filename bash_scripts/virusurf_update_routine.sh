@@ -70,7 +70,7 @@ touch "$ongoing_update_or_error_file_path"
 
 # switch to conda environment vcm
 echo "Switching to  conda environment 'vcm'."
-source ~/miniconda3/etc/profile.d/conda.sh  # finds command conda
+source ~/anaconda3_new/etc/profile.d/conda.sh  # finds command conda
 check_exit_code "$?"
 conda activate vcm
 check_exit_code "$?"
