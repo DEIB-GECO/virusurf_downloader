@@ -364,7 +364,7 @@ class AnyNCBIVNucSample:
         geo_group = geo_groups.get(country.lower()) if country else None
         if not country and not region and self.external_host_data() is not None:
             country, region, geo_group = self.external_host_data().country__region__geo_group()
-        if country.strip().upper() == 'USA':
+        if country and country.strip().upper() == 'USA':
             region = data_cleaning_module.correct_usa_regions(region)
         return country, region, geo_group
 
