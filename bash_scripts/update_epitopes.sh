@@ -3,15 +3,19 @@
 # make sure this script is executable:  chmod 755 myscript.sh
 # set your user as owner of the script: chown myusername: myscript.sh
 
-echo "This script expects the database_name as parameter."
-database_name=$1
-echo "Epitopes are being updated on database ${database_name}.
-Make sure that the password for database ${database_name} is present in file .pgpass as host:port:dat_name:user:psw"
+echo "Assumptions for the proper execution of this script:
+- command line arguments: <virusurf_directory_path> <target_database_name>;
+- the postgres password file contains one entry for the given database formatted as host:port:dat_name:user:psw;"
+
+# input parameters
+virusurf_dir=${1}/
+database_name=$2
+echo "Check of arguments:
+- VIRUSURF DIR: ${virusurf_dir};
+- VIRUSURF NORMAL DB: ${database_name};
+The program resumes in 10 seconds."
 sleep 10
 
-
-user_home_path=/home/alfonsi/
-virusurf_dir=${user_home_path}virusurf_downloader/
 log_file_path=${virusurf_dir}logs/epitope_updates.log
 
 # define utility functions
@@ -24,7 +28,7 @@ check_exit_code() {    # expects exit status code as argument
     echo ""
     echo ""
     echo ""
-    exit
+    exit 1
   fi
 }
 
@@ -38,16 +42,17 @@ echo "* ViruSurf automatic epitopes update script started at $(timestamp)" | tee
 
 
 
-## Update epitope files from IEDB
+# Update epitope files from IEDB
 echo "* Download of updated source files from IEDB..." | tee -a $log_file_path
 cd $virusurf_dir
 python main.py download epitopes
 check_exit_code "$?"
 
-## Delete old epitopes
+# Delete old epitopes
 echo "* Deletion of previous epitopes..." | tee -a $log_file_path
-psql -h localhost -U geco -d ${database_name} -c "TRUNCATE TABLE epitope, epitope_fragment;"
-check_exit_code "$?"
+cd $virusurf_dir
+psql -h localhost -U geco -d ${database_name} -c "TRUNCATE TABLE epitope_fragment, epitope;" | tee -a $log_file_path
+check_exit_code "${PIPESTATUS[0]}"
 
 # Insert new epitopes
 cd $virusurf_dir
@@ -80,7 +85,7 @@ python main.py epitopes ${database_name} sars_cov_2
 check_exit_code "$?"
 
 echo "* Begin import of epitopes for virus sars_cov_1" | tee -a $log_file_path
-python main.py epitopes ${database_name} sars_cov_2
+python main.py epitopes ${database_name} sars_cov_1
 check_exit_code "$?"
 
 echo "* Begin import of epitopes for virus sudan_ebolavirus" | tee -a $log_file_path
@@ -93,3 +98,7 @@ check_exit_code "$?"
 
 echo "* Update of epitopes completed on database ${database_name}." | tee -a $log_file_path
 
+
+echp "* Refresh eptiope variants and info materialized view"
+psql -h localhost -U geco -d ${database_name} -c "REFRESH MATERIALIZED VIEW epitope_variants_and_info_all;" | tee -a $log_file_path
+check_exit_code "${PIPESTATUS[0]}"
