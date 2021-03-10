@@ -237,7 +237,7 @@ USA_state_names_upper_case = {v.upper(): v for v in USA_state_postal_codes.value
 
 
 def correct_usa_regions(region: str):
-    if not region:
+    if not region or 'unknown' in region.lower():
         return None
     region_parts_upper_case = [x.strip().upper() for x in region.split(',', maxsplit=1)]   # REGION PARTS ARE UPPER CASE
 
@@ -267,7 +267,14 @@ def correct_usa_regions(region: str):
             state_name = USA_state_postal_codes.get(region_parts_upper_case[0])
         if not state_name:
             state_name = USA_state_postal_codes.get(region_parts_upper_case[1])
-        return state_name or region_parts_upper_case[0].capitalize()
+        if not state_name:
+            state_name = region_parts_upper_case[0].capitalize()
+            if '/' in state_name:
+                try:
+                    state_name = state_name[:state_name.rindex('/') - 1].rstrip()
+                except:
+                    pass
+        return state_name
 
     else:
         logger.warning(f"Correction of USA country names. Region '{region}' is not handled")
