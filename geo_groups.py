@@ -125,6 +125,7 @@ geo_groups = {
     'taiwan': 'Asia',
     'uzbekistan': 'Asia',
     'viet nam': 'Asia',
+    'west bank': 'Asia',
     'yemen': 'Asia',
     'andorra': 'Europe',
     'albania': 'Europe',
