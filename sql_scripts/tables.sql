@@ -162,3 +162,12 @@ CREATE TABLE public.overlap (
     overlapping_accession_id varchar NOT NULL,
     overlapping_source varchar NOT NULL
 );
+
+CREATE TABLE public.pipeline_event (
+    event_id    serial primary key,
+    event_name    varchar NOT NULL,
+    event_date    varchar,
+    added_items   integer,
+    removed_items integer,
+    changed_items integer
+);

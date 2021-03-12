@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Optional
 from loguru import logger
 import stats_module
@@ -169,6 +170,17 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
         except KeyError:
             pass    # if pop on empty set
 
+    # create pipeline_event (will be inserted later)
+    pipeline_event = database.PipelineEvent(
+        event_date=datetime.now().strftime("%Y-%m-%d"),
+        event_name=f'GISAID sars_cov_2 sequences update',
+        removed_items=len(acc_ids_sequences_to_remove),
+        changed_items=len(acc_ids_sequences_to_update),     # provisional - (sqlalchemy wants a value at obj creation)
+        added_items=len(acc_id_sequences_to_import)         # provisional - (sqlalchemy wants a value at obj creation)
+    )
+    changed_items = 0
+    added_items = 0
+
     stats_module.schedule_samples(stats_module.StatsBasedOnIds(acc_id_sequences_to_import, True, virus_id, ['GISAID']))
 
     logger.info('Removing outdated sequences...')
@@ -190,12 +202,14 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
                 database.try_py_function(import_method.import_virus_sample, sample)
                 vcm.DBCache.commit_changes()
                 progress.update()
+                added_items += 1
             elif sample_accession_id in acc_ids_sequences_to_update:
                 # update values inside the database
                 changes_in_sequence = sequences_to_update[sample_accession_id]
                 database.try_py_function(import_method.update_virus_sample, sample, changes_in_sequence)
                 vcm.DBCache.commit_changes()
                 progress.update()
+                changed_items += 1
         except KeyboardInterrupt:
             logger.info("main loop interrupted by the user")
             break
@@ -208,3 +222,7 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
 
     logger.info('Removal of unused database objects...')
     database.try_py_function(vcm.clean_objects_unreachable_from_sequences)
+
+    pipeline_event.changed_items = changed_items
+    pipeline_event.added_items = added_items
+    database.try_py_function(vcm.insert_data_update_pipeline_event, pipeline_event)

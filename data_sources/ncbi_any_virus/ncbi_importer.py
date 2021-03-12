@@ -893,6 +893,15 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
     if from_sample is not None and to_sample is not None:
         id_new_sequences = id_new_sequences[from_sample:to_sample]
 
+    # create pipeline_event (will be inserted later)
+    pipeline_event = database.PipelineEvent(
+        event_date=datetime.now().strftime("%Y-%m-%d"),
+        event_name=f'GenBank {source_name} sequences update',
+        removed_items=len(id_outdated_sequences),
+        changed_items=0,
+        added_items=len(id_new_sequences),  # may eventually change if some sequence are not imported
+    )
+
     stats_module.schedule_samples(
         stats_module.StatsBasedOnIds([str(x) for x in id_new_sequences], False, virus_id, ['GenBank', 'RefSeq']))
 
@@ -951,6 +960,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
     except:
         logger.exception("Removal of metadata leftovers in the DB and XML files of the samples that failed was not successful.")
 
+    database.try_py_function(vcm.insert_data_update_pipeline_event, pipeline_event)
 
 # !!!!! ARE YOU LOOKING FOR prepared_parameters ? Use instead data_source.ncbi_any_virus.settings -> known_settings !!!!
 #########################################################################################################################

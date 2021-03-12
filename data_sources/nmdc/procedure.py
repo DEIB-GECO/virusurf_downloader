@@ -23,6 +23,7 @@ from vcm import vcm
 import dateutil.parser as dateparser
 from geo_groups import geo_groups
 from db_config import read_db_import_configuration as import_config, database
+from logger_settings import send_message
 
 Entrez.email = "example@mail.com"   # just to silence the warning. Then a correct email can be set later
 
@@ -517,6 +518,14 @@ def import_samples_into_vcm():
                 f'{a_sample.primary_accession_number()}. Rollback transaction.')
             raise database.Rollback()
 
+    # create pipeline_event (will be inserted later)
+    pipeline_event = database.PipelineEvent(
+        event_date=datetime.now().strftime("%Y-%m-%d"),
+        event_name=f'NMDC sars_cov_2 sequences update',
+        removed_items=0,
+        changed_items=0
+    )
+
     logger.info('begin import of selected records')
     vcm.DBCache.commit_changes()
     total_sequences_imported = 0
@@ -568,5 +577,11 @@ def import_samples_into_vcm():
 
         logger.info(f'{total_sequences_imported} sequences imported.')
         logger.info(f'{total_sequences_skipped} sequences skipped.')
+        if total_sequences_skipped > 100:
+            send_message(f"NMDC importer can have a bug. {total_sequences_skipped} out of "
+                         f"{total_sequences_skipped+total_sequences_imported} were not imported.")
+
         logger.info(f'list of sequences with GISAID references at path: '+log_of_gisaid_id_path)
 
+    pipeline_event.added_items = total_sequences_imported
+    database.try_py_function(vcm.insert_data_update_pipeline_event, pipeline_event)

@@ -5,7 +5,7 @@ from sqlalchemy import cast
 from vcm.vcm import DBCache
 from data_sources.virus_sample import VirusSample
 from db_config.database import AminoAcidVariant, ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, \
-    Epitope, HostSpecie, EpitopeFragment, NucleotideSequence, AnnotationSequence
+    Epitope, HostSpecie, EpitopeFragment, NucleotideSequence, AnnotationSequence, PipelineEvent
 from xml_helper import *
 import string
 import random
@@ -396,4 +396,12 @@ def check_existence_epitopes(session, virus_id):
 
 
 def update_db_metadata(session, virus_db_id: int, database_source: str):
+    pass
+
+
+def clean_objects_unreachable_from_sequences(session):
+    pass
+
+
+def insert_data_update_pipeline_event(session, event: PipelineEvent):
     pass
