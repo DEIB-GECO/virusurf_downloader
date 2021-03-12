@@ -39,7 +39,9 @@ def set_nucleotide_refseq(seq: str):
 known_settings = {
     "sars_cov_2": {
         "reference_sample_query": "txid2697049[Organism] AND srcdb_refseq[Properties]",
-        "non_reference_samples_query": "txid2697049[Organism] NOT srcdb_refseq[Properties]",
+        "non_reference_samples_query": 'txid2697049[Organism] NOT srcdb_refseq[Properties] '
+                                       'NOT ("wgs"[Keyword] OR "wgs contig"[Keyword] OR "wgs master"[Keyword] '
+                                       'OR "wgs scaffold"[Keyword] OR "wgs wgs"[Keyword])',
         "virus_taxon_id": 2697049,
         "chromosome_name": "NC_045512",
         "snpeff_db_name": "new_ncbi_sars_cov_2",
