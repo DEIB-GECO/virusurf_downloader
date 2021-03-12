@@ -15,6 +15,7 @@ from data_sources.ncbi_any_virus.settings import known_settings as ncbi_known_se
 from locations import get_local_folder_for, FileType, remove_file
 from nuc_aa_pipeline import sequence_aligner
 import stats_module
+from logger_settings import send_message
 
 sc2_chromosome = ncbi_known_settings["sars_cov_2"]["chromosome_name"]
 sc2_annotations_file_path = ncbi_known_settings["sars_cov_2"]["annotation_file_path"]
@@ -245,6 +246,10 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     # remove leftovers of failed samples
     try:
         metadata_samples_to_remove: set = stats_module.get_scheduled_not_completed()
+        if len(metadata_samples_to_remove) > 1100:
+            send_message(f"COGUK importer can have a bug. {len(metadata_samples_to_remove)} out of "
+                         f"{len(id_new_sequences)} failed.")
+        pipeline_event.added_items = pipeline_event.added_items - len(metadata_samples_to_remove)
         if len(metadata_samples_to_remove) > 0:
             logger.info(
                 f"Removing metadata leftovers of imports that failed during variant/annotation calling or metadata"

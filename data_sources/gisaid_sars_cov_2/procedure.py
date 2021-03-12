@@ -9,6 +9,7 @@ from data_sources.gisaid_sars_cov_2.virus import GISAIDSarsCov2
 from time import sleep
 from tqdm import tqdm
 from db_config import read_db_import_configuration as import_config, database
+from logger_settings import send_message
 
 
 class Sequential:
@@ -222,6 +223,10 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
 
     logger.info('Removal of unused database objects...')
     database.try_py_function(vcm.clean_objects_unreachable_from_sequences)
+
+    if len(acc_id_sequences_to_import) - added_items > 100:
+        send_message(f"GISAID importer can have a bug. import of {len(acc_id_sequences_to_import) - added_items} out of"
+                     f" {len(acc_id_sequences_to_import)} failed.")
 
     pipeline_event.changed_items = changed_items
     pipeline_event.added_items = added_items

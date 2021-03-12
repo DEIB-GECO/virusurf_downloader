@@ -27,6 +27,7 @@ import pickle
 import data_cleaning_module
 from db_config import read_db_import_configuration as db_import_config, database
 from data_sources.ncbi_any_virus import settings
+from logger_settings import send_message
 
 
 DOWNLOAD_ATTEMPTS = 3
@@ -944,6 +945,10 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
     # remove leftovers of failed samples
     try:
         metadata_samples_to_remove: set = stats_module.get_scheduled_not_completed()
+        if len(metadata_samples_to_remove) > 200:
+            send_message(f"NCBI importer can have a bug. {len(metadata_samples_to_remove)} out of "
+                         f"{len(id_new_sequences)} failed.")
+        pipeline_event.added_items = pipeline_event.added_items - len(metadata_samples_to_remove)
         if len(metadata_samples_to_remove) > 0:
             logger.info(f"Removing metadata leftovers of imports that failed during variant/annotation calling or metadata"
                         f" ({len(metadata_samples_to_remove)} samples)")
