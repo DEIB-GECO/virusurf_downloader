@@ -1,7 +1,9 @@
 from typing import List, Tuple
-from db_config.database import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, NucleotideVariant, \
-    VariantImpact, AminoAcidVariant, Epitope, EpitopeFragment, HostSpecie, DBMeta, NucleotideSequence, AnnotationSequence, \
-    Session
+from db_config.database import ExperimentType, SequencingProject, Virus, HostSample, Sequence, Annotation, \
+    NucleotideVariant, \
+    VariantImpact, AminoAcidVariant, Epitope, EpitopeFragment, HostSpecie, DBMeta, NucleotideSequence, \
+    AnnotationSequence, \
+    Session, PipelineEvent
 from locations import *
 from data_sources.virus_sample import VirusSample
 from xml_helper import *
@@ -786,3 +788,13 @@ def clean_objects_unreachable_from_sequences(session: Session):
             (HostSpecie.host_id.notin_(session.query(HostSample.host_id))) &
             (HostSpecie.host_id.notin_(session.query(Epitope.host_id)))
         ).delete(synchronize_session=False)
+
+
+def insert_data_update_pipeline_event(session, event: PipelineEvent):
+    try:
+        session.add(event)
+    except:
+        logger.error(f"Exception while inserting pipeline_event: name, date, added, removed, changed\n"
+                         f"{event.event_name}, {event.event_date}, {event.added_items}, {event.removed_items}, "
+                         f"{event.changed_items}")
+        raise

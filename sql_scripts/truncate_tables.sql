@@ -5,4 +5,4 @@ TRUNCATE db_meta,
     nucleotide_sequence, sequence,
     epitope_fragment, epitope,
     host_sample, experiment_type, sequencing_project,
-    host_specie, virus RESTART IDENTITY;
+    host_specie, virus, pipeline_event RESTART IDENTITY;

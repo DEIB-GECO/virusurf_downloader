@@ -361,6 +361,16 @@ class Overlap(_base):
     overlapping_source = Column(String, nullable=False)
 
 
+class PipelineEvent(_base):
+    __tablename__ = 'pipeline_event'
+
+    event_id = Column(Integer, primary_key=True)
+    event_name = Column(String)
+    event_date = Column(String)
+    added_items = Column(Integer)
+    removed_items = Column(Integer)
+    changed_items = Column(Integer)
+
 #   ###################################     VIEWS       ##################################
 # class View:
 #     """

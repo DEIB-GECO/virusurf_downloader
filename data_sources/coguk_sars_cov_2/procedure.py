@@ -1,5 +1,6 @@
 import os
 import pickle
+from datetime import datetime
 from time import sleep
 from loguru import logger
 from typing import Optional, List
@@ -201,6 +202,15 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     if from_sample is not None and to_sample is not None:
         id_new_sequences = {id_new_sequences.pop() for i in range(to_sample-from_sample)}
 
+    # create pipeline_event (will be inserted later)
+    pipeline_event = database.PipelineEvent(
+        event_date=datetime.now().strftime("%Y-%m-%d"),
+        event_name=f'COGUK sars_cov_2 sequences update',
+        removed_items=len(id_outdated_sequences),
+        changed_items=0,
+        added_items=len(id_new_sequences),  # may eventually change if some sequence are not imported
+    )
+
     # initialize statistics module
     stats_module.schedule_samples(
         stats_module.StatsBasedOnIds(id_new_sequences, True, virus_id, ['COG-UK']))
@@ -250,3 +260,4 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
         logger.exception(
             "Removal of metadata leftovers in the DB of the samples that failed was not successful.")
 
+    database.try_py_function(vcm.insert_data_update_pipeline_event, pipeline_event)
