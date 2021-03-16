@@ -7,6 +7,7 @@ from dateutil.parser import parse
 import data_cleaning_module
 from data_sources.ncbi_services import host_taxon_id_from_ncbi_taxon_name
 from data_sources.virus_sample import VirusSample
+from geo_groups import geo_groups
 
 gene_protein_name_replacements = {
     "E": ("E", "E (envelope protein)"),
@@ -162,7 +163,14 @@ class GISAIDSarsCov2Sample(VirusSample):
             pass
         except IndexError:
             pass
-        return strip_or_none(country), strip_or_none(region), strip_or_none(geo_group)
+        geo_group = strip_or_none(geo_group)
+        # assign geo group using internal dictionary country -> continent; use provided geo_group as fallback value
+        if country:
+            country = country.strip()
+            geo_group = geo_groups.get(country.lower(), geo_group)
+        else:
+            country = None
+        return country, strip_or_none(region), geo_group
 
     def submission_date(self) -> Optional[str]:
         submission_date = self.sequence_dict.get('covv_subm_date')
