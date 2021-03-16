@@ -14,7 +14,7 @@ from loguru import logger
 from Bio.SubsMat import MatrixInfo as matlist
 
 nuc_aligner: Optional[Align.PairwiseAligner] = None
-allowed_nucleotide_characters = {"a", "g", "c", "t", "y", "r", "w", "s", "k", "m", "d", "v", "h", "b", "n", "x"}
+allowed_nucleotide_characters = {"a", "g", "c", "t", "y", "r", "w", "s", "k", "m", "d", "v", "h", "b", "n"}
 not_allowed_chars = set()
 used_characters = set()
 
