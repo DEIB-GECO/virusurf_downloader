@@ -246,7 +246,7 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     # remove leftovers of failed samples
     try:
         metadata_samples_to_remove: set = stats_module.get_scheduled_not_completed()
-        if len(metadata_samples_to_remove) > 1100:
+        if len(metadata_samples_to_remove) > 100:
             send_message(f"COGUK importer can have a bug. {len(metadata_samples_to_remove)} out of "
                          f"{len(id_new_sequences)} failed.")
         pipeline_event.added_items = pipeline_event.added_items - len(metadata_samples_to_remove)
