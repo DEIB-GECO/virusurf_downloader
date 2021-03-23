@@ -87,7 +87,7 @@ def create_or_get_host_specie(session, sample: VirusSample) -> int:
     host_specie = HostSpecie(host_taxon_id=host_taxon_id,
                              host_taxon_name=host_taxon_name)
 
-    logger.info(f'ACC.ID: {sample.primary_accession_number()} - {sample.alternative_accession_number()} HOST_SPECIE: {host_taxon_name} - {host_taxon_id}')
+    # logger.info(f'ACC.ID: {sample.primary_accession_number()} - {sample.alternative_accession_number()} HOST_SPECIE: {host_taxon_name} - {host_taxon_id}')
     return 1
 
 

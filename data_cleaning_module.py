@@ -11,6 +11,7 @@ spellcheck_cache = {
     "h. sapiens": "homo sapiens",
     "howo sapiens": "homo sapiens",
     "human": "homo sapiens",
+    "hunan": "homo sapiens",
     "homo sapiens": "homo sapiens",  # prevents spellchecker from correcting "homo sapiens" into "homosapien"
     "homosapien": "homo sapiens",
     "ae. aegypti": "aedes aegypti",
