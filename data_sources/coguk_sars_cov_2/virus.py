@@ -124,48 +124,51 @@ class COGUKSarsCov2:
                         f'Unable to parse the following line from the metadata file {self.metadata_file_path}:\n\t'
                         f'{line}')
 
-        accession_ids_of_interest = filter_accession_ids if filter_accession_ids else meta.keys()
+        accession_ids_of_interest = filter_accession_ids if filter_accession_ids is not None else meta.keys()
 
-        # scan the multi-fasta file
-        nuc_sequences_with_errors = 0
-        with open(self.sequence_file_path, mode='r') as seq_file:
-            progress = tqdm(total=len(accession_ids_of_interest))
-            while True:
-                sample_key = seq_file.readline()
-                sample_sequence = seq_file.readline()
-                # exit loop when sequences are finished
-                if not sample_sequence or not sample_key:
-                    break
-                else:
-                    # in the sequence file, the strain name is preceded by a '>', while in the metadata file not
-                    sample_key = sample_key[1:].rstrip()
-                    # ignore sequences not in the accession_ids_of_interest list
-                    if sample_key not in accession_ids_of_interest:
-                        continue
+        if len(accession_ids_of_interest) == 0:
+            yield from ()
+        else:
+            # scan the multi-fasta file
+            nuc_sequences_with_errors = 0
+            with open(self.sequence_file_path, mode='r') as seq_file:
+                progress = tqdm(total=len(accession_ids_of_interest))
+                while True:
+                    sample_key = seq_file.readline()
+                    sample_sequence = seq_file.readline()
+                    # exit loop when sequences are finished
+                    if not sample_sequence or not sample_key:
+                        break
                     else:
-                        progress.update()
-                        sample_sequence = sample_sequence.rstrip().replace("?", "n")
-                        if not nuc_aa_pipeline.is_valid_sequence(sample_sequence):
-                            nuc_sequences_with_errors += 1
+                        # in the sequence file, the strain name is preceded by a '>', while in the metadata file not
+                        sample_key = sample_key[1:].rstrip()
+                        # ignore sequences not in the accession_ids_of_interest list
+                        if sample_key not in accession_ids_of_interest:
                             continue
-                        sample = {
-                            COGUKSarsCov2Sample.STRAIN_NAME: sample_key,
-                            COGUKSarsCov2Sample.NUC_SEQUENCE: sample_sequence
-                        }
-                        try:
-                            sample[COGUKSarsCov2Sample.METADATA_RAW_STRING] = meta[sample_key]
-                        except KeyError:
-                            logger.error(
-                                f'Found a sequence without a paired metadata string. Foreign key was {sample_key}')
-                        try:
-                            yield COGUKSarsCov2Sample(sample)
-                        except:
-                            logger.exception(
-                                f"Sample {sample_key} skipped due to an error while parsing the input data.")
-            if nuc_sequences_with_errors > 0:
-                logger.warning(f"{nuc_sequences_with_errors} were rejected because they include one of the following "
-                               f"invalid characters: {nuc_aa_pipeline.not_allowed_chars}")
-            logger.debug(f"known nucleotides observed in this set of sequences: {nuc_aa_pipeline.used_characters}")
+                        else:
+                            progress.update()
+                            sample_sequence = sample_sequence.rstrip().replace("?", "n")
+                            if not nuc_aa_pipeline.is_valid_sequence(sample_sequence):
+                                nuc_sequences_with_errors += 1
+                                continue
+                            sample = {
+                                COGUKSarsCov2Sample.STRAIN_NAME: sample_key,
+                                COGUKSarsCov2Sample.NUC_SEQUENCE: sample_sequence
+                            }
+                            try:
+                                sample[COGUKSarsCov2Sample.METADATA_RAW_STRING] = meta[sample_key]
+                            except KeyError:
+                                logger.error(
+                                    f'Found a sequence without a paired metadata string. Foreign key was {sample_key}')
+                            try:
+                                yield COGUKSarsCov2Sample(sample)
+                            except:
+                                logger.exception(
+                                    f"Sample {sample_key} skipped due to an error while parsing the input data.")
+                if nuc_sequences_with_errors > 0:
+                    logger.warning(f"{nuc_sequences_with_errors} were rejected because they include one of the following "
+                                   f"invalid characters: {nuc_aa_pipeline.not_allowed_chars}")
+                logger.debug(f"known nucleotides observed in this set of sequences: {nuc_aa_pipeline.used_characters}")
 
     def deltas(self):
         """
