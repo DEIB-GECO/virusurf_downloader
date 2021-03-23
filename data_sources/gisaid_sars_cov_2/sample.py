@@ -45,6 +45,7 @@ def replace_gene_and_protein_name(protein_name):
 class GISAIDSarsCov2Sample(VirusSample):
     default_datetime = datetime(2020, 1, 1, 0, 0, 0, 0, None)
     aa_variant_regex = re.compile(r'(\D+)(\d+)(\D+)')
+    prov_in_parentheses = re.compile(r'.*\((.+)\).*')
 
     def __init__(self, sequence_dict):
         super().__init__()
@@ -151,26 +152,51 @@ class GISAIDSarsCov2Sample(VirusSample):
         except AttributeError:
             return None
 
-    def country__region__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-        country, region, geo_group = None, None, None
+    def province__region__country__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
+        province, region, country, geo_group = None, None, None, None
         try:
             covv_location = self.sequence_dict['covv_location']
             split_locations = [x.strip() for x in covv_location.split('/')]
             geo_group = split_locations[0]
             country = split_locations[1]
             region = split_locations[2]
+            province = split_locations[3]
         except KeyError:
             pass
         except IndexError:
             pass
+        #  assign geo group based on the country but use the provided geo_group as fallback value
         geo_group = strip_or_none(geo_group)
-        # assign geo group using internal dictionary country -> continent; use provided geo_group as fallback value
         if country:
             country = country.strip()
             geo_group = geo_groups.get(country.lower(), geo_group)
         else:
             country = None
-        return country, strip_or_none(region), geo_group
+
+        # clean-up region
+        if region:
+            region = region.strip()
+            if region.endswith('r.'):
+                region = region.replace('r.', '')
+        else:
+            region = None
+
+        # clean-up province
+        if province:
+            province_has_parentheses = GISAIDSarsCov2Sample.prov_in_parentheses.match(province)
+            # if it has parentheses, take what's inside
+            if province_has_parentheses:
+                province = province_has_parentheses.group(1).strip()
+            else:
+                # take left part of string if comma is present
+                province = province.split(',')[0]
+                # replace _ with spaces
+                # remove trailing/leading spaces
+                province = province.replace('_', ' ').strip().lower()
+                province = province.replace('co.', 'county')
+            province = province.capitalize()
+
+        return province, region, country, geo_group
 
     def submission_date(self) -> Optional[str]:
         submission_date = self.sequence_dict.get('covv_subm_date')

@@ -19,6 +19,12 @@ Possible improvements: correct methods enqueue_... so that they enqueue database
 AminoacidVariant, etc, instead of tuples (this would reduce the overhead).
 """
 
+
+logger.warning('This module has been developed for testing alternative methods for efficient data insertion but it is '
+               'not actively maintained anymore. In particular, this implementation is susceptible of cache '
+               'misalignment problems. If you plan to use it, update the caching mechanism here used with the more '
+               'robust method used in vcm/vcm.py (DBCache).')
+
 cache_host_specie = dict()
 cache_host_sample = dict()
 cache_experiment_type = dict()
@@ -308,9 +314,10 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
     gender = sample.gender()
     age = sample.age()
 
-    country, region, geo_group = sample.country__region__geo_group()
+    province, region, country, geo_group = sample.province__region__country__geo_group()
 
-    host_sample_key = (host_specie_id, gender, age, originating_lab, collection_date, isolation_source, country, region, geo_group)
+    host_sample_key = (host_specie_id, gender, age, originating_lab, collection_date, isolation_source, province,
+                       region, country, geo_group)
 
     if host_sample_key in cache_host_sample:
         host_sample_id = cache_host_sample[host_sample_key]
@@ -319,8 +326,9 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
                                                        HostSample.collection_date == collection_date,
                                                        HostSample.isolation_source == isolation_source,
                                                        HostSample.originating_lab == originating_lab,
-                                                       HostSample.country == country,
+                                                       HostSample.province == province,
                                                        HostSample.region == region,
+                                                       HostSample.country == country,
                                                        HostSample.geo_group == geo_group,
                                                        HostSample.age == age,
                                                        HostSample.gender == gender,
@@ -331,8 +339,9 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
                                      collection_date=collection_date,
                                      isolation_source=isolation_source,
                                      originating_lab=originating_lab,
-                                     country=country,
+                                     province=province,
                                      region=region,
+                                     country=country,
                                      geo_group=geo_group,
                                      age=age,
                                      gender=gender,

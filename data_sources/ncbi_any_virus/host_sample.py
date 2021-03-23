@@ -60,7 +60,7 @@ class NCBIHostSample:
     def isolation_source(self):
         return self._find_in_attributes_(('tissue', 'source'), use_keyword_priority=True)[1]
 
-    def country__region__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    def province__region__country__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
         country: Optional[str] = self._find_in_attributes('country')[1]
         region: Optional[str] = self._find_in_attributes('region')[1]
         if country is not None:
@@ -78,7 +78,7 @@ class NCBIHostSample:
                 region = None
             else:
                 region = region.strip().capitalize()
-        return country, region, geo_group
+        return None, region, country, geo_group
 
     def coverage(self) -> Optional[int]:
         value = self._find_in_attributes('coverage')[1]

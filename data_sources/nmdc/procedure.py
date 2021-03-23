@@ -264,7 +264,7 @@ class NMDCVirusSample:
     def isolation_source(self):
         return self.metadata.get('isolationSource')
 
-    def country__region__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    def province__region__country__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
         input_string: str = self.metadata.get("country")
         geo_group = None
         country = None
@@ -284,7 +284,7 @@ class NMDCVirusSample:
                 pass
             else:
                 region = input_string
-        return country, region, geo_group
+        return None, region, country, geo_group
 
     def submission_date(self):
         submit_date_format = self.metadata.get('submitDateFormat')

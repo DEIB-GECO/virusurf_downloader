@@ -200,8 +200,10 @@ class HostSample(_base):
     collection_date = Column(String)
     isolation_source = Column(String)
     originating_lab = Column(String)
-    country = Column(String)
+
+    province = Column(String)
     region = Column(String)
+    country = Column(String)
     geo_group = Column(String)
 
     #     extra

@@ -192,9 +192,10 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
     gender = sample.gender()
     age = sample.age()
 
-    country, region, geo_group = sample.country__region__geo_group()
+    province, region, country, geo_group = sample.province__region__country__geo_group()
 
-    host_sample_key = (host_specie_id, gender, age, originating_lab, collection_date, isolation_source, country, region, geo_group)
+    host_sample_key = (host_specie_id, gender, age, originating_lab, collection_date, isolation_source, province,
+                       region, country, geo_group)
 
     host_sample_id = cache_host_sample.get_or_none(host_sample_key)
     if not host_sample_id:
@@ -202,20 +203,21 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
                                                        HostSample.collection_date == collection_date,
                                                        HostSample.isolation_source == isolation_source,
                                                        HostSample.originating_lab == originating_lab,
-                                                       HostSample.country == country,
+                                                       HostSample.province == province,
                                                        HostSample.region == region,
+                                                       HostSample.country == country,
                                                        HostSample.geo_group == geo_group,
                                                        HostSample.age == age,
                                                        HostSample.gender == gender,
                                                        ).one_or_none()
         if not host_sample:
-            #         print("not exists")
             host_sample = HostSample(host_id=host_specie_id,
                                      collection_date=collection_date,
                                      isolation_source=isolation_source,
                                      originating_lab=originating_lab,
-                                     country=country,
+                                     province=province,
                                      region=region,
+                                     country=country,
                                      geo_group=geo_group,
                                      age=age,
                                      gender=gender,
