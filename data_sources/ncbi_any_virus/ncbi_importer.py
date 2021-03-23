@@ -351,8 +351,8 @@ class AnyNCBIVNucSample:
         else:
             return source
 
-    def country__region__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
-        region = None
+    def province__region__country__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
+        # assign country and region as indicated into the "country" XML node or as suggested by other class methods
         node = text_at_node(self.sample_xml,
                             '..//INSDQualifier[./INSDQualifier_name/text() = "country"]/INSDQualifier_value',
                             mandatory=False)
@@ -362,12 +362,21 @@ class AnyNCBIVNucSample:
             region = node[1].strip() if len(node) > 1 else None
         else:
             country = self.country_suggested_by_other_method    # can be None
+            region = None
+        province = None
+
+        # find geo_group based on country
         geo_group = geo_groups.get(country.lower()) if country else None
+
+        # (2nd attempt:) look for externally referenced data
         if not country and not region and self.external_host_data() is not None:
-            country, region, geo_group = self.external_host_data().country__region__geo_group()
+            province, region, country, geo_group = self.external_host_data().province__region__country__geo_group()
+
+        # apply special corrections for USA counties
         if country and country.strip().upper() == 'USA':
             region = data_cleaning_module.correct_usa_regions(region)
-        return country, region, geo_group
+
+        return province, region, country, geo_group
 
     def _init_and_get_journal(self):
         if not self._journal:

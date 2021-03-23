@@ -65,7 +65,7 @@ class VirusSample:
     def isolation_source(self):
         raise NotImplementedError
 
-    def country__region__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    def province__region__country__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
         raise NotImplementedError
 
     def submission_date(self):

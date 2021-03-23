@@ -114,7 +114,7 @@ class GISAIDSarsCov2(VirusSource):
                                                           source_host.collection_date, source_host.originating_lab,
                                                           str(source_prj.submission_date) if source_prj.submission_date is not None else None,
                                                           source_prj.sequencing_lab,
-                                                          source_host.country, source_host.region,
+                                                          source_host.province, source_host.region, source_host.country,
                                                           source_host.isolation_source)
             return all_sequences
 
@@ -242,9 +242,9 @@ class GISAIDSarsCov2(VirusSource):
                     # changes in host sample table
                     if current_sequence_data[4] != new_sequence.collection_date() \
                             or current_sequence_data[5] != new_sequence.originating_lab() \
-                            or (current_sequence_data[8], current_sequence_data[9]) != \
-                                new_sequence.country__region__geo_group()[:2] \
-                            or current_sequence_data[10] != new_sequence.isolation_source():
+                            or (current_sequence_data[8], current_sequence_data[9], current_sequence_data[10]) != \
+                            new_sequence.province__region__country__geo_group()[0:3] \
+                            or current_sequence_data[11] != new_sequence.isolation_source():
                         changes["host_sample"] = True
                         changes_distribution["host_sample"] = changes_distribution["host_sample"] + 1
                     # changes in sequencing project table

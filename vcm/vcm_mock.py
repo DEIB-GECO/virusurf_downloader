@@ -103,14 +103,15 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
     collection_date = sample.collection_date()
     isolation_source = sample.isolation_source()
 
-    country, region, geo_group = sample.country__region__geo_group()
+    province, region, country, geo_group = sample.province__region__country__geo_group()
 
     # host_sample = session.query(HostSample).filter(HostSample.host_id == host_specie_id,
     #                                                HostSample.collection_date == collection_date,
     #                                                HostSample.isolation_source == isolation_source,
     #                                                HostSample.originating_lab == originating_lab,
-    #                                                HostSample.country == country,
+    #                                                HostSample.province == province,
     #                                                HostSample.region == region,
+    #                                                HostSample.country == country,
     #                                                HostSample.geo_group == geo_group,
     #                                                HostSample.age == age,
     #                                                HostSample.gender == gender,
@@ -122,15 +123,16 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
                              collection_date=collection_date,
                              isolation_source=isolation_source,
                              originating_lab=originating_lab,
-                             country=country,
+                             province=province,
                              region=region,
+                             country=country,
                              geo_group=geo_group,
                              age=age,
                              gender=gender,
                              )
     host_sample.host_sample_id = 1
-    logger.info(f'HOST_SAMPLE: coll_date:{collection_date} - isol_s:{isolation_source} - orig_lab:{originating_lab} - '
-                f'country:{country} - reg:{region} - geo_g:{geo_group} - age:{age} - gend:{gender}')
+    # logger.info(f'HOST_SAMPLE: coll_date:{collection_date} - isol_s:{isolation_source} - orig_lab:{originating_lab} - '
+    #             f'prov:{province} - reg:{region} - country:{country} - geo_g:{geo_group} - age:{age} - gend:{gender}')
     return host_sample.host_sample_id
 
 

@@ -128,12 +128,12 @@ class COGUKSarsCov2Sample(VirusSample):
     def isolation_source(self):
         return None
 
-    def country__region__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str]]:
+    def province__region__country__geo_group(self) -> Tuple[Optional[str], Optional[str], Optional[str], Optional[str]]:
         orig_country = self.sample_dict.get(self.COUNTRY)
         country = self.geo_mappings.get(orig_country) or orig_country
         orig_region = self.sample_dict.get(self.REGION)
         region = self.geo_mappings.get(orig_region) or orig_region
-        return country, region, 'Europe'
+        return None, region, country, 'Europe'
 
     def submission_date(self):
         return None
