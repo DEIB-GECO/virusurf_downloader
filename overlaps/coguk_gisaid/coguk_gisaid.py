@@ -88,9 +88,12 @@ class MockedVirusSampleClass:
         return self.host_sample_overwritten_values.get("age") or \
                self.host_sample_db_object.age
 
-    def country__region__geo_group(self):
+    def province__region__country__geo_group(self):
         return self.host_sample_overwritten_values.get("province__region__country__geo_group") or \
-               (self.host_sample_db_object.country, self.host_sample_db_object.region, self.host_sample_db_object.geo_group)
+               (self.host_sample_db_object.province,
+                self.host_sample_db_object.region,
+                self.host_sample_db_object.country,
+                self.host_sample_db_object.geo_group)
 
 
 mocked_virus_sample_obj = MockedVirusSampleClass()
