@@ -10,36 +10,36 @@ from data_sources.virus_sample import VirusSample
 from geo_groups import geo_groups
 
 gene_protein_name_replacements = {
-    "E": ("E", "E (envelope protein)"),
-    "M": ("M", "M (membrane glycoprotein)"),
-    "N": ("N", "N (nucleocapsid phosphoprotein)"),
-    "NSP16": ("ORF1ab", "NSP16 (2'-O-ribose methyltransferase)"),
-    "NSP5": ("ORF1ab", "NSP5 (3C-like proteinase)"),
-    "NSP14": ("ORF1ab", "NSP14 (3'-to-5' exonuclease)"),
-    "NSP15": ("ORF1ab", "NSP15 (endoRNAse)"),
-    "NSP13": ("ORF1ab", "NSP13 (helicase)"),
-    "NSP1": ("ORF1ab", "NSP1 (leader protein)"),
-    "NSP10": ("ORF1ab", "NSP10"),
-    "NSP11": ("ORF1ab", "NSP11"),
-    "NSP2": ("ORF1ab", "NSP2"),
-    "NSP3": ("ORF1ab", "NSP3"),
-    "NSP4": ("ORF1ab", "NSP4"),
-    "NSP6": ("ORF1ab", "NSP6"),
-    "NSP7": ("ORF1ab", "NSP7"),
-    "NSP8": ("ORF1ab", "NSP8"),
-    "NSP9": ("ORF1ab", "NSP9"),
-    "NSP12": ("ORF1ab", "NSP12 (RNA-dependent RNA polymerase)"),
-    "NS3": ("ORF3a", "NS3 (ORF3a protein)"),
-    "NS6": ("ORF6", "NS6 (ORF6 protein)"),
-    "NS7a": ("ORF7a", "NS7a (ORF7a protein)"),
-    "NS7b": ("ORF7b", "NS7b (ORF7b)"),
-    "NS8": ("ORF8", "NS8 (ORF8 protein)"),
-    "Spike": ("S", "Spike (surface glycoprotein)")
+    "E": ("E", "E (envelope protein)", "YP_009724392.1"),
+    "M": ("M", "M (membrane glycoprotein)", "YP_009724393.1"),
+    "N": ("N", "N (nucleocapsid phosphoprotein)", "YP_009724397.2"),
+    "NSP16": ("ORF1ab", "NSP16 (2'-O-ribose methyltransferase)", "YP_009725311.1"),
+    "NSP5": ("ORF1ab", "NSP5 (3C-like proteinase)", "YP_009742612.1"),
+    "NSP14": ("ORF1ab", "NSP14 (3'-to-5' exonuclease)", "YP_009725309.1"),
+    "NSP15": ("ORF1ab", "NSP15 (endoRNAse)", "YP_009725310.1"),
+    "NSP13": ("ORF1ab", "NSP13 (helicase)", "YP_009725308.1"),
+    "NSP1": ("ORF1ab", "NSP1 (leader protein)", "YP_009742608.1"),
+    "NSP10": ("ORF1ab", "NSP10", "YP_009742617.1"),
+    "NSP11": ("ORF1ab", "NSP11", "YP_009725312.1"),
+    "NSP2": ("ORF1ab", "NSP2", "YP_009742609.1"),
+    "NSP3": ("ORF1ab", "NSP3", "YP_009742610.1"),
+    "NSP4": ("ORF1ab", "NSP4", "YP_009742611.1"),
+    "NSP6": ("ORF1ab", "NSP6", "YP_009742613.1"),
+    "NSP7": ("ORF1ab", "NSP7", "YP_009742614.1"),
+    "NSP8": ("ORF1ab", "NSP8", "YP_009742615.1"),
+    "NSP9": ("ORF1ab", "NSP9", "YP_009742616.1"),
+    "NSP12": ("ORF1ab", "NSP12 (RNA-dependent RNA polymerase)", "YP_009725307.1"),
+    "NS3": ("ORF3a", "NS3 (ORF3a protein)", "YP_009724391.1"),
+    "NS6": ("ORF6", "NS6 (ORF6 protein)", "YP_009724394.1"),
+    "NS7a": ("ORF7a", "NS7a (ORF7a protein)", "YP_009724395.1"),
+    "NS7b": ("ORF7b", "NS7b (ORF7b)", "YP_009725318.1"),
+    "NS8": ("ORF8", "NS8 (ORF8 protein)", "YP_009724396.1"),
+    "Spike": ("S", "Spike (surface glycoprotein)", "YP_009724390.1")
 }
 
 
 def replace_gene_and_protein_name(protein_name):
-    return gene_protein_name_replacements.get(protein_name, (None, protein_name))
+    return gene_protein_name_replacements.get(protein_name, (None, protein_name, None))
 
 
 class GISAIDSarsCov2Sample(VirusSample):
@@ -288,7 +288,7 @@ class GISAIDSarsCov2Sample(VirusSample):
                         already_present_mutations.append((original_aa, alternative_aa, start_pos, length, _type))
 
                 for product, _mutations in zip(annotations, parsed_mutations):
-                    gene_name, product = replace_gene_and_protein_name(product)
+                    gene_name, product, db_xref_merged = replace_gene_and_protein_name(product)
                     yield start, stop, feature_type, gene_name, product, db_xref_merged, amino_acid_sequence, _mutations
         except KeyError:
             yield from ()   # empty generator
