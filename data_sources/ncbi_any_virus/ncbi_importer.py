@@ -292,22 +292,42 @@ class AnyNCBIVNucSample:
         if not info and self.external_host_data() is not None:
             return self.external_host_data().coverage()
 
-    def collection_date(self) -> Optional[str]:
+    def collection_date(self) -> Tuple[Optional[str], Optional[int]]:
         collection_date = text_at_node(self.sample_xml,
                                        '..//INSDQualifier[./INSDQualifier_name/text() = "collection_date"]/INSDQualifier_value',
                                        mandatory=False)
         if collection_date:
+            if '/' in collection_date:
+                collection_date = collection_date.split('/')[0]
             try:
-                collection_date = dateparser.parse(collection_date, default=self.default_datetime).strftime('%Y-%m-%d')
-            except dateparser._parser.ParserError as e:
-                if '/' in collection_date:
-                    collection_date = dateparser.parse(collection_date.split('/')[0], default=self.default_datetime).strftime('%Y-%m-%d')
+                collection_date = collection_date.strip()
+                well_formatted_coll_date = dateparser.parse(collection_date, default=self.default_datetime).strftime('%Y-%m-%d')
+                # find precision (year = 0, month = 1, day = 2
+                if '-' in collection_date:
+                    precision = collection_date.count('-')
+                elif len(collection_date) == 4:
+                    precision = 0
+                elif '/' in collection_date:
+                    precision = collection_date.count('/')
+                elif '\\' in collection_date:
+                    precision = collection_date.count('\\')
+                elif ' ' in collection_date:
+                    precision = collection_date.count(' ')
                 else:
-                    collection_date = None
-                logger.warning(f'collection date string"{collection_date}" was parsed as {collection_date}')
-        if collection_date is None and self.external_host_data() is not None:
-            collection_date = self.external_host_data().collection_date()
-        return collection_date
+                    raise AssertionError(
+                        f'Unable to parse date string {collection_date}. Unexpected separator in date string or no '
+                        f'separator.')
+            except dateparser._parser.ParserError as e:
+                if self.external_host_data() is not None:
+                    well_formatted_coll_date, precision = self.external_host_data().collection_date()
+                else:
+                    logger.error(f'Unable to parse date from string {collection_date}. Format not recognised.')
+                    raise e
+        elif self.external_host_data() is not None:
+            well_formatted_coll_date, precision = self.external_host_data().collection_date()
+        else:
+            well_formatted_coll_date, precision = None, None
+        return well_formatted_coll_date, precision
 
     def submission_date(self) -> Optional[datetime]:
         try:

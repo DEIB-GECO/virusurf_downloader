@@ -76,12 +76,13 @@ CREATE TABLE public.host_sample (
 	collection_date varchar NULL,
 	isolation_source varchar NULL,
 	originating_lab varchar NULL,
-	province varchar NULL,
 	region varchar NULL,
 	country varchar NULL,
 	geo_group varchar NULL,
 	age int4 NULL,
-	gender varchar NULL
+	gender varchar NULL,
+	province varchar NULL,
+    coll_date_precision int2 NULL
 );
 
 CREATE TABLE public."sequence" (

@@ -2,7 +2,7 @@ from typing import Optional
 
 import sqlalchemy
 from sqlalchemy import Column, select, join, Index, column, REAL
-from sqlalchemy import String, Integer, Boolean, Float, Date, BigInteger
+from sqlalchemy import String, Integer, Boolean, Float, Date, BigInteger, SmallInteger
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy.orm.session import Session
@@ -198,6 +198,7 @@ class HostSample(_base):
     host_sample_id = Column(Integer, primary_key=True, autoincrement=True)
     host_id = Column(Integer)
     collection_date = Column(String)
+    coll_date_precision = Column(SmallInteger)
     isolation_source = Column(String)
     originating_lab = Column(String)
 

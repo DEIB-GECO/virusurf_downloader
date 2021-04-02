@@ -240,7 +240,7 @@ class GISAIDSarsCov2(VirusSource):
                         changes["annotations"] = True
                         changes_distribution["annotations"] = changes_distribution["annotations"] + 1
                     # changes in host sample table
-                    if current_sequence_data[4] != new_sequence.collection_date() \
+                    if current_sequence_data[4] != new_sequence.collection_date()[0] \
                             or current_sequence_data[5] != new_sequence.originating_lab() \
                             or (current_sequence_data[8], current_sequence_data[9], current_sequence_data[10]) != \
                             new_sequence.province__region__country__geo_group()[0:3] \

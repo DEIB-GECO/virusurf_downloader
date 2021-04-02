@@ -225,7 +225,7 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
     global cache_host_sample
 
     originating_lab = sample.originating_lab()
-    collection_date = sample.collection_date()
+    collection_date, precision = sample.collection_date()
     isolation_source = sample.isolation_source()
 
     gender = sample.gender()
@@ -233,14 +233,15 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
 
     province, region, country, geo_group = sample.province__region__country__geo_group()
 
-    host_sample_key = (host_specie_id, gender, age, originating_lab, collection_date, isolation_source, province,
-                       region, country, geo_group)
+    host_sample_key = (host_specie_id, gender, age, originating_lab, collection_date, precision, isolation_source,
+                       province, region, country, geo_group)
 
     if host_sample_key in cache_host_sample:
         host_sample_id = cache_host_sample[host_sample_key]
     else:
         host_sample = session.query(HostSample).filter(HostSample.host_id == host_specie_id,
                                                        HostSample.collection_date == collection_date,
+                                                       HostSample.coll_date_precision == precision,
                                                        HostSample.isolation_source == isolation_source,
                                                        HostSample.originating_lab == originating_lab,
                                                        HostSample.province == province,
@@ -254,6 +255,7 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
             #         print("not exists")
             host_sample = HostSample(host_id=host_specie_id,
                                      collection_date=collection_date,
+                                     coll_date_precision=precision,
                                      isolation_source=isolation_source,
                                      originating_lab=originating_lab,
                                      province=province,
