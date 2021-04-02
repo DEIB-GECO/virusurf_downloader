@@ -100,7 +100,7 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
     age = sample.age()
 
     originating_lab = sample.originating_lab()
-    collection_date = sample.collection_date()
+    collection_date, precision = sample.collection_date()
     isolation_source = sample.isolation_source()
 
     province, region, country, geo_group = sample.province__region__country__geo_group()
@@ -121,6 +121,7 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
         #         print("not exists")
     host_sample = HostSample(host_id=host_specie_id,
                              collection_date=collection_date,
+                             coll_date_precision=precision,
                              isolation_source=isolation_source,
                              originating_lab=originating_lab,
                              province=province,
@@ -131,8 +132,9 @@ def create_or_get_host_sample(session, sample: VirusSample, host_specie_id: int)
                              gender=gender,
                              )
     host_sample.host_sample_id = 1
-    # logger.info(f'HOST_SAMPLE: coll_date:{collection_date} - isol_s:{isolation_source} - orig_lab:{originating_lab} - '
-    #             f'prov:{province} - reg:{region} - country:{country} - geo_g:{geo_group} - age:{age} - gend:{gender}')
+    logger.info(f'HOST_SAMPLE: coll_date:{collection_date} - coll-date_prec:{precision} - isol_s:{isolation_source} - '
+                f'orig_lab:{originating_lab} - prov:{province} - reg:{region} - country:{country} - geo_g:{geo_group} -'
+                f' age:{age} - gend:{gender}')
     return host_sample.host_sample_id
 
 

@@ -122,8 +122,10 @@ class COGUKSarsCov2Sample(VirusSample):
     def coverage(self):
         return None
 
-    def collection_date(self) -> Optional[str]:
-        return self.sample_dict.get(self.COLLECTION_DATE)
+    def collection_date(self) -> Tuple[Optional[str], Optional[int]]:
+        col_d = self.sample_dict.get(self.COLLECTION_DATE)
+        precision = col_d.count('-') if col_d else None
+        return col_d, precision
 
     def isolation_source(self):
         return None

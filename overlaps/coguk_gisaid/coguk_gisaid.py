@@ -70,8 +70,11 @@ class MockedVirusSampleClass:
                self.host_sample_db_object.originating_lab
 
     def collection_date(self):
-        return self.host_sample_overwritten_values.get("collection_date") or \
-               self.host_sample_db_object.collection_date
+        col_date = self.host_sample_overwritten_values.get("collection_date")
+        if col_date:
+            return col_date, self.host_sample_overwritten_values.get("coll_date_precision")
+        else:
+            return self.host_sample_db_object.collection_date, self.host_sample_db_object.coll_date_precision
 
     def isolation_source(self):
         return self.host_sample_overwritten_values.get("isolation_source") or \

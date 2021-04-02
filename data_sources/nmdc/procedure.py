@@ -246,20 +246,36 @@ class NMDCVirusSample:
     def coverage():
         return None
 
-    def collection_date(self):
-        collection_date_format = self.metadata.get('collectionDateFormat')
+    def collection_date(self) -> Tuple[Optional[str], Optional[int]]:
+        collection_date = self.metadata.get('collectionDateFormat')
         # logger.debug(f'collectionDateFormat: {collection_date_format}. collectionDate: {self.metadata.get("collectionDate")}. originalCollectionDate: {self.metadata.get("originalCollectionDate")}')
-        if collection_date_format < '1900':     # for example, some unknown dates are encoded as '0001-01-01'
-            return None
-        elif collection_date_format:
+        if collection_date < '1900':     # for example, some unknown dates are encoded as '0001-01-01'
+            return None, None
+        elif collection_date:
             try:
-                collection_date_format = dateparser.parse(collection_date_format, default=self.default_datetime).strftime('%Y-%m-%d')
-            except dateparser._parser.ParserError as e:
-                logger.warning(f'collection date string"{collection_date_format}" was parsed as {None}')
-                return None
-            return collection_date_format
-        else:
-            return None
+                collection_date = collection_date.strip()
+                well_formatted_coll_date = dateparser.parse(collection_date, default=self.default_datetime).strftime(
+                    '%Y-%m-%d')
+                # find precision (year = 0, month = 1, day = 2
+                if '-' in collection_date:
+                    precision = collection_date.count('-')
+                elif len(collection_date) == 4:
+                    precision = 0
+                elif '/' in collection_date:
+                    precision = collection_date.count('/')
+                elif '\\' in collection_date:
+                    precision = collection_date.count('\\')
+                elif ' ' in collection_date:
+                    precision = collection_date.count(' ')
+                else:
+                    logger.warning(
+                        f'Unable to parse date string {collection_date}. Unexpected separator in date string or no '
+                        f'separator.')
+                    well_formatted_coll_date, precision = None, None
+            except dateparser._parser.ParserError:
+                logger.error(f'Unable to parse date from string {collection_date}. Format not recognised.')
+                return None, None
+            return well_formatted_coll_date, precision
 
     def isolation_source(self):
         return self.metadata.get('isolationSource')

@@ -199,7 +199,7 @@ class COGUKSarsCov2:
                 if current_sequence_data[0] != new_sequence.length() \
                         or current_sequence_data[1] != new_sequence.gc_percent() \
                         or current_sequence_data[2] != new_sequence.n_percent() \
-                        or current_sequence_data[3] != new_sequence.collection_date() \
+                        or current_sequence_data[3] != new_sequence.collection_date()[0] \
                         or (current_sequence_data[4], current_sequence_data[5]) \
                         != new_sequence.province__region__country__geo_group()[1:3]:
                     acc_id_changed.append(acc_id)
@@ -261,7 +261,7 @@ class COGUKSarsCov2:
     #             if current_sequence_data[0] != new_sequence.length() \
     #                     or current_sequence_data[1] != new_sequence.gc_percent() \
     #                     or current_sequence_data[2] != new_sequence.n_percent() \
-    #                     or current_sequence_data[3] != new_sequence.collection_date() \
+    #                     or current_sequence_data[3] != new_sequence.collection_date()[0] \
     #                     or (current_sequence_data[4], current_sequence_data[5]) \
     #                     != new_sequence.province__region__country__geo_group()[1:3]:
     #                 acc_id_changed.append(acc_id)
@@ -270,7 +270,7 @@ class COGUKSarsCov2:
     #                 logger.trace(
     #                     f"current data of {acc_id}: {current_sequence_data[0]}, {current_sequence_data[1]}, {current_sequence_data[2]}, {current_sequence_data[3]}, {current_sequence_data[4]}, {current_sequence_data[5]}")
     #                 logger.trace(
-    #                     f"updated data of {acc_id}: {new_sequence.length()}, {new_sequence.gc_percent()}, {new_sequence.n_percent()}, {new_sequence.collection_date()}, {new_sequence.province__region__country__geo_group()[1]}, {new_sequence.province__region__country__geo_group()[2]}")
+    #                     f"updated data of {acc_id}: {new_sequence.length()}, {new_sequence.gc_percent()}, {new_sequence.n_percent()}, {new_sequence.collection_date()[0]}, {new_sequence.province__region__country__geo_group()[1]}, {new_sequence.province__region__country__geo_group()[2]}")
     #
     #                 if current_sequence_data[0] != new_sequence.length():
     #                     logger.trace("is length")
@@ -278,7 +278,7 @@ class COGUKSarsCov2:
     #                     logger.trace("is gc percent")
     #                 elif current_sequence_data[2] != new_sequence.n_percent():
     #                     logger.trace("is n percent")
-    #                 elif current_sequence_data[3] != new_sequence.collection_date():
+    #                 elif current_sequence_data[3] != new_sequence.collection_date()[0]:
     #                     logger.trace("is coll date")
     #                 elif [current_sequence_data[4],
     #                       current_sequence_data[5]] != new_sequence.province__region__country__geo_group()[1:3]:

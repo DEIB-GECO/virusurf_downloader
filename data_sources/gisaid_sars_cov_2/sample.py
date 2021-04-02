@@ -134,11 +134,13 @@ class GISAIDSarsCov2Sample(VirusSample):
     def coverage(self):
         return None
 
-    def collection_date(self) -> Optional[str]:
+    def collection_date(self) -> Tuple[Optional[str], Optional[int]]:
         collection_date = self.sequence_dict.get('covv_collection_date')
         if collection_date:
-            collection_date = parse(collection_date, default=self.default_datetime).strftime('%Y-%m-%d')
-        return collection_date
+            well_formed_collection_date = parse(collection_date, default=self.default_datetime).strftime('%Y-%m-%d')
+            return well_formed_collection_date, collection_date.count('-')
+        else:
+            return None, None
 
     def isolation_source(self):
         try:

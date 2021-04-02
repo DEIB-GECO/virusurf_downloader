@@ -9,6 +9,7 @@ from typing import Optional, Tuple, Collection
 from data_sources.ncbi_services import download_or_get_ncbi_host_sample_as_xml
 from locations import remove_file
 from geo_groups import geo_groups
+import dateutil.parser as dateparser
 
 
 class NCBIHostSample:
@@ -18,6 +19,9 @@ class NCBIHostSample:
     calls for every biosample, thus causing an important performance slowdown measured in an interval ranging from
     +1 second to +6 seconds per sequence, with an average of 4,7 seconds per sequence
     """
+
+    default_datetime = datetime(2020, 1, 1, 0, 0, 0, 0, None)
+
     def __init__(self, host_sample_accession_id: str, download_dir: str):
         self.acc_id = host_sample_accession_id
         self.file_path = download_or_get_ncbi_host_sample_as_xml(download_dir, self.acc_id)
@@ -94,8 +98,27 @@ class NCBIHostSample:
     def originating_lab(self) -> Optional[str]:
         return self._find_in_attributes('collecting institu')[1]
 
-    def collection_date(self) -> Optional[str]:
-        return self._find_in_attributes('collection date')[1]
+    def collection_date(self) -> Tuple[Optional[str], Optional[int]]:
+        col_d = self._find_in_attributes('collection date')[1]
+        if col_d:
+            col_d = col_d.strip()
+            # find precision (year = 0, month = 1, day = 2
+            if '-' in col_d:
+                precision = col_d.count('-')
+            elif len(col_d) == 4:
+                precision = 0
+            elif '/' in col_d:
+                precision = col_d.count('/')
+            elif '\\' in col_d:
+                precision = col_d.count('\\')
+            elif ' ' in col_d:
+                precision = col_d.count(' ')
+            else:
+                raise AssertionError(
+                    f'Unable to parse date string {col_d}. Unexpected separator in date string or no separator.')
+            return dateparser.parse(col_d, default=self.default_datetime).strftime('%Y-%m-%d'), precision
+        else:
+            return None, None
 
     def submission_date(self) -> Optional[datetime]:
         date = self._find_in_attributes('receipt date')[1]
