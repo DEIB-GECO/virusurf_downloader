@@ -82,7 +82,7 @@ class Sequential:
 
 class Parallel:
 
-    MAX_PROCESSES = max_number_of_workers(11)
+    MAX_PROCESSES = max_number_of_workers(28)
 
     def __init__(self):
         # empty job queue
@@ -200,7 +200,7 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
         return
 
     # select range
-    if from_sample is not None and to_sample is not None:
+    if from_sample is not None and to_sample is not None and len(id_new_sequences) > (to_sample - from_sample):
         id_new_sequences = {id_new_sequences.pop() for i in range(to_sample-from_sample)}
 
     # create pipeline_event (will be inserted later)
