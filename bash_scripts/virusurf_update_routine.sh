@@ -88,10 +88,18 @@ echo "* ViruSurf automatic data update script started at $(timestamp)" | tee -a 
 
 
 
+# # Update GISAID
+cd $virusurf_dir
+echo "* Begin update of GISAID SC2 at $(timestamp)" | tee -a $log_file_path
+python main.py import ${database_name_gisaid} gisaid 0 30000
+check_exit_code "$?"
+
+
+
 # # Update DB with new sequences
 cd $virusurf_dir
 echo "* Begin update of NCBI SC2 at $(timestamp)" | tee -a $log_file_path
-python main.py import ${database_name} sars_cov_2
+python main.py import ${database_name} sars_cov_2 0 5000
 check_exit_code "$?"
 
 # echo "* Begin update of NCBI Bombali at $(timestamp)" | tee -a $log_file_path
@@ -144,7 +152,7 @@ check_exit_code "$?"
 
 # # Import COG-UK
 echo "* Begin update of COGUK SC2 at $(timestamp)" | tee -a $log_file_path
-python main.py import ${database_name} coguk
+python main.py import ${database_name} coguk 0 13000
 check_exit_code "$?"
 
 
@@ -159,14 +167,6 @@ check_exit_code "$?"
 # # Refresh materialized views (only 1)
 echo "* Refresh of materialized view ${database_name}.nucleotide_variant_annotated at $(timestamp)" | tee -a $log_file_path
 psql -U geco -hlocalhost -d ${database_name} -c "REFRESH MATERIALIZED VIEW public.nucleotide_variant_annotated;" | tee -a $log_file_path
-check_exit_code "$?"
-
-
-
-
-# # Update GISAID
-echo "* Begin update of GISAID SC2 at $(timestamp)" | tee -a $log_file_path
-python main.py import ${database_name_gisaid} gisaid
 check_exit_code "$?"
 
 

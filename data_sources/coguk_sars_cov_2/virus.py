@@ -210,6 +210,12 @@ class COGUKSarsCov2:
         acc_id_changed = set(acc_id_changed)
         acc_id_unchanged = acc_id_present_in_current_and_remote - acc_id_changed
 
+        if len(acc_id_missing_in_remote) > 5000:
+            logger.warning(f'The number of local sequences missing from remote is really HIGH '
+                           f'({len(acc_id_missing_in_remote)}). It has ben cut to 5K max.')
+            for i in range(len(acc_id_missing_in_remote) - 5000):
+                acc_id_missing_in_remote.pop()
+
         acc_id_to_remove = acc_id_missing_in_remote | acc_id_changed
         acc_id_to_import = acc_id_missing_in_current | acc_id_changed
 
