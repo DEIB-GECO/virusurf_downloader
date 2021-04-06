@@ -8,6 +8,7 @@ from time import sleep
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Callable
 from tqdm import tqdm
+from http.client import HTTPException
 Entrez.email = "example@mail.com"   # just to silence the warning. Then a correct email can be set later
 
 cached_taxon_id = dict()
@@ -63,7 +64,7 @@ def _try_n_times(n_times: int, or_wait_secs: int, function: Callable, *args, **k
     with ThreadPoolExecutor(max_workers=1) as executor:
         try:
             return executor.submit(function, *args, **kwargs).result()
-        except (RuntimeError, IOError) as e:
+        except (RuntimeError, IOError, HTTPException) as e:
             n_times -= 1
             if n_times > 0:
                 logger.info(f'Error while invoking {function.__name__} with args: {args}\nkwargs: {kwargs}\n'
