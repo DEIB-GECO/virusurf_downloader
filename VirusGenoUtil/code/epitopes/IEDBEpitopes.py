@@ -843,7 +843,7 @@ class IEDBEpitopes:
 								"iedb frag:{}, ncbi prot:{}, iedb epitope link(s): {}".format(normalized, ncbi_prot_epi,
 								                                                              " ".join(external_links)))
 
-						epitope_iri, iedb_epitope_id = find_epitope_iri_and_id(mhc_current_protein, normalized.rstrip(','))
+						epitope_iri, iedb_epitope_id = find_epitope_iri_and_id(mhc_current_protein, normalized, normalized2unique)
 
 						# create epitope object for the two possible types of assay, if are found in the data
 						epitope = Epitope(self.current_virus_taxon_id, protein.get_ncbi_id(), host_iri, host_name,
@@ -919,8 +919,7 @@ class IEDBEpitopes:
 					if region[0] == -1 and region[-1] == -1:  # discontinuous epitope
 						is_linear = False
 						reg_start, reg_end = self.get_discontinous_epi_start_stop(normalized)
-					elif not (region[0] == region[-1] and region[
-						0] == 0):  # linear epitope with known start and end positions
+					elif not (region[0] == region[-1] and region[0] == 0):  # linear epitope with known start and end positions
 						is_linear = True
 						reg_start, reg_end = region[0], region[-1]
 						# decrease by one the region start to convert 1-index to 0-index
@@ -936,7 +935,7 @@ class IEDBEpitopes:
 						print("{} is a linear epitope without start and end".format(normalized))
 						continue
 
-					epitope_iri, iedb_epitope_id = find_epitope_iri_and_id(bcells_current_protein, normalized.rstrip(','))
+					epitope_iri, iedb_epitope_id = find_epitope_iri_and_id(bcells_current_protein, normalized, normalized2unique)
 
 					external_links = normalized2external_links[normalized]
 					epitope = Epitope(self.current_virus_taxon_id, protein.get_ncbi_id(), host_iri,
@@ -997,13 +996,13 @@ class IEDBEpitopes:
 		uniq_epitopes = unique(iedb_assay["Description"])
 		normalized2unique = {}
 		for uniq_epi in uniq_epitopes:
-			if "," in uniq_epi:
-				# case: Discontinuous peptide	T359, T363, K365, K390, G391, D392, R395,
-				normalized = uniq_epi
-			elif "+" in uniq_epi:
+			if "+" in uniq_epi:
 				# case: Linear peptide	ALNCYWPLNDYGFYTTTGIGYQPYRVVVLSFEL + ACET(A1)
 				# remove the + ACET() information from the sequence
 				normalized = uniq_epi.split("+")[0].strip()
+			elif "," in uniq_epi:
+				# case: Discontinuous peptide	T359, T363, K365, K390, G391, D392, R395,
+				normalized = uniq_epi
 			elif uniq_epi[1:].isdigit():
 				# case: Discontinuous peptide (of one base)	P462
 				normalized = uniq_epi + ","
@@ -1279,7 +1278,7 @@ class IEDBEpitopes:
 								"iedb frag:{}, ncbi prot:{}, iedb epitope link(s): {}".format(normalized, ncbi_prot_epi,
 								                                                              " ".join(external_links)))
 
-						epitope_iri, iedb_epitope_id = find_epitope_iri_and_id(tcells_current_protein, normalized.rstrip(','))
+						epitope_iri, iedb_epitope_id = find_epitope_iri_and_id(tcells_current_protein, normalized, normalized2unique)
 
 						# create epitope object for the two possible types of assay, if are found in the data
 						epitope = Epitope(self.current_virus_taxon_id, protein.get_ncbi_id(), host_iri,
@@ -1315,16 +1314,21 @@ def parse_to_float_or_none(input):
 		return None
 
 
-def find_epitope_iri_and_id(protein_dataset: DataFrame, epi_sequence_or_description: str)\
+def find_epitope_iri_and_id(protein_dataset: DataFrame, normalized_epitope: str, normalized_to_unique: dict)\
 		-> Tuple[Optional[str], Optional[int]]:
 	try:
+		epitope_sequence_as_in_df = normalized_to_unique[normalized_epitope]
+	except KeyError:
+		raise KeyError(f"Can't find unique epitope sequence paired to normalized epitope {normalized_epitope}"
+					   f" into map:\n {normalized_to_unique}")
+	try:
 		epitope_iri = protein_dataset \
-			.loc[protein_dataset['Description'] == epi_sequence_or_description, ["Epitope IRI"]]
+			.loc[protein_dataset['Description'] == epitope_sequence_as_in_df, ["Epitope IRI"]]
 		if not epitope_iri.empty:
 			epitope_iri = epitope_iri.head(1).values[0][0]
 			return epitope_iri, int(epitope_iri[epitope_iri.rfind("/")+1:].strip())
 		else:
-			logger.error(f"NO TCELL EPITOPE IRI FOUND FOR DESCRIPTION {epi_sequence_or_description}")
+			logger.error(f"NO EPITOPE IRI FOUND FOR DESCRIPTION {normalized_epitope}")
 			return None, None
 	except:
 		logger.exception("attempt to find the epitope IRI and ID failed")
