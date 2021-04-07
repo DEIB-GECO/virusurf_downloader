@@ -14,6 +14,7 @@ from locations import remove_file
 from data_sources.ncbi_any_virus.settings import known_settings
 
 epitope_id_mappings = dict()
+mat_view_template_path = f'.{sep}sql_scripts{sep}epitope_mat_view.sql'
 
 
 def import_epitopes(virus_taxon_id: int):
@@ -235,3 +236,80 @@ def protein_id_2_name(virus_taxon_id):
             if sequence and product_id != '.' and product_name != '.':
                 product_ncbi_id_2_name[product_id] = product_name
     return product_ncbi_id_2_name
+
+
+def protein_names_of_virus(virus_taxon_id):
+    this_virus_settings = [v for k, v in known_settings.items() if v['virus_taxon_id'] == virus_taxon_id]
+    # it is necessary to unfold it because it is a list of dictionaries
+    try:
+        this_virus_settings = this_virus_settings[0]
+    except IndexError:
+        raise AssertionError(f"Couldn't find the annotation file path for virus with taxon_id"
+                             f" {virus_taxon_id} (should be only numeric).")
+    protein_names = []
+    with open(this_virus_settings["annotation_file_path"], mode='r') as annotations_file:
+        for line in annotations_file.readlines():
+            _, _, _, _, _, product_name, _, sequence = line.rstrip().split('\t')
+            if sequence and product_name != '.':
+                protein_names.append(product_name)
+    return protein_names
+
+
+def generate_epitope_mat_view_n_indexes(virus_txid: int, output_file_path: Optional[str] = None):
+    max_db_object_length = 0                # NEEDED TO CHECK THAT MAXIMUM NAME LENGTH IS < 63
+    all_proteins_materialized_views = []
+
+    for protein in protein_names_of_virus(virus_txid):
+        # generate protein short name
+        short_protein_name = protein.replace('-', '_').replace('(', '').replace(')', '').replace(' ', '_')\
+            .replace("'", '').replace('/', '_').replace('\\', '_').lower()
+        short_protein_name = short_protein_name[:min(11, len(short_protein_name))]
+
+        # generate materialized view and indexes for current virus and protein
+        with open(mat_view_template_path, mode='r') as mat_view_template:
+            mat_view_of_protein = f"-- MATERIALIZED VIEW AND INDEXES FOR VIRUS {virus_txid} AND PROTEIN {protein}\n"
+            for line in mat_view_template.readlines():
+                replaced_line = line\
+                    .replace('$prot_name', protein)\
+                    .replace('$virus_id', str(virus_txid))\
+                    .replace('$short_prot_name', short_protein_name)
+                mat_view_of_protein += replaced_line
+
+                # test db object name length (must be < 63 chars)
+                object_to_test = None
+                if replaced_line.startswith('CREATE INDEX '):
+                    object_to_test = replaced_line.lstrip('CREATE INDEX ')
+                elif replaced_line.startswith('CREATE MATERIALIZED VIEW '):
+                    object_to_test = replaced_line.lstrip('CREATE MATERIALIZED VIEW ')
+                if object_to_test:
+                    object_to_test = object_to_test.lower().lstrip('public.')
+                    if len(object_to_test) > 63:
+                        print(replaced_line)
+                        raise AssertionError(f'DATABASE OBJECT {object_to_test} ({len(object_to_test)} CHARS)'
+                                             f' IN LINE {replaced_line} EXCEEDS '
+                                             f'THE 63 CHARACTERS LENGTH LIMIT.')
+                    max_db_object_length = max(max_db_object_length, len(object_to_test))
+
+        # collect materialized views for all the proteins of this virus
+        all_proteins_materialized_views.append(mat_view_of_protein)
+
+    print(f"length of longest db_object registered for virus {virus_txid}: {max_db_object_length}")
+
+    if output_file_path is not None:
+        with open(output_file_path, mode='w') as out:
+            for view_n_indexes in all_proteins_materialized_views:
+                out.write(view_n_indexes)
+                out.write('\n\n')
+        print(f"epitope materialized views and indexes for virus  {virus_txid} created at path {output_file_path}")
+    else:
+        for view_n_indexes in all_proteins_materialized_views:
+            print(view_n_indexes)
+            print('\n\n')
+
+
+def generate_epitope_mat_view_n_indexes_4_all_viruses(generate_into_directory_path: str) -> None:
+    for virus_short_name in known_settings.keys():
+        virus_settings = known_settings[virus_short_name]
+        virus_txid = virus_settings["virus_taxon_id"]
+        output_file_path = f'{generate_into_directory_path}{sep}{virus_short_name}_epitope_mat_views_n_indexes.sql'
+        generate_epitope_mat_view_n_indexes(virus_txid, output_file_path)
