@@ -11,6 +11,7 @@ from zipfile import ZipFile
 import gzip, shutil
 from tqdm import tqdm
 from locations import remove_file
+from data_sources.ncbi_any_virus.settings import known_settings
 
 epitope_id_mappings = dict()
 
@@ -44,6 +45,7 @@ def import_epitopes(virus_taxon_id: int):
     logger.debug(
         f'calling epitopes for virus taxon {virus_taxon_id} associated to DB virud_id {virus_db_id}')
     epitopes, fragments = epitopes_for_virus_taxon(virus_taxon_id)
+    map_protein_id_2_name = protein_id_2_name(virus_taxon_id)
 
     # write to file
     # epitopes_file = open(f'.{sep}epitopes.csv', mode='w')
@@ -65,8 +67,11 @@ def import_epitopes(virus_taxon_id: int):
                 # put host specie foreign key
                 host_specie_db_id = create_or_get_host_specie_db_id(session, host_taxon_id)
 
+                # add protein_name to epitope columns:
+                prot_name = map_protein_id_2_name.get(protein_ncbi_id)
+
                 # insert epitope in the DB
-                epitope = (virus_db_id, host_specie_db_id, host_name, host_iri, protein_ncbi_id, cell_type,
+                epitope = (virus_db_id, host_specie_db_id, host_name, host_iri, prot_name, cell_type,
                            mhc_class, mhc_allele, response_frequency_positive, assay_type, seq, start, stop, ext_links,
                            prediction_process, is_linear, epitope_iri, iedb_epitope_id)
 
@@ -213,3 +218,20 @@ def download_epitope_data() -> (str, str, str):
     extract_epitopes_data()
 
     return final_bcell_local_file_path, final_tcell_local_file_path, final_mhc_ligand_local_file_path
+
+
+def protein_id_2_name(virus_taxon_id):
+    this_virus_settings = [v for k, v in known_settings.items() if v['virus_taxon_id'] == virus_taxon_id]
+    # it is necessary to unfold it because it is a list of dictionaries
+    try:
+        this_virus_settings = this_virus_settings[0]
+    except IndexError:
+        raise AssertionError(f"Couldn't find the annotation file path for virus with taxon_id"
+                             f" {virus_taxon_id} (should be only numeric).")
+    product_ncbi_id_2_name = dict()
+    with open(this_virus_settings["annotation_file_path"], mode='r') as annotations_file:
+        for line in annotations_file.readlines():
+            _, _, _, _, _, product_name, product_id, sequence = line.rstrip().split('\t')
+            if sequence and product_id != '.' and product_name != '.':
+                product_ncbi_id_2_name[product_id] = product_name
+    return product_ncbi_id_2_name

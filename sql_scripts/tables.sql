@@ -40,7 +40,7 @@ CREATE TABLE public.epitope (
 	iedb_epitope_id int4 NULL,
 	virus_id int4 NOT NULL,
 	host_id int4 NOT NULL,
-	protein_ncbi_id varchar NULL,
+	protein_name varchar NULL,
 	cell_type varchar NULL,
 	mhc_class varchar NULL,
 	response_frequency_pos float4 NULL,
