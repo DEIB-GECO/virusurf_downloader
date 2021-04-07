@@ -325,11 +325,11 @@ def create_epitopes(session, epitopes: List[Tuple], virus_id, _host_specie_id):
     global epitope_id_mappings
     epitope_id_mappings = dict()
     for elem in epitopes:
-        pseudo_epi_id, _virus_taxon_id, _, protein_ncbi_id, _type, hla_restriction, response_frequency, epitope_sequence, \
+        pseudo_epi_id, _virus_taxon_id, _, protein_name, _type, hla_restriction, response_frequency, epitope_sequence, \
         epi_annotation_start, epi_annotation_stop, is_imported, external_link, perdition_process, is_linear = elem
         epitope = Epitope(virus_id=virus_id,
                           host_id=_host_specie_id,
-                          protein_ncbi_id=protein_ncbi_id,
+                          protein_name=protein_name,
                           epitope_type=_type,
                           hla_restriction=hla_restriction,
                           response_frequency=response_frequency,

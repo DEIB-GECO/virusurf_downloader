@@ -420,7 +420,7 @@ def create_epitopes(session, epitopes: List[Tuple], virus_id, _host_specie_id):
 
 
 def create_epitope(session, epitope: Tuple):
-    db_virus_id, host_specie_db_id, host_name, host_iri, protein_ncbi_id, cell_type, \
+    db_virus_id, host_specie_db_id, host_name, host_iri, protein_name, cell_type, \
     mhc_class, mhc_allele, response_frequency_positive, assay_type, seq, start, stop, ext_links, \
     prediction_process, is_linear = epitope
 
@@ -428,7 +428,7 @@ def create_epitope(session, epitope: Tuple):
                       host_id=host_specie_db_id,
                       source_host_name=host_name,
                       source_host_iri=host_iri,
-                      protein_ncbi_id=protein_ncbi_id,
+                      protein_name=protein_name,
                       cell_type=cell_type,
                       mhc_class=mhc_class,
                       mhc_allele=mhc_allele,

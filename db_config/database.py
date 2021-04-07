@@ -323,7 +323,7 @@ class Epitope(_base):
     host_id = Column(Integer, nullable=False)
     source_host_name = Column(String)
     source_host_iri = Column(String)
-    protein_ncbi_id = Column(String)
+    protein_name = Column(String)
     cell_type = Column(String)
     mhc_class = Column(String)
     mhc_allele = Column(String)
