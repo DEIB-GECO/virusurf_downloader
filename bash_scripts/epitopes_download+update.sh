@@ -6,13 +6,14 @@
 echo "Assumptions for the proper execution of this script:
 - command line arguments: <virusurf_directory_path> <target_database_name>;
 - the postgres password file contains one entry for the given database formatted as host:port:dat_name:user:psw;"
+echo "THIS SCRIPT DOES NOT UPDATE EPITOPE ASSOCIATED MATERIALIZED VIEWS"
 
 # input parameters
 virusurf_dir=${1}/
 database_name=$2
 echo "Check of arguments:
 - VIRUSURF DIR: ${virusurf_dir};
-- VIRUSURF NORMAL DB: ${database_name};
+- VIRUSURF DB: ${database_name};
 The program resumes in 10 seconds."
 sleep 10
 
@@ -36,7 +37,8 @@ echo "The output of this script is appended to ${log_file_path}"
 
 # Begin logging of operations
 echo "################################          ##################################" | tee -a $log_file_path
-echo "######################   Auto Updater for ViruSurf   #######################" | tee -a $log_file_path
+echo "####################    Epitope Updater for ViruSurf   #####################" | tee -a $log_file_path
+echo "################   (does NOT affect views for EpiSurf)   ###################" | tee -a $log_file_path
 echo "################################          ##################################" | tee -a $log_file_path
 echo "* ViruSurf automatic epitopes update script started at $(timestamp)" | tee -a $log_file_path
 
@@ -96,9 +98,7 @@ echo "* Begin import of epitopes for virus zaire_ebolavirus" | tee -a $log_file_
 python main.py epitopes ${database_name} zaire_ebolavirus
 check_exit_code "$?"
 
-echo "* Update of epitopes completed on database ${database_name}." | tee -a $log_file_path
+echo "* Import of epitopes completed on database ${database_name}." | tee -a $log_file_path
+echo "THIS SCRIPT DID NOT UPDATE EPITOPE ASSOCIATED MATERIALIZED VIEWS" | tee -a $log_file_path
 
 
-echp "* Refresh eptiope variants and info materialized view"
-psql -h localhost -U geco -d ${database_name} -c "REFRESH MATERIALIZED VIEW epitope_variants_and_info_all;" | tee -a $log_file_path
-check_exit_code "${PIPESTATUS[0]}"
