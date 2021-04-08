@@ -14,7 +14,7 @@ from locations import remove_file
 from data_sources.ncbi_any_virus.settings import known_settings
 
 epitope_id_mappings = dict()
-mat_view_template_path = f'.{sep}sql_scripts{sep}epitope_4_virus+protein_mat_view_template.sql'
+mat_view_template_path = f'.{sep}sql_scripts{sep}epitope_views_n_indexes{sep}template{sep}epitope_4_virus+protein_mat_view_template.sql'
 
 
 def import_epitopes(virus_taxon_id: int):
