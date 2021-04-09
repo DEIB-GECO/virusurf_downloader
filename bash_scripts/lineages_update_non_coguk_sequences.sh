@@ -60,6 +60,8 @@ echo "* ViruSurf automatic lineage update script started at $(timestamp)" | tee 
 
 # # Update lineages (of all sequences)
 echo "Switching to  conda environment 'vcm'."
+source ~/anaconda3_new/etc/profile.d/conda.sh  # finds command conda
+check_exit_code "$?"
 conda activate vcm
 check_exit_code "$?"
 cd $virusurf_dir

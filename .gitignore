@@ -144,3 +144,4 @@ dmypy.json
 epitopes.csv
 epitopes_fragments.csv
 /VirusGenoUtil/data/iedb_input/cell_epitopes/
+/debug/
