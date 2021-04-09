@@ -180,3 +180,15 @@ known_settings = {
         "generated_dir_name": "tai_forest_ebolavirus"
     }
 }
+
+
+def find_settings_of_virus_txid(virus_txid):
+    # settings of this virus
+    this_virus_settings = [v for k, v in known_settings.items() if v['virus_taxon_id'] == virus_txid]
+    # it is necessary to unfold it because it is a list of dictionaries
+    try:
+        this_virus_settings = this_virus_settings[0]
+    except IndexError:
+        raise AssertionError(f"Couldn't find the annotation file path for virus with taxon_id"
+                             f" {virus_txid} (should be only numeric).")
+    return this_virus_settings

@@ -6,8 +6,13 @@ import data_sources.nmdc.procedure as nmdc
 import stats_module
 from logger_settings import setup_logger
 from db_config import read_db_import_configuration as import_config, database
+from db_config.read_db_import_configuration import get_database_config_params
 import os
-from os.path import sep
+from os.path import abspath
+from generate_fasta import generate_fasta
+from datetime import date
+from lineages import update_pangolin, call_pangolin, update_db_with_computed_lineages
+from locations import get_local_folder_for, FileType
 
 log_file_keyword = ""
 
@@ -18,7 +23,7 @@ wrong_arguments_message = "Accepted parameters:\n" \
                           "\tdownload epitopes" + "\n" \
                           "\tepitopes <db_name> " + "|".join(ncbi_virus_names) + "\n" \
                           "\toverlaps <source1>_<source2> <commit to the DB ?>\n" \
-                          "\tlineages <db_name> " + "|".join(ncbi_virus_names) + "all|only_new_sequences" + "\n"
+                          "\tlineages <db_name> " + "|".join(ncbi_virus_names) + "all|only_null_lineages|all_except_coguk" + "\n"
 wrong_arguments_message += 'When action is "import", the source name can be optionally followed by a range of samples to import as <min> (included) <max> (excluded).\n'
 
 try:
@@ -28,6 +33,7 @@ try:
         import_config.set_db_name(db_name)
     if action == 'import':
         source = sys.argv[3].lower()
+        known_settings[source]  # raises KeyError if the source is not recognized
         log_file_keyword = source
         try:
             _from = int(sys.argv[4])
@@ -40,10 +46,23 @@ try:
             to = None
     elif 'epitopes' in action:
         _epitope_target = sys.argv[3]
+        known_settings[_epitope_target]     # raises KeyError if the source is not recognized
         log_file_keyword = f"epi_{_epitope_target}"
     elif 'lineages' in action:
         _fasta_target = sys.argv[3]
+        known_settings[_fasta_target]       # raises KeyError if the source is not recognized
         _method = sys.argv[4]
+        if _method == 'all':
+            _only_null_lineages = False
+            _data_source = None
+        elif _method == 'only_null_lineages':
+            _only_null_lineages = True
+            _data_source = None
+        elif _method == 'all_except_coguk':
+            _only_null_lineages = False
+            _data_source = ('GenBank', 'NMDC', 'RefSeq')
+        else:
+            raise ValueError('last argument must be one of all|only_null_lineages|all_except_coguk')
         log_file_keyword = f"lineages_{_fasta_target}"
     elif 'overlaps' in action:
         _overlap_target = sys.argv[2]
@@ -53,7 +72,7 @@ try:
         log_file_keyword = f"download_{_what_to_download}"
     else:
         log_file_keyword = action
-except IndexError:
+except (IndexError, KeyError):
     logger.error(wrong_arguments_message)
     sys.exit(1)
 
@@ -71,9 +90,7 @@ try:
     elif 'epitopes' in action:
         from epitopes import import_epitopes
         # noinspection PyUnboundLocalVariable
-        virus_import_parameters = known_settings.get(_epitope_target)
-        if not virus_import_parameters:
-            raise ValueError(f'{_epitope_target} is not recognised as an importable virus')
+        virus_import_parameters = known_settings[_epitope_target]
         virus_txid = virus_import_parameters["virus_taxon_id"]
         import_epitopes(virus_txid)
     elif 'import' in action:
@@ -91,22 +108,19 @@ try:
         else:
             logger.error(f'the argument {source} is not recognised.\n'+wrong_arguments_message)
     elif 'lineages' in action:
-        _method = sys.argv[4]
-        logger.warning('This action requires pangolin to be installed in a pangolin environment.')
-        from generate_fasta import generate_fasta
-        from datetime import date
-        from db_config.read_db_import_configuration import get_database_config_params
-        # noinspection PyUnboundLocalVariable
-        virus_import_parameters = known_settings.get(_fasta_target)
-        if not virus_import_parameters:
-            raise ValueError(f'{_fasta_target} is not recognised as an importable virus')
+        # create fasta with the nucleotide sequences to analyze with pangolin
+        virus_import_parameters = known_settings[_fasta_target]
         virus_txid = virus_import_parameters["virus_taxon_id"]
         virus_folder = virus_import_parameters["generated_dir_name"]
         fasta_name = f'{_fasta_target}_{_method}_{date.today().strftime("%Y-%b-%d")}.fasta'
-        fasta_path = generate_fasta(virus_txid, virus_folder, fasta_name, _method == 'only_new_sequences')
-        # the following script runs pangolin and loads the result into the database
-        db_name = get_database_config_params()["db_name"]
-        os.system(f"bash .{sep}bash_scripts{sep}load_lineages.sh {fasta_path} {db_name}")
+        fasta_path = generate_fasta(virus_txid, virus_folder, fasta_name, _only_null_lineages, _data_source)
+        # use pangoling to compute lineages
+        update_pangolin()
+        pangolin_output_path = abspath(get_local_folder_for(virus_folder, FileType.Fasta)
+                                       + 'lineages_pangolin_output.csv')
+        call_pangolin(fasta_path, pangolin_output_path)
+        # load lineages into db
+        update_db_with_computed_lineages(pangolin_output_path)
     elif 'overlaps' in action:
         from overlaps import overlaps_controller
         overlaps_controller.run()
