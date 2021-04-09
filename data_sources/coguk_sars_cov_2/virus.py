@@ -103,7 +103,8 @@ class COGUKSarsCov2:
                                                           source_seq.gc_percentage, source_seq.n_percentage,
                                                           source_host.collection_date,
                                                           source_host.region, source_host.country,
-                                                          nuc_seq_db_obj.nucleotide_sequence)
+                                                          nuc_seq_db_obj.nucleotide_sequence,
+                                                          source_seq.lineage)
             return all_sequences
 
         return try_py_function(do)
@@ -201,7 +202,9 @@ class COGUKSarsCov2:
                         or current_sequence_data[2] != new_sequence.n_percent() \
                         or current_sequence_data[3] != new_sequence.collection_date()[0] \
                         or (current_sequence_data[4], current_sequence_data[5]) \
-                        != new_sequence.province__region__country__geo_group()[1:3]:
+                        != new_sequence.province__region__country__geo_group()[1:3] \
+                        or current_sequence_data[7] != new_sequence.lineage() \
+                        or current_sequence_data[6] != new_sequence.nucleotide_sequence():
                     acc_id_changed.append(acc_id)
             except KeyError:
                 pass  # the accession id is not present in current data. it's a new sequence

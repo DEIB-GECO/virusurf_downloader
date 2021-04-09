@@ -69,7 +69,6 @@ def generate_fasta(virus_taxon_id: int, virus_folder_name: str, generated_file_n
     logger.info(f"Generating fasta...")
     with open(file=target_file_path, mode='w') as file:
         total_count = database.try_py_function(get_total_acc_ids_from_db)
-        print(total_count)
         data = database.try_py_function(get_acc_ids_and_sequences_from_db)
         progress = tqdm(total=total_count)
         if total_count > 0:

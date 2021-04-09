@@ -33,7 +33,6 @@ try:
         import_config.set_db_name(db_name)
     if action == 'import':
         source = sys.argv[3].lower()
-        known_settings[source]  # raises KeyError if the source is not recognized
         log_file_keyword = source
         try:
             _from = int(sys.argv[4])
