@@ -993,8 +993,8 @@ AS
   WHERE (epi.protein_name::text = ann.product::text
              AND amin.start_aa_original <= epif.epi_frag_annotation_stop
              AND amin.start_aa_original >= epif.epi_frag_annotation_start
-             AND ann.product = '2'-O-methyltransferase'
-             AND epi.protein_name = '2'-O-methyltransferase'
+             AND ann.product = '2''-O-methyltransferase'
+             AND epi.protein_name = '2''-O-methyltransferase'
              AND vir.taxon_id = 1335626)
   ORDER BY epi.iedb_epitope_id
 WITH DATA;

@@ -611,8 +611,8 @@ AS
   WHERE (epi.protein_name::text = ann.product::text
              AND amin.start_aa_original <= epif.epi_frag_annotation_stop
              AND amin.start_aa_original >= epif.epi_frag_annotation_start
-             AND ann.product = 'NSP14 (3'-to-5' exonuclease)'
-             AND epi.protein_name = 'NSP14 (3'-to-5' exonuclease)'
+             AND ann.product = 'NSP14 (3''-to-5'' exonuclease)'
+             AND epi.protein_name = 'NSP14 (3''-to-5'' exonuclease)'
              AND vir.taxon_id = 2697049)
   ORDER BY epi.iedb_epitope_id
 WITH DATA;
@@ -993,8 +993,8 @@ AS
   WHERE (epi.protein_name::text = ann.product::text
              AND amin.start_aa_original <= epif.epi_frag_annotation_stop
              AND amin.start_aa_original >= epif.epi_frag_annotation_start
-             AND ann.product = 'NSP16 (2'-O-ribose methyltransferase)'
-             AND epi.protein_name = 'NSP16 (2'-O-ribose methyltransferase)'
+             AND ann.product = 'NSP16 (2''-O-ribose methyltransferase)'
+             AND epi.protein_name = 'NSP16 (2''-O-ribose methyltransferase)'
              AND vir.taxon_id = 2697049)
   ORDER BY epi.iedb_epitope_id
 WITH DATA;

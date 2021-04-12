@@ -611,8 +611,8 @@ AS
   WHERE (epi.protein_name::text = ann.product::text
              AND amin.start_aa_original <= epif.epi_frag_annotation_stop
              AND amin.start_aa_original >= epif.epi_frag_annotation_start
-             AND ann.product = '3' to 5' exonuclease'
-             AND epi.protein_name = '3' to 5' exonuclease'
+             AND ann.product = '3'' to 5'' exonuclease'
+             AND epi.protein_name = '3'' to 5'' exonuclease'
              AND vir.taxon_id = 694009)
   ORDER BY epi.iedb_epitope_id
 WITH DATA;
@@ -993,8 +993,8 @@ AS
   WHERE (epi.protein_name::text = ann.product::text
              AND amin.start_aa_original <= epif.epi_frag_annotation_stop
              AND amin.start_aa_original >= epif.epi_frag_annotation_start
-             AND ann.product = '2'-O-MTase'
-             AND epi.protein_name = '2'-O-MTase'
+             AND ann.product = '2''-O-MTase'
+             AND epi.protein_name = '2''-O-MTase'
              AND vir.taxon_id = 694009)
   ORDER BY epi.iedb_epitope_id
 WITH DATA;

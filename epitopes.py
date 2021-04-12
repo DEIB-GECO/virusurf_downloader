@@ -270,7 +270,7 @@ def generate_epitope_mat_view_n_indexes(virus_txid: int, output_file_path: Optio
             mat_view_of_protein = f"-- MATERIALIZED VIEW AND INDEXES FOR VIRUS {virus_txid} AND PROTEIN {protein}\n"
             for line in mat_view_template.readlines():
                 replaced_line = line\
-                    .replace('$prot_name', protein)\
+                    .replace('$prot_name', protein.replace("'", "''"))\
                     .replace('$virus_id', str(virus_txid))\
                     .replace('$short_prot_name', short_protein_name)
                 mat_view_of_protein += replaced_line
