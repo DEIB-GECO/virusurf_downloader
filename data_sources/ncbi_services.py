@@ -5,10 +5,10 @@ from loguru import logger
 from lxml import etree
 from xml_helper import text_at_node
 from time import sleep
-from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Callable
 from tqdm import tqdm
 from http.client import HTTPException
+import socket
 Entrez.email = "example@mail.com"   # just to silence the warning. Then a correct email can be set later
 
 cached_taxon_id = dict()
@@ -16,7 +16,9 @@ cached_taxon_name = dict()
 _config_params: Optional[Tuple] = None  # tool name, email, api_key
 
 DOWNLOAD_ATTEMPTS = 3
-DOWNLOAD_FAILED_PAUSE_SECONDS = 30
+DOWNLOAD_FAILED_PAUSE_SECONDS = [10, 30]  # for N attempts, there are N-1 waiting periods
+socket.setdefaulttimeout(6)     # sets a timeout on Biopython.Entrez requests (default limit is None = infinite)
+                                # affects all socket created from now on
 
 
 def read_config_params():
@@ -60,20 +62,20 @@ def read_config_params():
     return _config_params
 
 
-def _try_n_times(n_times: int, or_wait_secs: int, function: Callable, *args, **kwargs):
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        try:
-            return executor.submit(function, *args, **kwargs).result()
-        except (RuntimeError, IOError, HTTPException) as e:
-            n_times -= 1
-            if n_times > 0:
-                logger.info(f'Error while invoking {function.__name__} with args: {args}\nkwargs: {kwargs}\n'
-                             f'\tReason of error: {str(type(e))} {e.args}'
-                             f'\tNew attempt in {or_wait_secs}s. Left attempts {n_times}')
-                executor.submit(sleep, or_wait_secs).result()
-                return _try_n_times(n_times, or_wait_secs, function, *args, **kwargs)
-            else:
-                raise e
+def _try_n_times(n_times: int, or_wait_secs: List[int], function: Callable, *args, **kwargs):
+    try:
+        return function(*args, **kwargs)
+    except (RuntimeError, IOError, HTTPException) as e:
+        n_times -= 1
+        if n_times > 0:
+            wait_time = or_wait_secs[-n_times]
+            logger.info(f'Error while invoking {function.__name__} with args: {args}\nkwargs: {kwargs}\n'
+                        f'\tReason of error: {str(type(e))} {e.args}'
+                        f'\tNew attempt in {wait_time}s. Left attempts {n_times}')
+            sleep(float(wait_time))
+            return _try_n_times(n_times, or_wait_secs, function, *args, **kwargs)
+        else:
+            raise e
             
 
 def host_taxon_id_from_ncbi_taxon_name(taxon_name: str) -> Optional[int]:

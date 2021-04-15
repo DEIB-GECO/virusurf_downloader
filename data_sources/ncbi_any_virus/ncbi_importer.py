@@ -28,6 +28,7 @@ import data_cleaning_module
 from db_config import read_db_import_configuration as db_import_config, database
 from data_sources.ncbi_any_virus import settings
 from logger_settings import send_message
+from http.client import HTTPException
 
 
 DOWNLOAD_ATTEMPTS = 3
@@ -618,7 +619,7 @@ def _download_as_sample_object(alternative_accession_ids, SampleWrapperClass=Any
     for sample_id in tqdm(alternative_accession_ids):
         try:
             sample_path = download_or_get_ncbi_sample_as_xml(download_sample_dir_path, sample_id)
-        except urllib.error.URLError:
+        except (urllib.error.URLError, HTTPException):
             logger.exception(
                 f"Network error while downloading sample {sample_id} can't be solved. This sample 'll be skipped.")
             network_skipped_samples += 1
@@ -804,7 +805,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
     db_params: dict = db_import_config.get_database_config_params()
     database.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
     # prepare multiprocessor
-    task_manager = TaskManager(30, 28, TheWorker)
+    task_manager = TaskManager(30, 22, TheWorker)
 
     def check_user_query():
         """
@@ -971,30 +972,30 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
     finally:
         task_manager.stop_workers()
 
-    # remove leftovers of failed samples
-    try:
-        metadata_samples_to_remove: set = stats_module.get_scheduled_not_completed()
-        if len(metadata_samples_to_remove) > 100:
-            send_message(f"NCBI importer can have a bug. {len(metadata_samples_to_remove)} out of "
-                         f"{len(id_new_sequences)} failed.")
-        pipeline_event.added_items = pipeline_event.added_items - len(metadata_samples_to_remove)
-        if len(metadata_samples_to_remove) > 0:
-            logger.info(f"Removing metadata leftovers of imports that failed during variant/annotation calling or metadata"
-                        f" ({len(metadata_samples_to_remove)} samples)")
+        # remove leftovers of failed samples
+        try:
+            metadata_samples_to_remove: set = stats_module.get_scheduled_not_completed()
+            if len(metadata_samples_to_remove) > 100:
+                send_message(f"NCBI importer can have a bug. {len(metadata_samples_to_remove)} out of "
+                             f"{len(id_new_sequences)} failed.")
+            pipeline_event.added_items = pipeline_event.added_items - len(metadata_samples_to_remove)
+            if len(metadata_samples_to_remove) > 0:
+                logger.info(f"Removing metadata leftovers of imports that failed during variant/annotation calling or metadata"
+                            f" ({len(metadata_samples_to_remove)} samples)")
 
-            metadata_samples_to_remove_as_string: list = [str(x) for x in metadata_samples_to_remove]
-            logger.trace("Alternative accession id of failed imports:\n"
-                         f"{metadata_samples_to_remove_as_string}")
-            logger.info("Deleting leftovers in database")
-            database.try_py_function(vcm.remove_sequence_and_meta_list,
-                                     alternative_sequence_accession_id=metadata_samples_to_remove_as_string)
-            logger.info("Deleting XML sequence files")
-            for x in metadata_samples_to_remove_as_string:
-                remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{x}.xml")
-    except:
-        logger.exception("Removal of metadata leftovers in the DB and XML files of the samples that failed was not successful.")
+                metadata_samples_to_remove_as_string: list = [str(x) for x in metadata_samples_to_remove]
+                logger.trace("Alternative accession id of failed imports:\n"
+                             f"{metadata_samples_to_remove_as_string}")
+                logger.info("Deleting leftovers in database")
+                database.try_py_function(vcm.remove_sequence_and_meta_list,
+                                         alternative_sequence_accession_id=metadata_samples_to_remove_as_string)
+                logger.info("Deleting XML sequence files")
+                for x in metadata_samples_to_remove_as_string:
+                    remove_file(f"{get_local_folder_for(settings.generated_dir_name, FileType.SequenceOrSampleData)}{x}.xml")
+        except:
+            logger.exception("Removal of metadata leftovers in the DB and XML files of the samples that failed was not successful.")
 
-    database.try_py_function(vcm.insert_data_update_pipeline_event, pipeline_event)
+        database.try_py_function(vcm.insert_data_update_pipeline_event, pipeline_event)
 
 # !!!!! ARE YOU LOOKING FOR prepared_parameters ? Use instead data_source.ncbi_any_virus.settings -> known_settings !!!!
 #########################################################################################################################
