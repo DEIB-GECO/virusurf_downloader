@@ -5,13 +5,10 @@ from data_sources.ncbi_any_virus.settings import known_settings
 import data_sources.nmdc.procedure as nmdc
 import stats_module
 from logger_settings import setup_logger
-from db_config import read_db_import_configuration as import_config, database
-from db_config.read_db_import_configuration import get_database_config_params
-import os
+from db_config import read_db_import_configuration as import_config
 from os.path import abspath
 from generate_fasta import generate_fasta
 from datetime import date
-from lineages import update_pangolin, call_pangolin, update_db_with_computed_lineages
 from locations import get_local_folder_for, FileType
 
 log_file_keyword = ""
@@ -107,6 +104,7 @@ try:
         else:
             logger.error(f'the argument {source} is not recognised.\n'+wrong_arguments_message)
     elif 'lineages' in action:
+        from lineages import update_pangolin, call_pangolin, update_db_with_computed_lineages
         # create fasta with the nucleotide sequences to analyze with pangolin
         virus_import_parameters = known_settings[_fasta_target]
         virus_txid = virus_import_parameters["virus_taxon_id"]
