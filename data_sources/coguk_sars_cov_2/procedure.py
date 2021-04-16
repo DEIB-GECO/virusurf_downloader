@@ -1,6 +1,7 @@
 import os
 import pickle
 from datetime import datetime
+from queue import Empty
 from time import sleep
 from loguru import logger
 from typing import Optional, List
@@ -50,6 +51,10 @@ def main_pipeline_part_3(session: database.Session, sample, db_sequence_id):
         for nuc in nuc_variants:
             vcm.create_nuc_variants_and_impacts(session, db_sequence_id, nuc)
         stats_module.completed_sample(sample.primary_accession_number())
+    except KeyboardInterrupt:
+        # cached file may be incomplete
+        remove_file(file_path)
+        raise database.Rollback()
     except Exception as e:
         if str(e).endswith("sequence contains letters not in the alphabet"):
             logger.warning(f"sample {sample.primary_accession_number()} skipped because sequence contains letter not in "
@@ -171,6 +176,14 @@ class Parallel:
         self._queue.join()
         logger.info('all processes_finished')
 
+    def discard_waiting_tasks(self):
+        while not self._queue.empty():
+            try:
+                self._queue.get(False)
+            except Empty:
+                continue
+            self._queue.task_done()
+
 
 def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     global virus, virus_id, import_method
@@ -229,40 +242,53 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     import_method = Parallel()
 
     vcm.DBCache.commit_changes()
-    for s in virus.get_sequences_of_updated_source(filter_accession_ids=id_new_sequences):
-        if not s.nucleotide_sequence():
-            logger.info(f'sample {s.primary_accession_number()} skipped because nucleotide sequence is empty or null')
-            continue
-        try:
-            database.try_py_function(import_method.import_virus_sample, s)
-            vcm.DBCache.commit_changes()
-        except:
-            logger.exception(f'exception occurred while working on virus sample {s.primary_accession_number()}')
-            vcm.DBCache.rollback_changes()
-
-    logger.info('main process completed')
-    import_method.tear_down()
-
-    # remove leftovers of failed samples
     try:
-        metadata_samples_to_remove: set = stats_module.get_scheduled_not_completed()
-        if len(metadata_samples_to_remove) > 100:
-            send_message(f"COGUK importer can have a bug. {len(metadata_samples_to_remove)} out of "
-                         f"{len(id_new_sequences)} failed.")
-        pipeline_event.added_items = pipeline_event.added_items - len(metadata_samples_to_remove)
-        if len(metadata_samples_to_remove) > 0:
-            logger.info(
-                f"Removing metadata leftovers of imports that failed during variant/annotation calling or metadata"
-                f" ({len(metadata_samples_to_remove)} samples)")
+        for s in virus.get_sequences_of_updated_source(filter_accession_ids=id_new_sequences):
+            if not s.nucleotide_sequence():
+                logger.info(f'sample {s.primary_accession_number()} skipped because nucleotide sequence is empty or null')
+                continue
+            try:
+                database.try_py_function(import_method.import_virus_sample, s)
+                vcm.DBCache.commit_changes()
+            except KeyboardInterrupt:
+                logger.info('Execution aborted by the user. Cancelling waiting tasks...')
+                vcm.DBCache.rollback_changes()
+                # When using multiprocessing, each process receives KeyboardInterrupt. Child process should take care of clean up.
+                # Child process should not raise themselves KeyboardInterrupt
+                import_method.discard_waiting_tasks()
+                break
+            except Exception:
+                logger.exception(f'exception occurred while working on virus sample {s.primary_accession_number()}')
+                vcm.DBCache.rollback_changes()
+            else:
+                logger.info('main process completed')
+    except Exception as e:
+        logger.error("AN EXCEPTION CAUSED THE LOOP TO TERMINATE. Workers will be terminated.")
+        import_method.discard_waiting_tasks()
+        raise e
+    finally:
+        import_method.tear_down()
 
-            metadata_samples_to_remove_as_string: list = [str(x) for x in metadata_samples_to_remove]
-            logger.trace("Accession id of failed imports:\n"
-                         f"{metadata_samples_to_remove_as_string}")
-            logger.info("Deleting leftovers in database")
-            database.try_py_function(vcm.remove_sequence_and_meta_list,
-                                     primary_sequence_accession_id=metadata_samples_to_remove_as_string)
-    except:
-        logger.exception(
-            "Removal of metadata leftovers in the DB of the samples that failed was not successful.")
+        # remove leftovers of failed samples
+        try:
+            metadata_samples_to_remove: set = stats_module.get_scheduled_not_completed()
+            if len(metadata_samples_to_remove) > 100:
+                send_message(f"COGUK importer can have a bug. {len(metadata_samples_to_remove)} out of "
+                             f"{len(id_new_sequences)} failed.")
+            pipeline_event.added_items = pipeline_event.added_items - len(metadata_samples_to_remove)
+            if len(metadata_samples_to_remove) > 0:
+                logger.info(
+                    f"Removing metadata leftovers of imports that failed during variant/annotation calling or metadata"
+                    f" ({len(metadata_samples_to_remove)} samples)")
 
-    database.try_py_function(vcm.insert_data_update_pipeline_event, pipeline_event)
+                metadata_samples_to_remove_as_string: list = [str(x) for x in metadata_samples_to_remove]
+                logger.trace("Accession id of failed imports:\n"
+                             f"{metadata_samples_to_remove_as_string}")
+                logger.info("Deleting leftovers in database")
+                database.try_py_function(vcm.remove_sequence_and_meta_list,
+                                         primary_sequence_accession_id=metadata_samples_to_remove_as_string)
+        except:
+            logger.exception(
+                "Removal of metadata leftovers in the DB of the samples that failed was not successful.")
+
+        database.try_py_function(vcm.insert_data_update_pipeline_event, pipeline_event)
