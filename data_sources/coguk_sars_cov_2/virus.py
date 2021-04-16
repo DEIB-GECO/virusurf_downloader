@@ -162,10 +162,12 @@ class COGUKSarsCov2:
                                 logger.error(
                                     f'Found a sequence without a paired metadata string. Foreign key was {sample_key}')
                             try:
-                                yield COGUKSarsCov2Sample(sample)
-                            except:
+                                sample_obj = COGUKSarsCov2Sample(sample)
+                            except Exception:
                                 logger.exception(
                                     f"Sample {sample_key} skipped due to an error while parsing the input data.")
+                                continue
+                            yield sample_obj
                 if nuc_sequences_with_errors > 0:
                     logger.warning(f"{nuc_sequences_with_errors} were rejected because they include one of the following "
                                    f"invalid characters: {nuc_aa_pipeline.not_allowed_chars}")

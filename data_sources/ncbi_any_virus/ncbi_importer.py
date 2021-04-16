@@ -968,6 +968,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
         task_manager.discard_waiting_tasks()
     except Exception as e:
         logger.error("AN EXCEPTION CAUSED THE LOOP TO TERMINATE. Workers will be terminated.")
+        task_manager.discard_waiting_tasks()
         raise e
     finally:
         task_manager.stop_workers()
