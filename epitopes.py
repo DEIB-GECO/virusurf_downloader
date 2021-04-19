@@ -1,3 +1,4 @@
+import socket
 from typing import Optional
 from os.path import sep
 from loguru import logger
@@ -18,6 +19,10 @@ mat_view_template_path = f'.{sep}sql_scripts{sep}epitope_views_n_indexes{sep}tem
 
 
 def import_epitopes(virus_taxon_id: int):
+    socket.setdefaulttimeout(120)  # sets a timeout on Biopython.Entrez requests (default limit is None = infinite)
+                                   # importing ncbi_services involves the timeout to be set to 6
+                                   # affects all socket created from now on
+
     # remember to update the data source
     logger.warning("Keep in mind to update the data source with 'python main.py download epitopes' before performing"
                    " the current action. This program will resume in 10 seconds.")
@@ -45,7 +50,9 @@ def import_epitopes(virus_taxon_id: int):
     # run epitopes' code
     logger.debug(
         f'calling epitopes for virus taxon {virus_taxon_id} associated to DB virud_id {virus_db_id}')
+    logger.trace(f"socket timeout before epitopes is {socket.getdefaulttimeout()}")
     epitopes, fragments = epitopes_for_virus_taxon(virus_taxon_id)
+    logger.trace(f"socket timeout after epitopes is {socket.getdefaulttimeout()}")
     map_protein_id_2_name = protein_id_2_name(virus_taxon_id)
 
     # write to file
