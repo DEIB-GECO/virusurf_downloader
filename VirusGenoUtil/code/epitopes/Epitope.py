@@ -65,10 +65,10 @@ class Epitope:
         if response_frequency_info["positive"]["exists_pos_assay"] and response_frequency_info["negative"][
             "exists_neg_assay"]:
             self.assay_types = "both"
-        elif response_frequency_info["positive"]:
+        elif response_frequency_info["positive"]["exists_pos_assay"]:
             self.assay_types = "positive"
-        elif response_frequency_info["negative"]:
-            self.assay_type = "negative"
+        elif response_frequency_info["negative"]["exists_neg_assay"]:
+            self.assay_types = "negative"
 
         self.seq = region_seq
         self.region_start = region_start
