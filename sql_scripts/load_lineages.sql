@@ -1,8 +1,9 @@
 CREATE TABLE IF NOT EXISTS lineages (
     accession_id varchar primary key,
     lineage varchar,
-    probability float4,
+    conflict float4,
     pangoLEARN_version varchar,
+    pango_version varchar,
     status varchar,
     note varchar
 );
