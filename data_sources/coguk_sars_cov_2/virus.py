@@ -168,6 +168,7 @@ class COGUKSarsCov2:
                                     f"Sample {sample_key} skipped due to an error while parsing the input data.")
                                 continue
                             yield sample_obj
+                progress.close()
                 if nuc_sequences_with_errors > 0:
                     logger.warning(f"{nuc_sequences_with_errors} were rejected because they include one of the following "
                                    f"invalid characters: {nuc_aa_pipeline.not_allowed_chars}")
@@ -175,10 +176,14 @@ class COGUKSarsCov2:
 
     def deltas(self):
         """
-        Returns the set of Sequence.accession_id to remove from current database, and the set of Sequence.accession_id
-        that should be imported from the source. Note that because sequences in the current data may have been updated,
-        the two sets are not necessarily disjoint. So first remove the sequences to be removed and only then
-         insert the new ones.
+        Returns:
+            - a set of accession ids of sequences to be removed
+            - a set of accession ids to be imported
+            - a dictionary of accession ids, each mapped to a dictionary telling which database table need to be updated.
+        A sequence can be in the se of updatable accession ids only if the changes are not associated to the nucleotide
+        sequence (and the values depending on it, including annotations and variants); otherwise the sequence will appear
+        both in the set of sequences to be removed and in the set of sequences to be imported. Since the 1st and 2nd set
+        are not necessarily disjoint, it's recommended to remove outdated sequences before importing the new ones.
          """
         logger.info("Reading updated data...")
         acc_id_remote = set([x.primary_accession_number() for x in self.get_sequences_of_updated_source()])  # all the sequences from remote
@@ -190,30 +195,50 @@ class COGUKSarsCov2:
         acc_id_missing_in_current = acc_id_remote - acc_id_current
 
         acc_id_present_in_current_and_remote = acc_id_current & acc_id_remote
-        acc_id_changed = []
+        acc_id_changed_updatable = dict()
+        acc_id_changed_not_updatable = []
+
+        changes_distribution = {
+            "sequence": 0,
+            "host_sample": 0
+        }
 
         # to compare sequences present in both, have to scan the file of remote sequences
         logger.info('Comparing current data with that from source...')
         for new_sequence in self.get_sequences_of_updated_source(filter_accession_ids=acc_id_present_in_current_and_remote):
             acc_id = new_sequence.primary_accession_number()
-            try:
-                current_sequence_data = current_data[acc_id]
-                # if the gisaid id is the same, compare metadata to detect if the sample changed over time
-                if current_sequence_data[0] != new_sequence.length() \
-                        or current_sequence_data[1] != new_sequence.gc_percent() \
-                        or current_sequence_data[2] != new_sequence.n_percent() \
-                        or current_sequence_data[3] != new_sequence.collection_date()[0] \
-                        or (current_sequence_data[4], current_sequence_data[5]) \
-                        != new_sequence.province__region__country__geo_group()[1:3] \
-                        or current_sequence_data[7] != new_sequence.lineage() \
-                        or current_sequence_data[6] != new_sequence.nucleotide_sequence():
-                    acc_id_changed.append(acc_id)
-            except KeyError:
-                pass  # the accession id is not present in current data. it's a new sequence
+            current_sequence_data = current_data[acc_id]
+            # if the id is the same, compare metadata to detect if the sample changed over time
+
+            # changes to the nucleotide sequence cannot be addressed with an update
+            # checking (length, GC%, N%) are possible shorthands to know whether the nucleotide sequence changed
+            if current_sequence_data[0] != new_sequence.length() \
+                    or current_sequence_data[1] != new_sequence.gc_percent() \
+                    or current_sequence_data[2] != new_sequence.n_percent() \
+                    or current_sequence_data[6] != new_sequence.nucleotide_sequence():
+                acc_id_changed_not_updatable.append(acc_id)
+
+            else:
+                # detect which tables have changes
+                changes = {
+                    "host_sample": False,
+                    "sequence": False
+                }
+                if current_sequence_data[3] != new_sequence.collection_date()[0] \
+                    or (current_sequence_data[4], current_sequence_data[5]) \
+                        != new_sequence.province__region__country__geo_group()[1:3]:
+                    changes["host_sample"] = True
+                    changes_distribution["host_sample"] = changes_distribution["host_sample"] + 1
+                if current_sequence_data[7] != new_sequence.lineage():
+                    changes["sequence"] = True
+                    changes_distribution["sequence"] = changes_distribution["sequence"] + 1
+
+                if True in changes.values():
+                    acc_id_changed_updatable[acc_id] = changes
 
         # compute additional sets
-        acc_id_changed = set(acc_id_changed)
-        acc_id_unchanged = acc_id_present_in_current_and_remote - acc_id_changed
+        acc_id_changed_not_updatable = set(acc_id_changed_not_updatable)
+        acc_id_unchanged = acc_id_present_in_current_and_remote - acc_id_changed_updatable.keys() - acc_id_changed_not_updatable
 
         if len(acc_id_missing_in_remote) > 5000:
             logger.warning(f'The number of local sequences missing from remote is really HIGH '
@@ -221,20 +246,24 @@ class COGUKSarsCov2:
             for i in range(len(acc_id_missing_in_remote) - 5000):
                 acc_id_missing_in_remote.pop()
 
-        acc_id_to_remove = acc_id_missing_in_remote | acc_id_changed
-        acc_id_to_import = acc_id_missing_in_current | acc_id_changed
+        acc_id_to_remove = acc_id_missing_in_remote | acc_id_changed_not_updatable
+        acc_id_to_import = acc_id_missing_in_current | acc_id_changed_not_updatable
 
         logger.info(f'\n'
                     f'# Sequences from remote source: {len(acc_id_remote)}. Of which\n'
                     f'# {len(acc_id_unchanged)} present also locally and unchanged\n'
                     f'# {len(acc_id_missing_in_current)} never seen before.\n'
-                    f'# {len(acc_id_changed)} have different attributes in the remote source\n'
+                    f'# {len(acc_id_changed_not_updatable)} have changed nuc-seq/length in the remote source and impact the overlaps\n'
+                    f"# {len(acc_id_changed_updatable)} have changes that don't affect overlaps\n"
                     f'# Sequences from local source: {len(acc_id_current)}. Of which\n'
                     f'# {len(acc_id_missing_in_remote)} are missing from remote and must be removed from local.\n'
-                    f'# In conclusion: {len(acc_id_to_remove)} sequences will be removed because missing or changed in remote\n'
-                    f'# and {len(acc_id_to_import)} sequences will be imported because novel or changed in remote.')
+                    f'# In conclusion: {len(acc_id_to_remove)} sequences will be removed because missing or changed nucseq in remote\n'
+                    f'# {len(acc_id_to_import)} sequences will be imported because novel or changed nuc-seq/length in remote\n'
+                    f'# {len(acc_id_changed_updatable)} sequence will be updated with changes from remote.')
 
-        return acc_id_to_remove, acc_id_to_import
+        logger.info(f"distribution of updates: {changes_distribution}")
+
+        return acc_id_to_remove, acc_id_to_import, acc_id_changed_updatable
 
     # following function is a copy of deltas with some debug prints
     # def deltas(self):

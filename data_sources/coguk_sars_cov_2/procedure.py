@@ -81,6 +81,23 @@ class Sequential:
                                                sequencing_project_id)
         main_pipeline_part_3(session, sample, sequence.sequence_id)
 
+    @staticmethod
+    def update_virus_sample(session: Session, sample: COGUKSarsCov2Sample, changes: dict):
+        host_sample_id = None
+        if changes["host_sample"] is True:
+            host_specie_id = vcm.create_or_get_host_specie(session, sample)
+            host_sample_id = vcm.create_or_get_host_sample(session, sample, host_specie_id)
+        if changes["sequence"] is True or changes["host_sample"] is True:
+            updated_lineage = {
+                database.Sequence.lineage: sample.lineage()
+            }
+            vcm.update_sequence(session,
+                                accession_id=sample.primary_accession_number(),
+                                update_content=updated_lineage,
+                                experiment_id=None,
+                                host_sample_id=host_sample_id,
+                                sequencing_project_id=None)
+
     def tear_down(self):
         pass
 
@@ -168,6 +185,24 @@ class Parallel:
             logger.warning(f'maximum number of CPUs or usable process reached. At most {used_processes} will be used.')
         return used_processes
 
+    @staticmethod
+    def update_virus_sample(session: Session, sample: COGUKSarsCov2Sample, changes: dict):
+        # do this synchronously
+        host_sample_id = None
+        if changes["host_sample"] is True:
+            host_specie_id = vcm.create_or_get_host_specie(session, sample)
+            host_sample_id = vcm.create_or_get_host_sample(session, sample, host_specie_id)
+        if changes["sequence"] is True or changes["host_sample"] is True:
+            updated_lineage = {
+                database.Sequence.lineage: sample.lineage()
+            }
+            vcm.update_sequence(session,
+                                accession_id=sample.primary_accession_number(),
+                                update_content=updated_lineage,
+                                experiment_id=None,
+                                host_sample_id=host_sample_id,
+                                sequencing_project_id=None)
+
     def tear_down(self):
         # terminate workers
         for _ in self.workers:
@@ -205,7 +240,8 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
         sleep(15)
     except KeyboardInterrupt:
         return
-    id_outdated_sequences, id_new_sequences = virus.deltas()
+    id_outdated_sequences, id_new_sequences, sequences_to_update = virus.deltas()
+    id_sequences_to_update = sequences_to_update.keys()
     logger.warning('Check deltas.. The program will resume in 30 seconds.')
     try:
         sleep(30)
@@ -221,16 +257,18 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
         event_date=datetime.now().strftime("%Y-%m-%d"),
         event_name=f'COGUK sars_cov_2 sequences update',
         removed_items=len(id_outdated_sequences),
-        changed_items=0,
-        added_items=len(id_new_sequences),  # may eventually change if some sequence are not imported
+        changed_items=len(id_sequences_to_update),  # provisional - (sqlalchemy wants a value at obj creation)
+        added_items=len(id_new_sequences),          # provisional - (sqlalchemy wants a value at obj creation)
     )
+    changed_items = 0
+    added_items = 0
 
     # initialize statistics module
     stats_module.schedule_samples(
         stats_module.StatsBasedOnIds(id_new_sequences, True, virus_id, ['COG-UK']))
 
     # remove outdated sequences
-    logger.info(f'removing outdated sequences')
+    logger.info(f'Removing outdated sequences')
     database.try_py_function(vcm.remove_sequence_and_meta_list, primary_sequence_accession_id=id_outdated_sequences)
     stats_module.removed_samples(id_outdated_sequences)
     for _id in id_outdated_sequences:
@@ -238,18 +276,29 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
         remove_file(file_path)
 
     # prepare multiprocessing
-    logger.info(f'importing virus sequences and related tables')
+    logger.info(f'Importing virus sequences and related tables')
     import_method = Parallel()
 
     vcm.DBCache.commit_changes()
     try:
-        for s in virus.get_sequences_of_updated_source(filter_accession_ids=id_new_sequences):
-            if not s.nucleotide_sequence():
-                logger.info(f'sample {s.primary_accession_number()} skipped because nucleotide sequence is empty or null')
-                continue
+        for s in virus.get_sequences_of_updated_source(filter_accession_ids=id_new_sequences | id_sequences_to_update):
+            sample_accession_id = s.primary_accession_number()
             try:
-                database.try_py_function(import_method.import_virus_sample, s)
-                vcm.DBCache.commit_changes()
+                if sample_accession_id in id_new_sequences:
+                    # import sample from scratch
+                    if not s.nucleotide_sequence():
+                        logger.info(f'sample {s.primary_accession_number()} skipped because nucleotide sequence is empty or null')
+                        continue
+                    else:
+                        database.try_py_function(import_method.import_virus_sample, s)
+                        vcm.DBCache.commit_changes()
+                        added_items += 1
+                elif sample_accession_id in id_sequences_to_update:
+                    # update values inside the database
+                    changes_in_sequence = sequences_to_update[sample_accession_id]
+                    database.try_py_function(import_method.update_virus_sample, s, changes_in_sequence)
+                    vcm.DBCache.commit_changes()
+                    changed_items += 1
             except KeyboardInterrupt:
                 logger.info('Execution aborted by the user. Cancelling waiting tasks...')
                 vcm.DBCache.rollback_changes()
@@ -260,8 +309,7 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
             except Exception:
                 logger.exception(f'exception occurred while working on virus sample {s.primary_accession_number()}')
                 vcm.DBCache.rollback_changes()
-            else:
-                logger.info('main process completed')
+        logger.info('Exit main loop')
     except Exception as e:
         logger.error("AN EXCEPTION CAUSED THE LOOP TO TERMINATE. Workers will be terminated.")
         import_method.discard_waiting_tasks()
@@ -275,7 +323,7 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
             if len(metadata_samples_to_remove) > 100:
                 send_message(f"COGUK importer can have a bug. {len(metadata_samples_to_remove)} out of "
                              f"{len(id_new_sequences)} failed.")
-            pipeline_event.added_items = pipeline_event.added_items - len(metadata_samples_to_remove)
+
             if len(metadata_samples_to_remove) > 0:
                 logger.info(
                     f"Removing metadata leftovers of imports that failed during variant/annotation calling or metadata"
@@ -288,7 +336,14 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
                 database.try_py_function(vcm.remove_sequence_and_meta_list,
                                          primary_sequence_accession_id=metadata_samples_to_remove_as_string)
         except:
-            logger.exception(
-                "Removal of metadata leftovers in the DB of the samples that failed was not successful.")
+            logger.exception("Removal of metadata leftovers in the DB of the samples that failed was not successful.")
 
+        try:
+            logger.info('Removal of unused database objects...')
+            database.try_py_function(vcm.clean_objects_unreachable_from_sequences)
+        except:
+            logger.exception("Removal of unused db objects of samples that have been updated was not successful.")
+
+        pipeline_event.changed_items = changed_items
+        pipeline_event.added_items = added_items
         database.try_py_function(vcm.insert_data_update_pipeline_event, pipeline_event)
