@@ -115,7 +115,7 @@ class GISAIDSarsCov2(VirusSource):
                                                           str(source_prj.submission_date) if source_prj.submission_date is not None else None,
                                                           source_prj.sequencing_lab,
                                                           source_host.province, source_host.region, source_host.country,
-                                                          source_host.isolation_source)
+                                                          source_host.isolation_source, source_seq.lineage)
             return all_sequences
 
         return try_py_function(do)
@@ -233,7 +233,8 @@ class GISAIDSarsCov2(VirusSource):
                     }
                     # changes in sequence table (implies a likely change in the sequence and variants too)
                     if current_sequence_data[2] != new_sequence.gc_percent() \
-                            or current_sequence_data[3] != new_sequence.n_percent():
+                            or current_sequence_data[3] != new_sequence.n_percent() \
+                            or current_sequence_data[12] != new_sequence.lineage():
                         changes["sequence"] = True
                         changes_distribution["sequence"] = changes_distribution["sequence"] + 1
                     if self.annotations_changed(aa_variants_local[acc_id], new_sequence):
