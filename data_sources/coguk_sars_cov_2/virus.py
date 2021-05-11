@@ -240,11 +240,18 @@ class COGUKSarsCov2:
         acc_id_changed_not_updatable = set(acc_id_changed_not_updatable)
         acc_id_unchanged = acc_id_present_in_current_and_remote - acc_id_changed_updatable.keys() - acc_id_changed_not_updatable
 
-        if len(acc_id_missing_in_remote) > 5000:
+        # limit spikes in the number of sequences that changed or have been removed
+        # this slow down the rate of deletions to avoid following the rapid changes of the source
+        if len(acc_id_missing_in_remote) > 2500:
             logger.warning(f'The number of local sequences missing from remote is really HIGH '
-                           f'({len(acc_id_missing_in_remote)}). It has ben cut to 5K max.')
-            for i in range(len(acc_id_missing_in_remote) - 5000):
+                           f'({len(acc_id_missing_in_remote)}). It has ben cut to 2500 max.')
+            for i in range(len(acc_id_missing_in_remote) - 2500):
                 acc_id_missing_in_remote.pop()
+        if len(acc_id_changed_not_updatable) > 2500:
+            logger.warning(f'The number of sequences that changed nucleotide sequence in the updated data is really HIGH '
+                           f'({len(acc_id_changed_not_updatable)}). It has ben cut to 2500K max.')
+            for i in range(len(acc_id_changed_not_updatable) - 2500):
+                acc_id_changed_not_updatable.pop()
 
         acc_id_to_remove = acc_id_missing_in_remote | acc_id_changed_not_updatable
         acc_id_to_import = acc_id_missing_in_current | acc_id_changed_not_updatable
