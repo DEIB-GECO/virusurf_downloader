@@ -15,6 +15,7 @@ from locations import get_local_folder_for, FileType, remove_file
 from xml_helper import text_at_node
 from urllib.request import Request, urlopen
 import nuc_aa_pipeline
+from socket import timeout
 
 
 class COGUKSarsCov2:
@@ -407,9 +408,32 @@ def download_or_get_sample_data(containing_directory: str) -> (str, str):
     def download_coguk_data():
         # make sure the output path does not exist already, or wget assigns a trailing number to it
         logger.info(f'downloading sample sequences for COG-UK data from {COGUKSarsCov2.sequence_file_url} ...')
-        wget.download(COGUKSarsCov2.sequence_file_url, sequence_local_file_path)
+        attempts, success = 0, False
+        while not success:
+            attempts += 1
+            try:
+                wget.download(COGUKSarsCov2.sequence_file_url, sequence_local_file_path)
+                success = True
+            except timeout as e:
+                if attempts <= 3:
+                    logger.error(f"download attempt #{attempts}/3 failed")
+                    logger.error(str(e))
+                if attempts == 3:
+                    raise e
+
         logger.info(f'\ndownloading sample metadata for COG-UK data from {COGUKSarsCov2.metadata_file_url} ...')
-        wget.download(COGUKSarsCov2.metadata_file_url, metadata_local_file_path)
+        attempts, success = 0, False
+        while not success:
+            attempts += 1
+            try:
+                wget.download(COGUKSarsCov2.metadata_file_url, metadata_local_file_path)
+                success = True
+            except timeout as e:
+                if attempts <= 3:
+                    logger.error(f"download attempt #{attempts}/3 failed")
+                    logger.error(str(e))
+                if attempts == 3:
+                    raise e
         logger.info('\n')
 
     sequence_local_file_path = containing_directory + COGUKSarsCov2.sequence_file_url.rsplit('/', maxsplit=1)[1]
