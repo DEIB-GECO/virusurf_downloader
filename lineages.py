@@ -72,7 +72,7 @@ def update_db_with_computed_lineages(path_to_pangolin_output: str):
     db_params = get_database_config_params()
     db_user = db_params["db_user"]
     db_name = db_params["db_name"]
-    psql_cmd = f'psql -h localhost -U {db_user} -d {db_name} -f {tmp_script_path}'
+    psql_cmd = f'psql -v ON_ERROR_STOP=1 -h localhost -U {db_user} -d {db_name} -f {tmp_script_path}'
     logger.trace(f"executing bash command {psql_cmd}")
     try:
         output = check_output(psql_cmd, shell=True, executable='/bin/bash', stderr=subprocess.STDOUT)
