@@ -24,6 +24,7 @@ import dateutil.parser as dateparser
 from geo_groups import geo_groups
 from db_config import read_db_import_configuration as import_config, database
 from logger_settings import send_message
+from multiprocessing import Lock
 
 Entrez.email = "example@mail.com"   # just to silence the warning. Then a correct email can be set later
 
@@ -32,6 +33,7 @@ sc2_settings = ncbi_known_settings["sars_cov_2"]
 sc2_chr_name = sc2_settings["chromosome_name"]
 sc2_snpeff_db_name = sc2_settings["snpeff_db_name"]
 sc2_ann_file_path =  sc2_settings["annotation_file_path"]
+snpeff_semaphore = Lock()
 
 cached_taxonomy = {}
 
@@ -516,7 +518,8 @@ def import_samples_into_vcm():
                     a_sample.nucleotide_sequence(),
                     sc2_chr_name,
                     sc2_ann_file_path,
-                    sc2_snpeff_db_name)
+                    sc2_snpeff_db_name,
+                    snpeff_semaphore)
                 with open(file_path, mode='wb') as cache_file:
                     pickle.dump(annotations_and_nuc_variants, cache_file, protocol=pickle.HIGHEST_PROTOCOL)
             else:

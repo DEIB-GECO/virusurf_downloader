@@ -9,7 +9,7 @@ from queuable_tasks import max_number_of_workers
 from vcm import vcm as vcm
 from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
 from data_sources.coguk_sars_cov_2.virus import COGUKSarsCov2
-from multiprocessing import JoinableQueue, cpu_count, Process
+from multiprocessing import JoinableQueue, cpu_count, Process, Lock
 from sqlalchemy.orm.session import Session
 from db_config import read_db_import_configuration as import_config, database
 from data_sources.ncbi_any_virus.settings import known_settings as ncbi_known_settings
@@ -21,6 +21,7 @@ from logger_settings import send_message
 sc2_chromosome = ncbi_known_settings["sars_cov_2"]["chromosome_name"]
 sc2_annotations_file_path = ncbi_known_settings["sars_cov_2"]["annotation_file_path"]
 sc2_snpeff_db_name = ncbi_known_settings["sars_cov_2"]["snpeff_db_name"]
+snpeff_semaphore = Lock()
 
 
 reference_sequence = None
@@ -29,7 +30,7 @@ virus_id: Optional[int] = None
 import_method = None
 
 
-def main_pipeline_part_3(session: database.Session, sample, db_sequence_id):
+def main_pipeline_part_3(session: database.Session, sample, db_sequence_id, semaphore: Lock):
     file_path = get_local_folder_for(virus.name, FileType.Annotations) + str(sample.internal_id()) + ".pickle"
     try:
         if not os.path.exists(file_path):
@@ -39,7 +40,8 @@ def main_pipeline_part_3(session: database.Session, sample, db_sequence_id):
                 sample.nucleotide_sequence(),
                 sc2_chromosome,
                 sc2_annotations_file_path,
-                sc2_snpeff_db_name)
+                sc2_snpeff_db_name,
+                semaphore)
             with open(file_path, mode='wb') as cache_file:
                 pickle.dump(annotations_and_nuc_variants, cache_file, protocol=pickle.HIGHEST_PROTOCOL)
         else:
@@ -71,6 +73,7 @@ class Sequential:
     def __init__(self):
         global reference_sequence
         reference_sequence = virus.reference_sequence()
+        self.snpeff_semaphore = snpeff_semaphore
 
     def import_virus_sample(self, session: Session, sample: COGUKSarsCov2Sample):
         experiment_id = vcm.create_or_get_experiment(session, sample)
@@ -79,7 +82,7 @@ class Sequential:
         sequencing_project_id = vcm.create_or_get_sequencing_project(session, sample)
         sequence, nucleotide_seq = vcm.create_and_get_sequence(session, sample, virus_id, experiment_id, host_sample_id,
                                                sequencing_project_id)
-        main_pipeline_part_3(session, sample, sequence.sequence_id)
+        main_pipeline_part_3(session, sample, sequence.sequence_id, self.snpeff_semaphore)
 
     @staticmethod
     def update_virus_sample(session: Session, sample: COGUKSarsCov2Sample, changes: dict):
@@ -143,6 +146,7 @@ class Parallel:
             self.refseq = refseq
             self.shared_session: Session = shared_session
             logger.info('worker started')
+            self.snpeff_semaphore = snpeff_semaphore
 
         def run(self):
             try:
@@ -155,7 +159,7 @@ class Parallel:
                     else:
                         sample, sequence_id = job
                         try:
-                            main_pipeline_part_3(self.shared_session, sample, sequence_id)
+                            main_pipeline_part_3(self.shared_session, sample, sequence_id, self.snpeff_semaphore)
                             self.shared_session.commit()
                         except:
                             database.rollback(self.shared_session)

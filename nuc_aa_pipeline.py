@@ -12,6 +12,7 @@ import json
 import datetime
 from loguru import logger
 from Bio.SubsMat import MatrixInfo as matlist
+from multiprocessing import Lock
 
 nuc_aligner: Optional[Align.PairwiseAligner] = None
 allowed_nucleotide_characters = {"a", "g", "c", "t", "y", "r", "w", "s", "k", "m", "d", "v", "h", "b", "n"}
@@ -470,7 +471,7 @@ def add_variant_factory(chr_name):
 
 
 def call_nucleotide_variants(sequence_id, reference, sequence, ref_aligned, seq_aligned, ref_positions, seq_positions,
-                             chr_name, snpeff_database_name):
+                             chr_name, snpeff_database_name, semaphore: Lock):
 
     add_variant = add_variant_factory(chr_name)
     variants = []
@@ -568,13 +569,17 @@ def call_nucleotide_variants(sequence_id, reference, sequence, ref_aligned, seq_
     if variants:
         shell_cmd = "java -jar ./tmp_snpeff/snpEff/snpEff.jar  {}  {} > ./tmp_snpeff/output_{}.vcf" \
             .format(snpeff_database_name, variant_file, sequence_id)
+        # the following version limits the java heap size to 64MB
         # shell_cmd = "java -jar -Xmx64m ./tmp_snpeff/snpEff/snpEff.jar  {}  {} > ./tmp_snpeff/output_{}.vcf" \
-        #     .format(snpeff_database_name, variant_file, sequence_id)  # TODO delete this line
+        #     .format(snpeff_database_name, variant_file, sequence_id)
+        semaphore.acquire(block=True)
         try:
             ret_code = call(shell_cmd, shell=True)  # exceptions are caught externally
         except OSError as e:
             logger.error(f"the process running snpEff raised an exception")
             raise e
+        finally:
+            semaphore.release()
         if ret_code < 0:
             raise ChildProcessError(f"the process running snpEff was terminated by signal {-ret_code}")
         elif ret_code != 0:
@@ -674,7 +679,9 @@ def get_nuc_aligner() -> Align.PairwiseAligner:
     aligner.substitution_matrix = matrix
     return aligner
 
-def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file, snpeff_database_name):
+
+def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file, snpeff_database_name,
+                     snpeff_semaphore: Lock):
     global nuc_aligner
     if not nuc_aligner:
         nuc_aligner = get_nuc_aligner()
@@ -704,7 +711,8 @@ def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file
                                                   ref_positions,
                                                   seq_positions,
                                                   chr_name,
-                                                  snpeff_database_name
+                                                  snpeff_database_name,
+                                                  snpeff_semaphore
                                                   )
 
     annotations = filter_ann_and_variants(

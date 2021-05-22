@@ -29,10 +29,12 @@ from db_config import read_db_import_configuration as db_import_config, database
 from data_sources.ncbi_any_virus import settings
 from logger_settings import send_message
 from http.client import HTTPException
+from multiprocessing import Lock
 
 
 DOWNLOAD_ATTEMPTS = 3
 DOWNLOAD_FAILED_PAUSE_SECONDS = 30
+snpeff_semaphore = Lock()
 
 
 class AnyNCBITaxon:
@@ -723,7 +725,7 @@ def _deltas(virus_id, id_remote_samples):
     return id_unchanged_sequences, id_outdated_sequences, id_new_sequences
 
 
-def main_pipeline_part_3(session: database.Session, sample: AnyNCBIVNucSample, db_sequence_id):
+def main_pipeline_part_3(session: database.Session, sample: AnyNCBIVNucSample, db_sequence_id, semaphore: Lock):
     file_path = get_local_folder_for(settings.generated_dir_name, FileType.Annotations) + str(sample.internal_id()) + ".pickle"
     try:
         # logger.debug(f'callling sequence aligner with args: {db_sequence_id}, <ref_seq>, <seq>, {virus_sequence_chromosome_name}, {annotation_file_path}, {snpeff_db_name}')
@@ -735,7 +737,8 @@ def main_pipeline_part_3(session: database.Session, sample: AnyNCBIVNucSample, d
                 sample.nucleotide_sequence(),
                 settings.chromosome_name,
                 settings.annotation_file_path,
-                settings.snpeff_db_name)
+                settings.snpeff_db_name,
+                semaphore)
             with open(file_path, mode='wb') as cache_file:
                 pickle.dump(annotations_and_nuc_variants, cache_file, protocol=pickle.HIGHEST_PROTOCOL)
         else:
@@ -766,7 +769,7 @@ class ImportAnnotationsAndNucVariants(Task):
 
     def execute(self):
         try:
-            main_pipeline_part_3(self.session, self.sample, self.sequence_id)
+            main_pipeline_part_3(self.session, self.sample, self.sequence_id, self.snpeff_semaphore)
             self.session.commit()
             stats_module.completed_sample(self.sample.alternative_accession_number())
         except database.Rollback:
@@ -778,17 +781,22 @@ class ImportAnnotationsAndNucVariants(Task):
     def use_session(self, session):
         self.session = session
 
+    def use_semaphore(self, semaphore):
+        self.snpeff_semaphore = semaphore
+
 
 class TheWorker(Worker):
     def __init__(self, tasks):
         super(TheWorker, self).__init__(tasks)
         self.worker_session = database.get_session()
+        self.semaphore = snpeff_semaphore
 
     def pick_up_task(self) -> Optional[Task]:
         # noinspection PyTypeChecker
         task: ImportAnnotationsAndNucVariants = super().pick_up_task()
         if task:
             task.use_session(self.worker_session)
+            task.use_semaphore(self.semaphore)
         return task
 
     def release_resources(self):
