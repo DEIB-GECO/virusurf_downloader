@@ -114,7 +114,7 @@ class COGUKSarsCov2:
         meta = {}
         with open(self.metadata_file_path, mode='r') as metadata_file:
             header = metadata_file.readline()  # skip header
-            if not header.startswith("sequence_name,country,adm1,pillar_2,sample_date,epi_week,lineage"):
+            if not header.startswith("sequence_name,country,adm1,is_pillar_2,sample_date,epi_week,lineage"):
                 raise AssertionError(f"Unexpected metadata columns in file {self.metadata_file_path}.\n"
                                      f"Check the compatibility of this new metadata file before importing.")
             for line in metadata_file:
