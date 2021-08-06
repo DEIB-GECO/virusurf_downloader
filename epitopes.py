@@ -15,7 +15,8 @@ from locations import remove_file
 from data_sources.ncbi_any_virus.settings import known_settings
 
 epitope_id_mappings = dict()
-mat_view_template_path = f'.{sep}sql_scripts{sep}epitope_views_n_indexes{sep}template{sep}epitope_4_virus+protein_mat_view_template.sql'
+mat_view_with_data_template_path = f'.{sep}sql_scripts{sep}epitope_views_n_indexes{sep}template{sep}epitope_4_virus+protein_mat_view_with_data_template.sql'
+mat_view_with_no_data_template_path = f'.{sep}sql_scripts{sep}epitope_views_n_indexes{sep}template{sep}epitope_4_virus+protein_mat_view_with_no_data_template.sql'
 
 
 def import_epitopes(virus_taxon_id: int):
@@ -262,7 +263,7 @@ def protein_names_of_virus(virus_taxon_id):
     return protein_names
 
 
-def generate_epitope_mat_view_n_indexes(virus_txid: int, output_file_path: Optional[str] = None):
+def generate_epitope_mat_view_n_indexes(virus_txid: int, ddl_with_data: bool, output_file_path: Optional[str] = None):
     max_db_object_length = 0                # NEEDED TO CHECK THAT MAXIMUM NAME LENGTH IS < 63
     all_proteins_materialized_views = []
 
@@ -273,7 +274,8 @@ def generate_epitope_mat_view_n_indexes(virus_txid: int, output_file_path: Optio
         short_protein_name = short_protein_name[:min(11, len(short_protein_name))]
 
         # generate materialized view and indexes for current virus and protein
-        with open(mat_view_template_path, mode='r') as mat_view_template:
+        template_path = mat_view_with_data_template_path if ddl_with_data else mat_view_with_no_data_template_path
+        with open(template_path, mode='r') as mat_view_template:
             mat_view_of_protein = f"-- MATERIALIZED VIEW AND INDEXES FOR VIRUS {virus_txid} AND PROTEIN {protein}\n"
             for line in mat_view_template.readlines():
                 replaced_line = line\
@@ -314,9 +316,59 @@ def generate_epitope_mat_view_n_indexes(virus_txid: int, output_file_path: Optio
             print('\n\n')
 
 
-def generate_epitope_mat_view_n_indexes_4_all_viruses(generate_into_directory_path: str) -> None:
+def generate_epitope_mat_view_n_indexes_4_all_viruses(generate_into_directory_path: str, ddl_with_data: bool) -> None:
     for virus_short_name in known_settings.keys():
         virus_settings = known_settings[virus_short_name]
         virus_txid = virus_settings["virus_taxon_id"]
-        output_file_path = f'{generate_into_directory_path}{sep}{virus_short_name}_epitope_mat_views_n_indexes.sql'
-        generate_epitope_mat_view_n_indexes(virus_txid, output_file_path)
+        if generate_into_directory_path:
+            output_file_path = f'{generate_into_directory_path}{sep}{virus_short_name}_epitope_mat_views_n_indexes.sql'
+        else:
+            output_file_path = None
+        generate_epitope_mat_view_n_indexes(virus_txid, ddl_with_data, output_file_path)
+
+
+def generate_refresh_epitope_mat_view(virus_txid: int, output_file_path: Optional[str] = None):
+    # find epitope mat view name template
+    epitope_mat_view_template = ""
+    with open(mat_view_with_data_template_path, mode='r') as mat_view_template:
+        for line in mat_view_template.readlines():
+            line = line.strip()
+            if line.startswith("CREATE MATERIALIZED VIEW "):
+                epitope_mat_view_template = "REFRESH MATERIALIZED VIEW " \
+                                            + line.lstrip("CREATE MATERIALIZED VIEW public.") \
+                                            + ";"
+                break
+    if not epitope_mat_view_template:
+        raise AssertionError(f"Couldn't find the template name for the epitope materialized views in file {mat_view_with_data_template_path}")
+
+    all_protein_refresh_commands = []
+    for protein in protein_names_of_virus(virus_txid):
+        # generate protein short name
+        short_protein_name = protein.replace('-', '_').replace('(', '').replace(')', '').replace(' ', '_')\
+            .replace("'", '').replace('/', '_').replace('\\', '_').lower()
+        short_protein_name = short_protein_name[:min(11, len(short_protein_name))]
+
+        all_protein_refresh_commands.append(
+            epitope_mat_view_template
+                .replace('$virus_id', str(virus_txid)) \
+                .replace('$short_prot_name', short_protein_name)
+        )
+
+    if output_file_path:
+        with open(output_file_path, mode="w") as out:
+            for line in all_protein_refresh_commands:
+                out.write(line + "\n")
+    else:
+        for line in all_protein_refresh_commands:
+            print(line + "\n")
+
+
+def generate_refresh_epitope_mat_view_4_all_viruses(generate_into_directory_path: str) -> None:
+    for virus_short_name in known_settings.keys():
+        virus_settings = known_settings[virus_short_name]
+        virus_txid = virus_settings["virus_taxon_id"]
+        if generate_into_directory_path:
+            output_file_path = f'{generate_into_directory_path}{sep}{virus_short_name}_refresh_epitope_mat_views.sql'
+        else:
+            output_file_path = None
+        generate_refresh_epitope_mat_view(virus_txid, output_file_path)
