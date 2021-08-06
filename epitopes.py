@@ -256,8 +256,8 @@ def protein_names_of_virus(virus_taxon_id):
     protein_names = []
     with open(this_virus_settings["annotation_file_path"], mode='r') as annotations_file:
         for line in annotations_file.readlines():
-            _, _, _, _, _, product_name, _, sequence = line.rstrip().split('\t')
-            if sequence and product_name != '.':
+            _, _, _type, coordinates, gene, product_name, code, sequence = line.rstrip().split('\t')
+            if sequence != '.' and product_name != '.':
                 protein_names.append(product_name)
     return protein_names
 
