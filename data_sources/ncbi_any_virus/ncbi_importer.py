@@ -30,6 +30,7 @@ from data_sources.ncbi_any_virus import settings
 from logger_settings import send_message
 from http.client import HTTPException
 from multiprocessing import Lock
+import signal
 
 
 DOWNLOAD_ATTEMPTS = 3
@@ -621,6 +622,7 @@ def _download_as_sample_object(alternative_accession_ids, SampleWrapperClass=Any
     for sample_id in tqdm(alternative_accession_ids):
         try:
             sample_path = download_or_get_ncbi_sample_as_xml(download_sample_dir_path, sample_id)
+            other_sample = SampleWrapperClass(sample_path, sample_id)
         except (urllib.error.URLError, HTTPException):
             logger.exception(
                 f"Network error while downloading sample {sample_id} can't be solved. This sample 'll be skipped.")
@@ -631,14 +633,12 @@ def _download_as_sample_object(alternative_accession_ids, SampleWrapperClass=Any
         except KeyboardInterrupt:
             #  downloaded file may be incomplete
             remove_file(file_path=f"{download_sample_dir_path}{os.path.sep}{sample_id}.xml")
-            return
+            raise
         except TypeError:
             logger.error(f"Error while writing the XML for sample {sample_id}. This sample 'll be skipped.")
             other_reasons_skipped_samples += 1
             remove_file(file_path=f"{download_sample_dir_path}{os.path.sep}{sample_id}.xml")
             continue
-        try:
-            other_sample = SampleWrapperClass(sample_path, sample_id)
         except (lxml.etree.XMLSyntaxError, AssertionError):
             logger.exception(f"Error while parsing the sample XML {sample_path}. The file is being deleted, and the sample skipped.")
             remove_file(file_path=f"{download_sample_dir_path}{os.path.sep}{sample_id}.xml")
@@ -807,6 +807,7 @@ class TheWorker(Worker):
 # noinspection PyPep8Naming
 def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSample, OrganismWrapperClass=AnyNCBITaxon,
                             from_sample: Optional[int] = None, to_sample: Optional[int] = None):
+    interrupted_by_user = False
     # initialize globals
     settings.initialize_settings(*tuple(settings.known_settings[source_name].values()))
     # setup db connection
@@ -951,7 +952,11 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
 
     # prepare multiprocessing
     database.dispose_db_engine()
+    logger.warning("Worker processes will ignore SIGINT. The parent process must handle this condition.")
+    # temporary disables SIGINT handler in parent and restore it after the fork
+    default_ctrl_c_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
     task_manager.wake_up_workers()
+    signal.signal(signal.SIGINT, default_ctrl_c_handler)
     database.re_config_db_engine(False)
 
     logger.info('begin importing new sequences')
@@ -970,8 +975,9 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
                 #     main_pipeline_part_3, sample, sequence_id
                 # )
     except KeyboardInterrupt:
-        # When using multiprocessing, each process receives KeyboardInterrupt. Child process should take care of clean up.
-        # Child process should not raise themselves KeyboardInterrupt
+        # When using multiprocessing, each process receives KeyboardInterrupt. Children processes should take care of clean up.
+        # Children processes should not raise themselves KeyboardInterrupt
+        interrupted_by_user = True
         logger.info('Execution aborted by the user. Cancelling waiting tasks...')
         task_manager.discard_waiting_tasks()
     except Exception as e:
@@ -979,12 +985,16 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
         task_manager.discard_waiting_tasks()
         raise e
     finally:
+        # ignore Ctrl+C in future
+        logger.warning("SIGINT is being ignored during DB finalization process.")
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+
         task_manager.stop_workers()
 
         # remove leftovers of failed samples
         try:
             metadata_samples_to_remove: set = stats_module.get_scheduled_not_completed()
-            if len(metadata_samples_to_remove) > 100:
+            if len(metadata_samples_to_remove) > 100 and not interrupted_by_user:
                 send_message(f"NCBI importer can have a bug. {len(metadata_samples_to_remove)} out of "
                              f"{len(id_new_sequences)} failed.")
             pipeline_event.added_items = pipeline_event.added_items - len(metadata_samples_to_remove)

@@ -1,5 +1,6 @@
 import os
 import pickle
+import signal
 from datetime import datetime
 from queue import Empty
 from time import sleep
@@ -128,11 +129,15 @@ class Parallel:
         if not self.workers:
             global reference_sequence
             reference_sequence = virus.reference_sequence()
+            logger.warning("Worker processes will ignore SIGINT. The parent process must handle this condition.")
+            # temporary disables SIGINT handler in parent and restore it after the fork
+            default_ctrl_c_handler = signal.signal(signal.SIGINT, signal.SIG_IGN)
             # prepare workers
             for _ in range(Parallel.number_of_processes()):
                 worker = Parallel.Consumer(self._queue, virus.reference_sequence(), database.get_session())
                 self.workers.append(worker)
                 worker.start()
+            signal.signal(signal.SIGINT, default_ctrl_c_handler)
 
         # schedule nucleotide variants to be called asynchronously
         sample.on_before_multiprocessing()
@@ -226,6 +231,7 @@ class Parallel:
 
 def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     global virus, virus_id, import_method
+    interrupted_by_user = False
     db_params: dict = import_config.get_database_config_params()
     database.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
     virus = COGUKSarsCov2()
@@ -303,28 +309,32 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
                     database.try_py_function(import_method.update_virus_sample, s, changes_in_sequence)
                     vcm.DBCache.commit_changes()
                     changed_items += 1
-            except KeyboardInterrupt:
-                logger.info('Execution aborted by the user. Cancelling waiting tasks...')
-                vcm.DBCache.rollback_changes()
-                # When using multiprocessing, each process receives KeyboardInterrupt. Child process should take care of clean up.
-                # Child process should not raise themselves KeyboardInterrupt
-                import_method.discard_waiting_tasks()
-                break
             except Exception:
                 logger.exception(f'exception occurred while working on virus sample {s.primary_accession_number()}')
                 vcm.DBCache.rollback_changes()
         logger.info('Exit main loop')
+    except KeyboardInterrupt:
+        interrupted_by_user = True
+        logger.info('Execution aborted by the user. Cancelling waiting tasks...')
+        vcm.DBCache.rollback_changes()
+        # When using multiprocessing, each process receives KeyboardInterrupt. Child process should take care of clean up.
+        # Child process should not raise themselves KeyboardInterrupt
+        import_method.discard_waiting_tasks()
     except Exception as e:
         logger.error("AN EXCEPTION CAUSED THE LOOP TO TERMINATE. Workers will be terminated.")
         import_method.discard_waiting_tasks()
         raise e
     finally:
+        # ignore Ctrl+C in future
+        logger.warning("SIGINT is being ignored during DB finalization process.")
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
+
         import_method.tear_down()
 
         # remove leftovers of failed samples
         try:
             metadata_samples_to_remove: set = stats_module.get_scheduled_not_completed()
-            if len(metadata_samples_to_remove) > 100:
+            if len(metadata_samples_to_remove) > 100 and not interrupted_by_user:
                 send_message(f"COGUK importer can have a bug. {len(metadata_samples_to_remove)} out of "
                              f"{len(id_new_sequences)} failed.")
 

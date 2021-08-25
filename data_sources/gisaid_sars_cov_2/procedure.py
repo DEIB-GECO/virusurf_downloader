@@ -1,3 +1,4 @@
+import signal
 from datetime import datetime
 from typing import Optional
 from loguru import logger
@@ -146,6 +147,7 @@ class Sequential:
 
 
 def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
+    interrupted_by_user = False
     db_params: dict = import_config.get_database_config_params()
     database.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
 
@@ -158,7 +160,10 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     acc_ids_sequences_to_remove, acc_id_sequences_to_import, sequences_to_update = virus.deltas()
     acc_ids_sequences_to_update = sequences_to_update.keys()
     logger.warning('Check deltas.. The program will resume in 30 seconds.')
-    sleep(30)
+    try:
+        sleep(30)
+    except KeyboardInterrupt:
+        return
 
     # MIND FROM_SAMPLE/TO_SAMPLE
     if from_sample is not None and to_sample is not None:
@@ -195,39 +200,47 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
     import_method = Sequential(virus_id)
 
     progress = tqdm(total=len(acc_id_sequences_to_import)+len(acc_ids_sequences_to_update))
-    for sample in virus.get_sequences_of_updated_source():
-        sample_accession_id = sample.primary_accession_number()
-        try:
-            if sample_accession_id in acc_id_sequences_to_import:
-                # import sample from scratch
-                database.try_py_function(import_method.import_virus_sample, sample)
-                vcm.DBCache.commit_changes()
-                progress.update()
-                added_items += 1
-            elif sample_accession_id in acc_ids_sequences_to_update:
-                # update values inside the database
-                changes_in_sequence = sequences_to_update[sample_accession_id]
-                database.try_py_function(import_method.update_virus_sample, sample, changes_in_sequence)
-                vcm.DBCache.commit_changes()
-                progress.update()
-                changed_items += 1
-        except KeyboardInterrupt:
-            logger.info("main loop interrupted by the user")
-            break
-        except:
-            logger.exception(f'exception occurred while working on virus sample {sample.internal_id()}')
-            vcm.DBCache.rollback_changes()
+    try:
+        for sample in virus.get_sequences_of_updated_source():
+            sample_accession_id = sample.primary_accession_number()
+            try:
+                if sample_accession_id in acc_id_sequences_to_import:
+                    # import sample from scratch
+                    database.try_py_function(import_method.import_virus_sample, sample)
+                    vcm.DBCache.commit_changes()
+                    progress.update()
+                    added_items += 1
+                elif sample_accession_id in acc_ids_sequences_to_update:
+                    # update values inside the database
+                    changes_in_sequence = sequences_to_update[sample_accession_id]
+                    database.try_py_function(import_method.update_virus_sample, sample, changes_in_sequence)
+                    vcm.DBCache.commit_changes()
+                    progress.update()
+                    changed_items += 1
+            except:
+                logger.exception(f'exception occurred while working on virus sample {sample.internal_id()}')
+                vcm.DBCache.rollback_changes()
+        logger.info('main loop completed')
+    except KeyboardInterrupt:
+        interrupted_by_user = True
+        logger.info("main loop interrupted by the user")
+    except Exception as e:
+        logger.error("AN EXCEPTION CAUSED THE LOOP TO TERMINATE.")
+        raise e
+    finally:
+        # ignore Ctrl+C in future
+        logger.warning("SIGINT is being ignored during DB finalization process.")
+        signal.signal(signal.SIGINT, signal.SIG_IGN)
 
-    logger.info('main loop completed')
-    import_method.tear_down()
+        import_method.tear_down()
 
-    logger.info('Removal of unused database objects...')
-    database.try_py_function(vcm.clean_objects_unreachable_from_sequences)
+        logger.info('Removal of unused database objects...')
+        database.try_py_function(vcm.clean_objects_unreachable_from_sequences)
 
-    if len(acc_id_sequences_to_import) - added_items > 100:
-        send_message(f"GISAID importer can have a bug. import of {len(acc_id_sequences_to_import) - added_items} out of"
-                     f" {len(acc_id_sequences_to_import)} failed.")
+        if len(acc_id_sequences_to_import) - added_items > 100 and not interrupted_by_user:
+            send_message(f"GISAID importer can have a bug. import of {len(acc_id_sequences_to_import) - added_items} out of"
+                         f" {len(acc_id_sequences_to_import)} failed.")
 
-    pipeline_event.changed_items = changed_items
-    pipeline_event.added_items = added_items
-    database.try_py_function(vcm.insert_data_update_pipeline_event, pipeline_event)
+        pipeline_event.changed_items = changed_items
+        pipeline_event.added_items = added_items
+        database.try_py_function(vcm.insert_data_update_pipeline_event, pipeline_event)

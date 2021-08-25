@@ -144,7 +144,7 @@ def setup_logger(log_file_prefix: str):
 
     warnings.showwarning = customwarn
 
-    logger.info(f"EXECUTING main.py {' '.join(sys.argv[1:])}")
+    logger.info(f"EXECUTING main.py {' '.join(sys.argv[1:])} on PID {os.getpid()}")
 
 
 def _setup_messengers():
