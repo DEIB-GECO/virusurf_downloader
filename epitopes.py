@@ -260,6 +260,8 @@ def protein_names_of_virus(virus_taxon_id):
             _, _, _type, coordinates, gene, product_name, code, sequence = line.rstrip().split('\t')
             if sequence != '.' and product_name != '.':
                 protein_names.append(product_name)
+                # if 'nucleoprotein' in product_name:
+                #     print(f"AHA! FOUND nucleotprotein in line {_type} {coordinates} {product_name} {code}")
     return protein_names
 
 
@@ -372,3 +374,358 @@ def generate_refresh_epitope_mat_view_4_all_viruses(generate_into_directory_path
         else:
             output_file_path = None
         generate_refresh_epitope_mat_view(virus_txid, output_file_path)
+
+
+def test_generate_epitope_mat_view_n_indexes():
+
+    def test_length_with_template(mat_view_template_path, virus_txid, protein, short_protein_name):
+        # generate materialized view and indexes for current virus and protein
+        this_virus_max_db_object_length = 0
+        with open(mat_view_template_path, mode='r') as mat_view_template:
+            mat_view_of_protein = f"-- MATERIALIZED VIEW AND INDEXES FOR VIRUS {virus_txid} AND PROTEIN {protein}\n"
+            for line in mat_view_template.readlines():
+                replaced_line = line \
+                    .replace('$prot_name', protein.replace("'", "''")) \
+                    .replace('$virus_id', str(virus_txid)) \
+                    .replace('$short_prot_name', short_protein_name)
+                mat_view_of_protein += replaced_line
+
+                # test db object name length (must be < 63 chars)
+                object_to_test = None
+                if replaced_line.startswith('CREATE INDEX '):
+                    object_to_test = replaced_line.lstrip('CREATE INDEX ')
+                elif replaced_line.startswith('CREATE MATERIALIZED VIEW '):
+                    object_to_test = replaced_line.lstrip('CREATE MATERIALIZED VIEW ')
+                if object_to_test:
+                    object_to_test = object_to_test.lower().lstrip('public.')
+                    if len(object_to_test) > 63:
+                        print(replaced_line)
+                        raise AssertionError(f'DATABASE OBJECT {object_to_test} ({len(object_to_test)} CHARS)'
+                                             f' IN LINE {replaced_line} EXCEEDS '
+                                             f'THE 63 CHARACTERS LENGTH LIMIT.')
+                    this_virus_max_db_object_length = max(this_virus_max_db_object_length, len(object_to_test))
+
+        print(f"length of longest db_object registered for virus {virus_txid}: {this_virus_max_db_object_length}")
+        return this_virus_max_db_object_length
+
+    all_old_mviews = dict()
+    old_mviews_max_name_length = 0
+    all_new_mviews = dict()
+    new_mviews_max_name_length = 0
+    max_db_object_length = 0
+
+    for virus_short_name in known_settings.keys():
+        virus_settings = known_settings[virus_short_name]
+        virus_txid = virus_settings["virus_taxon_id"]
+
+        all_old_mviews[virus_txid] = []
+        all_new_mviews[virus_txid] = []
+        print(f"MVIEWS for {str(virus_txid)} {virus_short_name}")
+
+        matview_template_name = 'epitope_$virus_id_$short_prot_name'
+
+        all_proteins_materialized_views = []
+
+        for protein in protein_names_of_virus(virus_txid):
+            # generate protein short name
+            short_protein_name = protein.replace('-', '_').replace('(', '').replace(')', '').replace(' ', '_')\
+                .replace("'", '').replace('/', '_').replace('\\', '_').lower()
+            short_protein_name = short_protein_name[:min(11, len(short_protein_name))]
+
+            old_mat_view_name = matview_template_name\
+                .replace('$virus_id', str(virus_txid)) \
+                .replace('$short_prot_name', short_protein_name)
+            all_old_mviews[virus_txid].append(old_mat_view_name)
+
+            # test db object name length (must be < 63 chars)
+            if len(old_mat_view_name) > 63:
+                print(old_mat_view_name)
+                raise AssertionError(f'DATABASE OBJECT {old_mat_view_name} ({len(old_mat_view_name)} CHARS)'
+                                     f' IN LINE {old_mat_view_name} EXCEEDS '
+                                     f'THE 63 CHARACTERS LENGTH LIMIT.')
+            old_mviews_max_name_length = max(old_mviews_max_name_length, len(old_mat_view_name))
+
+
+
+            new_short_protein_name = protein.replace('-', '_').replace('(', '').replace(')', '').replace(' ', '_')\
+                .replace("'", '').replace('/', '_').replace('\\', '_').lower()
+            # min required length is 26
+            new_short_protein_name = new_short_protein_name[:min(28, len(new_short_protein_name))]
+
+            new_mat_view_name = matview_template_name\
+                .replace('$virus_id', str(virus_txid)) \
+                .replace('$short_prot_name', new_short_protein_name)
+            all_new_mviews[virus_txid].append(new_mat_view_name)
+
+            # test db object name length (must be < 63 chars)
+            if len(new_mat_view_name) > 63:
+                print(new_mat_view_name)
+                raise AssertionError(f'DATABASE OBJECT {new_mat_view_name} ({len(new_mat_view_name)} CHARS)'
+                                     f' IN LINE {new_mat_view_name} EXCEEDS '
+                                     f'THE 63 CHARACTERS LENGTH LIMIT.')
+            new_mviews_max_name_length = max(new_mviews_max_name_length, len(new_mat_view_name))
+
+            max_db_object_length = max(max_db_object_length, test_length_with_template(mat_view_with_data_template_path, virus_txid, protein, new_short_protein_name))
+
+            print(f"{old_mat_view_name:<63} | {new_mat_view_name:<63}")
+    print("")
+    print(f"MAX LENGTH: OLD NAMES {old_mviews_max_name_length} | NEW NAMES {new_mviews_max_name_length}")
+    print(f"MAX LENGTH NEW DB OBJECTS: {max_db_object_length}")
+    print("")
+
+    def check_uniqueness(map_vir_to_names: dict):
+        # check uniqueness old mview names
+        map_vir_to_names_flattened = [name for list_of_names in map_vir_to_names.values() for name in list_of_names]
+        set_map_vir_to_names_flattened = set(map_vir_to_names_flattened)
+        if len(set_map_vir_to_names_flattened) != len(map_vir_to_names_flattened):
+            for x in set_map_vir_to_names_flattened:
+                map_vir_to_names_flattened.remove(x)
+            print(f"mview names have {len(map_vir_to_names_flattened)} non-unique mview names in viruses:")
+
+            viruses_with_repeated_v_names = []
+            for x in map_vir_to_names_flattened:
+                for vir_txid, old_mviews_of_virus in map_vir_to_names.items():
+                    for v in old_mviews_of_virus:
+                        if v == x:
+                            viruses_with_repeated_v_names.append(str(vir_txid))
+            print(" ".join(sorted(viruses_with_repeated_v_names)))
+            print("")
+
+    print("CHECK UNIQUENESS OLD MVIEWS")
+    check_uniqueness(all_old_mviews)
+    print("CHECK UNIQUENESS NEW MVIEWS")
+    check_uniqueness(all_new_mviews)
+
+
+def find_mat_views_free_of_conflicts():
+    all_old_mviews = dict()
+
+    for virus_short_name in known_settings.keys():
+        virus_settings = known_settings[virus_short_name]
+        virus_txid = virus_settings["virus_taxon_id"]
+
+        all_old_mviews[virus_txid] = []
+        print(f"MVIEWS for {str(virus_txid)} {virus_short_name}")
+
+        matview_template_name = 'epitope_$virus_id_$short_prot_name'
+
+        max_db_object_length = 0                # NEEDED TO CHECK THAT MAXIMUM NAME LENGTH IS < 63
+        all_proteins_materialized_views = []
+
+        for protein in protein_names_of_virus(virus_txid):
+            # generate protein short name
+            short_protein_name = protein.replace('-', '_').replace('(', '').replace(')', '').replace(' ', '_')\
+                .replace("'", '').replace('/', '_').replace('\\', '_').lower()
+            short_protein_name = short_protein_name[:min(11, len(short_protein_name))]
+
+            old_mat_view_name = matview_template_name\
+                .replace('$virus_id', str(virus_txid)) \
+                .replace('$short_prot_name', short_protein_name)
+            all_old_mviews[virus_txid].append(old_mat_view_name)
+            print(f"{old_mat_view_name:<63} |")
+        print("")
+
+    def extract_only_unique_mat_views(map_vir_to_names: dict):
+        map_vir_to_names_flattened = [name for list_of_names in map_vir_to_names.values() for name in list_of_names]
+        set_map_vir_to_names_flattened = set(map_vir_to_names_flattened)
+
+
+    def check_unueness(map_vir_to_names: dict):
+        # check uniqueness old mview names across all viruses
+        map_vir_to_names_flattened = [name for list_of_names in map_vir_to_names.values() for name in list_of_names]
+        set_map_vir_to_names_flattened = set(map_vir_to_names_flattened)
+        if len(set_map_vir_to_names_flattened) != len(map_vir_to_names_flattened):
+            for x in set_map_vir_to_names_flattened:
+                map_vir_to_names_flattened.remove(x)
+            print(f"mview names have {len(map_vir_to_names_flattened)} non-unique mview names in viruses:")
+
+            viruses_with_repeated_v_names = []
+            for x in map_vir_to_names_flattened:
+                for vir_txid, old_mviews_of_virus in map_vir_to_names.items():
+                    for v in old_mviews_of_virus:
+                        if v == x:
+                            viruses_with_repeated_v_names.append(str(vir_txid))
+            print(" ".join(sorted(viruses_with_repeated_v_names)))
+            print("")
+
+        # find repeated mviews
+        for vir, its_views in map_vir_to_names.items():
+            view_set = set(its_views)
+            duplicate_views = []
+            for v in its_views:
+                try:
+                    view_set.remove(v)
+                except KeyError:
+                    duplicate_views.append(v)
+            if duplicate_views:
+                print(f"in virus {vir}, duplicate views are {duplicate_views}")
+
+    print("CHECK UNIQUENESS OLD MVIEWS")
+    check_unueness(all_old_mviews)
+
+
+def generate_drop_m_views():
+    output_file_path = f'sql_scripts{sep}epitope_views_n_indexes{sep}drop_epitope_mat_views_n_indexes.sql'
+    remove_file(output_file_path)
+    for virus_short_name in known_settings.keys():
+        virus_settings = known_settings[virus_short_name]
+        virus_txid = virus_settings["virus_taxon_id"]
+        for protein in protein_names_of_virus(virus_txid):
+            # generate protein short name
+            short_protein_name = protein.replace('-', '_').replace('(', '').replace(')', '').replace(' ', '_') \
+                .replace("'", '').replace('/', '_').replace('\\', '_').lower()
+            short_protein_name = short_protein_name[:min(11, len(short_protein_name))]
+
+            with open(
+                    "/Users/tom/PycharmProjects/virusurf_downloader/sql_scripts/epitope_views_n_indexes/template/drop_epitope_4_virus+protein_mat_view_template.sql",
+                    "r") as template:
+                with open(output_file_path, "a") as output_file:
+                    output_file.write(f"-- DROP ITEMS OF VIR {virus_short_name} and PROT {protein}\n")
+                    # output_file.write(f"RAISE NOTICE 'DROP ITEMS OF VIR {virus_short_name} and PROT {short_protein_name}';\n")
+                    output_file.write(
+                        template
+                            .read()
+                            .replace('$virus_id', str(virus_txid))
+                            .replace('$short_prot_name', short_protein_name)
+                    )
+                    output_file.write("\n\n")
+
+
+def generate_create_tables():
+    # output_file_path = f'sql_scripts{sep}epitope_views_n_indexes{sep}create_epitope_tables_n_indexes.sql'
+    # remove_file(output_file_path)
+    print("TABLE NAMES AND INDEXES GENERATED USING NEW PROTEIN  NAMING")
+    for virus_short_name in known_settings.keys():
+        output_file_path = f'sql_scripts{sep}epitope_tables{sep}create_table_n_indexes{sep}create_{virus_short_name}.sql'
+        remove_file(output_file_path)
+
+        virus_settings = known_settings[virus_short_name]
+        virus_txid = virus_settings["virus_taxon_id"]
+        for protein in protein_names_of_virus(virus_txid):
+            # generate protein short name
+            short_protein_name = protein.replace('-', '_').replace('(', '').replace(')', '').replace(' ', '_') \
+                .replace("'", '').replace('/', '_').replace('\\', '_').lower()
+            # min required length is 26
+            short_protein_name = short_protein_name[:min(28, len(short_protein_name))]
+
+            with open(
+                    "/Users/tom/PycharmProjects/virusurf_downloader/sql_scripts/epitope_views_n_indexes/template/epitope_4_virus+protein_table_template.sql",
+                    "r") as template:
+                with open(output_file_path, "a") as output_file:
+                    output_file.write(f"-- CREATE TABLES 'N INDEXES OF VIR {virus_short_name} and PROT {protein}\n")
+                    # output_file.write(f"RAISE NOTICE 'CREATE TABLES AND INDEXES OF VIR % and PROT %', {virus_short_name},{short_protein_name};\n")
+                    output_file.write(
+                        template
+                            .read()
+                            .replace('$virus_id', str(virus_txid))
+                            .replace('$short_prot_name', short_protein_name)
+                    )
+                    output_file.write("\n\n")
+
+
+def generate_truncate_fill_tables():
+    print("FILL TABLE INSTR GENERATED USING NEW PROTEIN  NAMING")
+    for virus_short_name in known_settings.keys():
+        output_file_path = f'sql_scripts{sep}epitope_tables{sep}refresh_table{sep}refresh_{virus_short_name}.sql'
+        remove_file(output_file_path)
+
+        virus_settings = known_settings[virus_short_name]
+        virus_txid = virus_settings["virus_taxon_id"]
+        for protein in protein_names_of_virus(virus_txid):
+            # generate protein short name
+            short_protein_name = protein.replace('-', '_').replace('(', '').replace(')', '').replace(' ', '_') \
+                .replace("'", '').replace('/', '_').replace('\\', '_').lower()
+            # min required length is 26
+            short_protein_name = short_protein_name[:min(28, len(short_protein_name))]
+
+            with open(
+                    "/Users/tom/PycharmProjects/virusurf_downloader/sql_scripts/epitope_views_n_indexes/template/truncate_fill_epitope_4_virus+protein_table_template.sql",
+                    "r") as template:
+                with open(output_file_path, "a") as output_file:
+                    output_file.write(f"-- CREATE TABLES 'N INDEXES OF VIR {virus_short_name} and PROT {protein}\n")
+                    # output_file.write(f"RAISE NOTICE 'CREATE TABLES AND INDEXES OF VIR % and PROT %', {virus_short_name},{short_protein_name};\n")
+                    output_file.write(
+                        template
+                            .read()
+                            .replace('$prot_name', protein.replace("'", "''")) \
+                            .replace('$virus_id', str(virus_txid)) \
+                            .replace('$short_prot_name', short_protein_name)
+                    )
+                    output_file.write("\n\n")
+
+
+def generate_drop_tables():
+    output_file_path = f'sql_scripts{sep}epitope_views_n_indexes{sep}drop_epitope_tables_n_indexes.sql'
+    remove_file(output_file_path)
+    print("TABLE NAMES AND INDEXES GENERATED USING NEW PROTEIN  NAMING")
+    for virus_short_name in known_settings.keys():
+        virus_settings = known_settings[virus_short_name]
+        virus_txid = virus_settings["virus_taxon_id"]
+        for protein in protein_names_of_virus(virus_txid):
+            # generate protein short name
+            short_protein_name = protein.replace('-', '_').replace('(', '').replace(')', '').replace(' ', '_') \
+                .replace("'", '').replace('/', '_').replace('\\', '_').lower()
+            # min required length is 26
+            short_protein_name = short_protein_name[:min(28, len(short_protein_name))]
+
+            with open(
+                    "/Users/tom/PycharmProjects/virusurf_downloader/sql_scripts/epitope_views_n_indexes/template/drop_epitope_4_virus+protein_table_template.sql",
+                    "r") as template:
+                with open(output_file_path, "a") as output_file:
+                    output_file.write(f"-- DROP TABLES 'N INDEXES OF VIR {virus_short_name} and PROT {protein}\n")
+                    # output_file.write(f"RAISE NOTICE 'CREATE TABLES AND INDEXES OF VIR % and PROT %', {virus_short_name},{short_protein_name};\n")
+                    output_file.write(
+                        template
+                            .read()
+                            .replace('$virus_id', str(virus_txid))
+                            .replace('$short_prot_name', short_protein_name)
+                    )
+                    output_file.write("\n\n")
+
+
+def generate_truncate_tables():
+    output_file_path = "sql_scripts/epitope_tables/truncate_epitope_4_virus+protein.sql".replace("/", sep)
+    template_string = "TRUNCATE public.epitope_$virus_id_$short_prot_name;"
+    with open(output_file_path, "w") as output_file:
+        print("FILL TABLE INSTR GENERATED USING NEW PROTEIN  NAMING")
+        for virus_short_name in known_settings.keys():
+            virus_settings = known_settings[virus_short_name]
+            virus_txid = virus_settings["virus_taxon_id"]
+            output_file.write(f"-- TRUNCATE EPITOPE TABLES FOR VIR {virus_short_name} TAXON-ID {virus_txid}\n")
+            for protein in protein_names_of_virus(virus_txid):
+                # generate protein short name
+                short_protein_name = protein.replace('-', '_').replace('(', '').replace(')', '').replace(' ', '_') \
+                    .replace("'", '').replace('/', '_').replace('\\', '_').lower()
+                # min required length is 26
+                short_protein_name = short_protein_name[:min(28, len(short_protein_name))]
+
+                output_file.write(template_string
+                                  .replace('$virus_id', str(virus_txid))
+                                  .replace('$short_prot_name', short_protein_name)
+                                  )
+                output_file.write("\n")
+
+            output_file.write("\n\n")
+
+
+if __name__ == '__main__':
+    # print(protein_names_of_virus(186538))
+
+    # test_generate_epitope_mat_view_n_indexes()
+
+    # find_mat_views_free_of_conflicts()
+
+    # generate_epitope_mat_view_n_indexes_4_all_viruses('sql_scripts/epitope_views_n_indexes/create_with_no_data/')
+
+    # generate_refresh_epitope_mat_view_4_all_viruses("sql_scripts/epitope_views_n_indexes/refresh_only/")
+
+    # generate_drop_m_views()
+
+    # generate_create_tables()
+
+    # generate_truncate_fill_tables()
+
+    generate_truncate_tables()
+
+    # generate_drop_tables()
+

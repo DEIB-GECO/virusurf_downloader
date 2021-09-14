@@ -1,0 +1,239 @@
+-- TRUNCATE EPITOPE TABLES FOR VIR sars_cov_2 TAXON-ID 2697049
+TRUNCATE public.epitope_2697049_orf1ab_polyprotein;
+TRUNCATE public.epitope_2697049_nsp12_rna_dependent_rna_poly;
+TRUNCATE public.epitope_2697049_nsp13_helicase;
+TRUNCATE public.epitope_2697049_nsp14_3_to_5_exonuclease;
+TRUNCATE public.epitope_2697049_nsp15_endornase;
+TRUNCATE public.epitope_2697049_nsp16_2_o_ribose_methyltrans;
+TRUNCATE public.epitope_2697049_orf1a_polyprotein;
+TRUNCATE public.epitope_2697049_nsp1_leader_protein;
+TRUNCATE public.epitope_2697049_nsp2;
+TRUNCATE public.epitope_2697049_nsp3;
+TRUNCATE public.epitope_2697049_nsp4;
+TRUNCATE public.epitope_2697049_nsp5_3c_like_proteinase;
+TRUNCATE public.epitope_2697049_nsp6;
+TRUNCATE public.epitope_2697049_nsp7;
+TRUNCATE public.epitope_2697049_nsp8;
+TRUNCATE public.epitope_2697049_nsp9;
+TRUNCATE public.epitope_2697049_nsp10;
+TRUNCATE public.epitope_2697049_nsp11;
+TRUNCATE public.epitope_2697049_spike_surface_glycoprotein;
+TRUNCATE public.epitope_2697049_ns3_orf3a_protein;
+TRUNCATE public.epitope_2697049_e_envelope_protein;
+TRUNCATE public.epitope_2697049_m_membrane_glycoprotein;
+TRUNCATE public.epitope_2697049_ns6_orf6_protein;
+TRUNCATE public.epitope_2697049_ns7a_orf7a_protein;
+TRUNCATE public.epitope_2697049_ns7b_orf7b;
+TRUNCATE public.epitope_2697049_ns8_orf8_protein;
+TRUNCATE public.epitope_2697049_n_nucleocapsid_phosphoprotei;
+TRUNCATE public.epitope_2697049_orf10_protein;
+
+
+-- TRUNCATE EPITOPE TABLES FOR VIR sars_cov_1 TAXON-ID 694009
+TRUNCATE public.epitope_694009_orf1ab_polyprotein;
+TRUNCATE public.epitope_694009_rna_dependent_rna_polymerase;
+TRUNCATE public.epitope_694009_helicase_ntpase;
+TRUNCATE public.epitope_694009_3_to_5_exonuclease;
+TRUNCATE public.epitope_694009_endoribonuclease;
+TRUNCATE public.epitope_694009_2_o_mtase;
+TRUNCATE public.epitope_694009_orf1a_polyprotein;
+TRUNCATE public.epitope_694009_nsp1;
+TRUNCATE public.epitope_694009_nsp2;
+TRUNCATE public.epitope_694009_nsp3;
+TRUNCATE public.epitope_694009_nsp4;
+TRUNCATE public.epitope_694009_3c_like_protease;
+TRUNCATE public.epitope_694009_nsp6;
+TRUNCATE public.epitope_694009_nsp7;
+TRUNCATE public.epitope_694009_nsp8;
+TRUNCATE public.epitope_694009_nsp9;
+TRUNCATE public.epitope_694009_nsp10;
+TRUNCATE public.epitope_694009_ndp11;
+TRUNCATE public.epitope_694009_spike_glycoprotein;
+TRUNCATE public.epitope_694009_orf3a_protein;
+TRUNCATE public.epitope_694009_orf3b_protein;
+TRUNCATE public.epitope_694009_small_envelope_protein;
+TRUNCATE public.epitope_694009_membrane_glycoprotein_m;
+TRUNCATE public.epitope_694009_orf6_protein;
+TRUNCATE public.epitope_694009_orf7a_protein;
+TRUNCATE public.epitope_694009_orf7b_protein;
+TRUNCATE public.epitope_694009_orf8a_protein;
+TRUNCATE public.epitope_694009_orf8b_protein;
+TRUNCATE public.epitope_694009_nucleocapsid_protein;
+TRUNCATE public.epitope_694009_orf9b_protein;
+TRUNCATE public.epitope_694009_orf9a_protein;
+
+
+-- TRUNCATE EPITOPE TABLES FOR VIR dengue_1 TAXON-ID 11053
+TRUNCATE public.epitope_11053_polyprotein;
+TRUNCATE public.epitope_11053_anchored_capsid_protein_ancc;
+TRUNCATE public.epitope_11053_capsid_protein_c;
+TRUNCATE public.epitope_11053_membrane_glycoprotein_precur;
+TRUNCATE public.epitope_11053_protein_pr;
+TRUNCATE public.epitope_11053_membrane_glycoprotein_m;
+TRUNCATE public.epitope_11053_envelope_protein_e;
+TRUNCATE public.epitope_11053_nonstructural_protein_ns1;
+TRUNCATE public.epitope_11053_nonstructural_protein_ns2a;
+TRUNCATE public.epitope_11053_nonstructural_protein_ns2b;
+TRUNCATE public.epitope_11053_nonstructural_protein_ns3;
+TRUNCATE public.epitope_11053_nonstructural_protein_ns4a;
+TRUNCATE public.epitope_11053_protein_2k;
+TRUNCATE public.epitope_11053_nonstructural_protein_ns4b;
+TRUNCATE public.epitope_11053_rna_dependent_rna_polymerase;
+
+
+-- TRUNCATE EPITOPE TABLES FOR VIR dengue_2 TAXON-ID 11060
+TRUNCATE public.epitope_11060_polyprotein;
+TRUNCATE public.epitope_11060_anchored_capsid_protein_ancc;
+TRUNCATE public.epitope_11060_capsid_protein_c;
+TRUNCATE public.epitope_11060_membrane_glycoprotein_precur;
+TRUNCATE public.epitope_11060_protein_pr;
+TRUNCATE public.epitope_11060_membrane_glycoprotein_m;
+TRUNCATE public.epitope_11060_envelope_protein_e;
+TRUNCATE public.epitope_11060_nonstructural_protein_ns1;
+TRUNCATE public.epitope_11060_nonstructural_protein_ns2a;
+TRUNCATE public.epitope_11060_nonstructural_protein_ns2b;
+TRUNCATE public.epitope_11060_nonstructural_protein_ns3;
+TRUNCATE public.epitope_11060_nonstructural_protein_ns4a;
+TRUNCATE public.epitope_11060_protein_2k;
+TRUNCATE public.epitope_11060_nonstructural_protein_ns4b;
+TRUNCATE public.epitope_11060_rna_dependent_rna_polymerase;
+
+
+-- TRUNCATE EPITOPE TABLES FOR VIR dengue_3 TAXON-ID 11069
+TRUNCATE public.epitope_11069_polyprotein;
+TRUNCATE public.epitope_11069_anchored_capsid_protein_ancc;
+TRUNCATE public.epitope_11069_capsid_protein_c;
+TRUNCATE public.epitope_11069_membrane_glycoprotein_precur;
+TRUNCATE public.epitope_11069_protein_pr;
+TRUNCATE public.epitope_11069_membrane_glycoprotein_m;
+TRUNCATE public.epitope_11069_envelope_protein_e;
+TRUNCATE public.epitope_11069_nonstructural_protein_ns1;
+TRUNCATE public.epitope_11069_nonstructural_protein_ns2a;
+TRUNCATE public.epitope_11069_nonstructural_protein_ns2b;
+TRUNCATE public.epitope_11069_nonstructural_protein_ns3;
+TRUNCATE public.epitope_11069_nonstructural_protein_ns4a;
+TRUNCATE public.epitope_11069_protein_2k;
+TRUNCATE public.epitope_11069_nonstructural_protein_ns4b;
+TRUNCATE public.epitope_11069_rna_dependent_rna_polymerase;
+
+
+-- TRUNCATE EPITOPE TABLES FOR VIR dengue_4 TAXON-ID 11070
+TRUNCATE public.epitope_11070_polyprotein;
+TRUNCATE public.epitope_11070_anchored_capsid_protein_ancc;
+TRUNCATE public.epitope_11070_capsid_protein_c;
+TRUNCATE public.epitope_11070_membrane_glycoprotein_precur;
+TRUNCATE public.epitope_11070_protein_pr;
+TRUNCATE public.epitope_11070_membrane_glycoprotein_m;
+TRUNCATE public.epitope_11070_envelope_protein_e;
+TRUNCATE public.epitope_11070_nonstructural_protein_ns1;
+TRUNCATE public.epitope_11070_nonstructural_protein_ns2a;
+TRUNCATE public.epitope_11070_nonstructural_protein_ns2b;
+TRUNCATE public.epitope_11070_nonstructural_protein_ns3;
+TRUNCATE public.epitope_11070_nonstructural_protein_ns4a;
+TRUNCATE public.epitope_11070_protein_2k;
+TRUNCATE public.epitope_11070_nonstructural_protein_ns4b;
+TRUNCATE public.epitope_11070_rna_dependent_rna_polymerase;
+
+
+-- TRUNCATE EPITOPE TABLES FOR VIR mers TAXON-ID 1335626
+TRUNCATE public.epitope_1335626_1ab_polyprotein;
+TRUNCATE public.epitope_1335626_rna_dependent_rna_polymerase;
+TRUNCATE public.epitope_1335626_hel;
+TRUNCATE public.epitope_1335626_exon;
+TRUNCATE public.epitope_1335626_nendou;
+TRUNCATE public.epitope_1335626_2_o_methyltransferase;
+TRUNCATE public.epitope_1335626_1a_polyprotein;
+TRUNCATE public.epitope_1335626_nsp1_protein;
+TRUNCATE public.epitope_1335626_nsp2_protein;
+TRUNCATE public.epitope_1335626_nsp3_protein;
+TRUNCATE public.epitope_1335626_nsp4_protein;
+TRUNCATE public.epitope_1335626_nsp5_protein;
+TRUNCATE public.epitope_1335626_nsp6_protein;
+TRUNCATE public.epitope_1335626_nsp7_protein;
+TRUNCATE public.epitope_1335626_nsp8_protein;
+TRUNCATE public.epitope_1335626_nsp9_protein;
+TRUNCATE public.epitope_1335626_nsp10_protein;
+TRUNCATE public.epitope_1335626_nsp11_protein;
+TRUNCATE public.epitope_1335626_spike_protein;
+TRUNCATE public.epitope_1335626_ns3_protein;
+TRUNCATE public.epitope_1335626_ns4a_protein;
+TRUNCATE public.epitope_1335626_ns4b_protein;
+TRUNCATE public.epitope_1335626_ns5_protein;
+TRUNCATE public.epitope_1335626_envelope_protein;
+TRUNCATE public.epitope_1335626_membrane_protein;
+TRUNCATE public.epitope_1335626_nucleocapsid_protein;
+TRUNCATE public.epitope_1335626_orf8b_protein;
+
+
+-- TRUNCATE EPITOPE TABLES FOR VIR zaire_ebolavirus TAXON-ID 186538
+TRUNCATE public.epitope_186538_nucleoprotein;
+TRUNCATE public.epitope_186538_polymerase_complex_protein;
+TRUNCATE public.epitope_186538_matrix_protein;
+TRUNCATE public.epitope_186538_spike_glycoprotein;
+TRUNCATE public.epitope_186538_small_secreted_glycoprotein;
+TRUNCATE public.epitope_186538_second_secreted_glycoprotein;
+TRUNCATE public.epitope_186538_minor_nucleoprotein;
+TRUNCATE public.epitope_186538_membrane_associated_protein;
+TRUNCATE public.epitope_186538_rna_dependent_rna_polymerase;
+
+
+-- TRUNCATE EPITOPE TABLES FOR VIR sudan_ebolavirus TAXON-ID 186540
+TRUNCATE public.epitope_186540_nucleoprotein;
+TRUNCATE public.epitope_186540_polymerase_complex_protein;
+TRUNCATE public.epitope_186540_matrix_protein;
+TRUNCATE public.epitope_186540_spike_glycoprotein;
+TRUNCATE public.epitope_186540_small_secreted_glycoprotein;
+TRUNCATE public.epitope_186540_second_secreted_glycoprotein;
+TRUNCATE public.epitope_186540_minor_nucleoprotein;
+TRUNCATE public.epitope_186540_membrane_associated_protein;
+TRUNCATE public.epitope_186540_rna_dependent_rna_polymerase;
+
+
+-- TRUNCATE EPITOPE TABLES FOR VIR reston_ebolavirus TAXON-ID 186539
+TRUNCATE public.epitope_186539_nucleoprotein;
+TRUNCATE public.epitope_186539_polymerase_complex_protein;
+TRUNCATE public.epitope_186539_matrix_protein;
+TRUNCATE public.epitope_186539_spike_glycoprotein;
+TRUNCATE public.epitope_186539_small_secreted_glycoprotein;
+TRUNCATE public.epitope_186539_second_secreted_glycoprotein;
+TRUNCATE public.epitope_186539_minor_nucleoprotein;
+TRUNCATE public.epitope_186539_membrane_associated_protein;
+TRUNCATE public.epitope_186539_rna_dependent_rna_polymerase;
+
+
+-- TRUNCATE EPITOPE TABLES FOR VIR bundibugyo_ebolavirus TAXON-ID 565995
+TRUNCATE public.epitope_565995_nucleoprotein;
+TRUNCATE public.epitope_565995_polymerase_complex_protein;
+TRUNCATE public.epitope_565995_matrix_protein;
+TRUNCATE public.epitope_565995_spike_glycoprotein;
+TRUNCATE public.epitope_565995_small_secreted_glycoprotein;
+TRUNCATE public.epitope_565995_second_secreted_glycoprotein;
+TRUNCATE public.epitope_565995_minor_nucleoprotein;
+TRUNCATE public.epitope_565995_membrane_associated_protein;
+TRUNCATE public.epitope_565995_rna_dependent_rna_polymerase;
+
+
+-- TRUNCATE EPITOPE TABLES FOR VIR bombali_ebolavirus TAXON-ID 2010960
+TRUNCATE public.epitope_2010960_nucleoprotein;
+TRUNCATE public.epitope_2010960_polymerase_complex_protein;
+TRUNCATE public.epitope_2010960_matrix_protein;
+TRUNCATE public.epitope_2010960_spike_glycoprotein;
+TRUNCATE public.epitope_2010960_small_secreted_glycoprotein;
+TRUNCATE public.epitope_2010960_second_secreted_glycoprotein;
+TRUNCATE public.epitope_2010960_minor_nucleoprotein;
+TRUNCATE public.epitope_2010960_membrane_associated_protein;
+TRUNCATE public.epitope_2010960_rna_dependent_rna_polymerase;
+
+
+-- TRUNCATE EPITOPE TABLES FOR VIR tai_forest_ebolavirus TAXON-ID 186541
+TRUNCATE public.epitope_186541_nucleoprotein;
+TRUNCATE public.epitope_186541_polymerase_complex_protein;
+TRUNCATE public.epitope_186541_matrix_protein;
+TRUNCATE public.epitope_186541_spike_glycoprotein;
+TRUNCATE public.epitope_186541_small_secreted_glycoprotein;
+TRUNCATE public.epitope_186541_second_secreted_glycoprotein;
+TRUNCATE public.epitope_186541_minor_nucleoprotein;
+TRUNCATE public.epitope_186541_membrane_associated_protein;
+TRUNCATE public.epitope_186541_rna_dependent_rna_polymerase;
+
+
