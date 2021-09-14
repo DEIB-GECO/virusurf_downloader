@@ -26,14 +26,14 @@ wrong_arguments_message = "Accepted parameters:\n" \
                           "\tdownload epitopes" + "\n" \
                           "\tepitopes <db_name> " + "|".join(ncbi_virus_names) + "\n" \
                           "\toverlaps <source1>_<source2> <commit to the DB ?>\n" \
-                          "\tlineages <db_name> " + "|".join(ncbi_virus_names) + "all|only_null_lineages|all_except_coguk" + "\n"
+                          "\tlineages <db_name> " + "|".join(ncbi_virus_names) + "all|only_null_lineages|all_except_coguk" + "\n" \
+                          "\tstop <import|download|epitopes|overlaps|lineages> <optional_arg> <optional_arg>"
 wrong_arguments_message += 'When action is "import", the source name can be optionally followed by a range of samples to import as <min> (included) <max> (excluded).\n'
 
 
-def cancel_old_run():
-    ## find old runs by looking to processes executing a command like this one, up to the 4th argument
-    process_command_words = set(sys.argv[:4])
-    logger.info(f"Searching previous instance with keywords: python + {' '.join(process_command_words)}")
+def cancel_an_old_run_with_parameters(args: list):
+    logger.info(f"Searching an older instance running with keywords: python + {' '.join(args)}")
+    process_command_words = set(args)
     result = []
     for process in psutil.process_iter():
         try:
@@ -67,6 +67,8 @@ def cancel_old_run():
                                   f"{process_to_terminate.pid} is still alive after "
                                   f"{TINE_TO_WAIT_FOR_TERMINATION} seconds. Maybe there is a bug. "
                                   f"Current time is {datetime.now()} UTC.")
+    else:
+        logger.info(f"No old instance found.")
 
 
 def start():
@@ -113,6 +115,9 @@ def start():
         elif 'download' in action:
             _what_to_download = sys.argv[2]
             log_file_keyword = f"download_{_what_to_download}"
+        elif 'stop' in action:
+            _commands_of_run_to_be_stopped = sys.argv[2:5]
+            log_file_keyword = f"stop_{'_'.join(_commands_of_run_to_be_stopped)}"
         else:
             log_file_keyword = action
     except (IndexError, KeyError):
@@ -123,8 +128,10 @@ def start():
     setup_logger(log_file_keyword)
 
     #   #############################     CANCEL PREVIOUS RUN (IF ANY)      ###################
+    # find old runs by looking to processes executing a command like this one, up to the 4th argument
+    # for example: main.py import db_name sars_cov_2
     try:
-        cancel_old_run()
+        cancel_an_old_run_with_parameters(sys.argv[:4])
     except SystemError as e:
         logger_settings.send_message(f"FATAL ERROR.\nSystemError {e}",
                                      block=True)
@@ -178,6 +185,9 @@ def start():
         elif 'overlaps' in action:
             from overlaps import overlaps_controller
             overlaps_controller.run()
+        elif 'stop' in action:
+            _commands_of_run_to_be_stopped.insert(0, sys.argv[0])  # add this module's name
+            cancel_an_old_run_with_parameters(_commands_of_run_to_be_stopped)
         else:
             logger.error(f'the argument {action} is not recognised.\n' + wrong_arguments_message)
     except:
