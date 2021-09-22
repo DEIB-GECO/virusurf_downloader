@@ -354,7 +354,9 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
 
         try:
             logger.info('Removal of unused database objects...')
-            database.try_py_function(vcm.clean_objects_unreachable_from_sequences)
+            # in coguk we update only host_sample/host_specie/sequence details. All other changes trigger a deletion+insertion
+            # this is needed to remove objects that became unlinked after an update (e.g. a change to sequence's host_sample_id)
+            database.try_py_function(vcm.clean_host_samples_and_species_not_reachable_from_sequence)
         except:
             logger.exception("Removal of unused db objects of samples that have been updated was not successful.")
 

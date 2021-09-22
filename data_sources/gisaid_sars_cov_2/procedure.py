@@ -235,6 +235,7 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
         import_method.tear_down()
 
         logger.info('Removal of unused database objects...')
+        # this is to remove leftovers of updated sequences (e.g. host_samples unreachable from any sequence)
         database.try_py_function(vcm.clean_objects_unreachable_from_sequences)
 
         if len(acc_id_sequences_to_import) - added_items > 100 and not interrupted_by_user:

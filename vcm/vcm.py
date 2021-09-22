@@ -794,6 +794,21 @@ def clean_objects_unreachable_from_sequences(session: Session):
         ).delete(synchronize_session=False)
 
 
+def clean_host_samples_and_species_not_reachable_from_sequence(session: Session):
+    session\
+        .query(HostSample) \
+        .filter(HostSample.host_sample_id.notin_(
+            session.query(Sequence.host_sample_id)
+        )).delete(synchronize_session=False)
+    # host specie
+    session\
+        .query(HostSpecie) \
+        .filter(
+            (HostSpecie.host_id.notin_(session.query(HostSample.host_id))) &
+            (HostSpecie.host_id.notin_(session.query(Epitope.host_id)))
+        ).delete(synchronize_session=False)
+
+
 def insert_data_update_pipeline_event(session, event: PipelineEvent):
     try:
         session.add(event)
