@@ -54,7 +54,7 @@ def cancel_an_old_run_with_parameters(args: list):
                               f"Current time is {datetime.now()} UTC.")
         else:
             process_to_terminate = psutil.Process(previous_instances[0][0])
-            logger.info(f"Terminating old instance: python {' '.join(process_to_terminate.cmdline())} with PID "
+            logger.info(f"Terminating old instance: {' '.join(process_to_terminate.cmdline())} with PID "
                         f"{process_to_terminate.pid}")
             process_to_terminate.send_signal(signal.SIGINT)
             TINE_TO_WAIT_FOR_TERMINATION = 60 * 60
@@ -63,10 +63,10 @@ def cancel_an_old_run_with_parameters(args: list):
                             f"{process_to_terminate.pid} to terminate itself.")
                 process_to_terminate.wait(TINE_TO_WAIT_FOR_TERMINATION)     # Keyboard Interrupt handled outside
             except psutil.TimeoutExpired:
-                raise SystemError(f"Process python {' '.join(process_to_terminate.cmdline())} with PID "
-                                  f"{process_to_terminate.pid} is still alive after "
-                                  f"{TINE_TO_WAIT_FOR_TERMINATION} seconds. Maybe there is a bug. "
-                                  f"Current time is {datetime.now()} UTC.")
+                raise TimeoutError(f"Process {' '.join(process_to_terminate.cmdline())} with PID "
+                                   f"{process_to_terminate.pid} is still alive after "
+                                   f"{TINE_TO_WAIT_FOR_TERMINATION} seconds. Maybe there is a bug. "
+                                   f"Current time is {datetime.now()} LOCAL TIME.")
     else:
         logger.info(f"No old instance found.")
 
@@ -132,9 +132,10 @@ def start():
     # for example: main.py import db_name sars_cov_2
     try:
         cancel_an_old_run_with_parameters(sys.argv[:4])
-    except SystemError as e:
-        logger_settings.send_message(f"FATAL ERROR.\nSystemError {e}",
-                                     block=True)
+    except TimeoutError as e:
+        error_msg = f"FATAL ERROR.\nTimeoutError {e}"
+        logger.error(error_msg)
+        logger_settings.send_message(error_msg, block=True)
         sys.exit(1)
     except KeyboardInterrupt:
         logger.info("Operation aborted. Launch of a new instance canceled.")
