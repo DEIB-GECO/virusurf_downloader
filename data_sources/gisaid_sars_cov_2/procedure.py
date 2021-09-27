@@ -217,13 +217,15 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
                     vcm.DBCache.commit_changes()
                     progress.update()
                     changed_items += 1
+            except KeyboardInterrupt:
+                vcm.DBCache.rollback_changes()
+                interrupted_by_user = True
+                logger.info("main loop interrupted by the user")
+                break
             except:
                 logger.exception(f'exception occurred while working on virus sample {sample.internal_id()}')
                 vcm.DBCache.rollback_changes()
-        logger.info('main loop completed')
-    except KeyboardInterrupt:
-        interrupted_by_user = True
-        logger.info("main loop interrupted by the user")
+        logger.info('main loop terminated')
     except Exception as e:
         logger.error("AN EXCEPTION CAUSED THE LOOP TO TERMINATE.")
         raise e
