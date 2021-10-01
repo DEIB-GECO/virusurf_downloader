@@ -69,7 +69,7 @@ class GISAIDSarsCov2(VirusSource):
         if not os.path.exists(self.credentials_path):
             with open(self.credentials_path, mode='w') as credentials_file:
                 credentials_file.write("# Lines starting with # are comments.\n"
-                                       "# Write in the following line <username>,<password> to use for downloading "
+                                       "# Write in the following line <username>,<password>,<url> to use for downloading "
                                        "updated sequence data from GISAID.")
             raise AssertionError(f"No GISAID credentials provided. Please update the file at path {self.credentials_path}")
         with open(self.credentials_path, mode='r') as credentials_file:
@@ -77,9 +77,10 @@ class GISAIDSarsCov2(VirusSource):
                 if line.startswith("#"):
                     continue
                 try:
-                    username, psw = line.split(",")
+                    username, psw, url = line.split(",")
                     username = username.strip().rstrip()
                     psw = psw.strip().rstrip()
+                    url = url.strip()
                 except Exception as e:
                     logger.error(f"Error encountered while parsing GISAID credentials file at path {self.credentials_path}")
                     raise e
@@ -90,9 +91,9 @@ class GISAIDSarsCov2(VirusSource):
         download_path += "export_" + date.today().strftime("%Y-%b-%d") + ".json.bz2"
         remove_file(download_path)
         remove_file(self.data_path)
-        os.system(f"wget --user {username} --password {psw} -O {download_path} ***REMOVED***")
+        os.system(f"wget --user {username} --password {psw} -O {download_path} {url}")
         if not exists(download_path):
-            raise ValueError("download of ***REMOVED*** with username "
+            raise ValueError(f"download of {url} with username "
                              f"'{username}' and password '{psw}' failed.")
         # extract archive to self.data_path
         with bz2.open(filename=download_path, mode='rt') as compressed_file:
