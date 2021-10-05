@@ -4,7 +4,7 @@
 # set your user as owner of the script: chown myusername: myscript.sh
 
 echo "Assumptions for the proper execution of this script:
-- command line arguments: <virusurf_directory_path> <virusurf_updating_databases_path>
+- command line arguments: <virusurf_directory_path> <virusurf_updating_databases_path> <(optional)genbank|coguk|gisaid>
 - the postgres password file contains one entry for each of the given databases formatted as host:port:dat_name:user:psw;
 - a conda environment named 'vcm' exists and it has the packages necessary for virusurf_downlaoder already installed;"
 sleep 10
@@ -13,13 +13,17 @@ sleep 10
 # input parameters
 virusurf_dir=${1}/
 virusurf_updating_databases_path=$2
+operation_to_stop=$3
 database_name=$(head -1 "$virusurf_updating_databases_path")
 database_name_gisaid=$(head -2 "$virusurf_updating_databases_path" | tail -1)
 echo "Check of arguments:
 - VIRUSURF DIR: ${virusurf_dir}
 - VIRUSURF NORMAL DB: ${database_name};
-- VIRUSURF GISAID DB ${database_name_gisaid};
-The program resumes in 10 seconds."
+- VIRUSURF GISAID DB ${database_name_gisaid};"
+if [ ! -z $operation_to_stop ]; then
+  echo "OPERATION TO STOP: ${operation_to_stop}"
+fi
+echo "The program resumes in 10 seconds."
 sleep 10
 
 # define utility functions
@@ -46,10 +50,21 @@ check_exit_code "$?"
 
 ##############################################################################
 cd $virusurf_dir
-echo "Stopping import of genbank sars cov 2 on ${database_name}"
-python main.py stop import ${database_name} sars_cov_2
-echo "Stopping import of coguk sars cov 2 on ${database_name}"
-python main.py stop import ${database_name} coguk
-echo "Stopping import of gisaid on ${database_name_gisaid}"
-python main.py stop import ${database_name_gisaid} gisaid
+if [ -z $operation_to_stop ]; then
+  echo "Stopping import of genbank sars cov 2 on ${database_name}"
+  python main.py stop import ${database_name} sars_cov_2
+  echo "Stopping import of coguk sars cov 2 on ${database_name}"
+  python main.py stop import ${database_name} coguk
+  echo "Stopping import of gisaid on ${database_name_gisaid}"
+  python main.py stop import ${database_name_gisaid} gisaid
+elif [ $operation_to_stop == "genbank" ]; then
+  echo "Stopping import of genbank sars cov 2 on ${database_name}"
+  python main.py stop import ${database_name} sars_cov_2
+elif [ $operation_to_stop == "coguk" ]; then
+  echo "Stopping import of coguk sars cov 2 on ${database_name}"
+  python main.py stop import ${database_name} coguk
+elif [ $operation_to_stop == "gisaid" ]; then
+  echo "Stopping import of gisaid on ${database_name_gisaid}"
+  python main.py stop import ${database_name_gisaid} gisaid
+fi
 
