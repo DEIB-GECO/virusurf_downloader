@@ -1,0 +1,6800 @@
+-- DROP ITEMS OF VIR sars_cov_2 and PROT ORF1ab polyprotein
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_orf1ab_poly__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_orf1ab_poly;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP12 (RNA-dependent RNA polymerase)
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp12_rna_d__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp12_rna_d;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP13 (helicase)
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp13_helic__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp13_helic;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP14 (3'-to-5' exonuclease)
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp14_3_to___virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp14_3_to_;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP15 (endoRNAse)
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp15_endor__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp15_endor;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP16 (2'-O-ribose methyltransferase)
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp16_2_o_r__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp16_2_o_r;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT ORF1a polyprotein
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_orf1a_polyp__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_orf1a_polyp;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP1 (leader protein)
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp1_leader__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp1_leader;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP2
+DROP INDEX IF EXISTS epi_2697049_nsp2__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp2__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp2__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp2__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp2__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp2__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp2__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp2__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp2__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp2__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp2__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp2;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP3
+DROP INDEX IF EXISTS epi_2697049_nsp3__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp3__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp3__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp3__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp3__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp3__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp3__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp3__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp3__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp3__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp3__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp3;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP4
+DROP INDEX IF EXISTS epi_2697049_nsp4__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp4__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp4__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp4__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp4__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp4__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp4__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp4__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp4__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp4__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp4__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp4;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP5 (3C-like proteinase)
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp5_3c_lik__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp5_3c_lik;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP6
+DROP INDEX IF EXISTS epi_2697049_nsp6__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp6__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp6__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp6__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp6__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp6__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp6__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp6__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp6__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp6__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp6__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp6;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP7
+DROP INDEX IF EXISTS epi_2697049_nsp7__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp7__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp7__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp7__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp7__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp7__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp7__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp7__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp7__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp7__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp7__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp7;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP8
+DROP INDEX IF EXISTS epi_2697049_nsp8__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp8__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp8__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp8__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp8__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp8__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp8__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp8__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp8__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp8__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp8__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp8;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP9
+DROP INDEX IF EXISTS epi_2697049_nsp9__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp9__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp9__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp9__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp9__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp9__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp9__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp9__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp9__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp9__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp9__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp9;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP10
+DROP INDEX IF EXISTS epi_2697049_nsp10__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp10__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp10__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp10__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp10__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp10__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp10__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp10__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp10__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp10__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp10__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp10;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NSP11
+DROP INDEX IF EXISTS epi_2697049_nsp11__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp11__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_nsp11__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_nsp11__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_nsp11__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_nsp11__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_nsp11__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_nsp11__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_nsp11__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_nsp11__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_nsp11__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_nsp11;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT Spike (surface glycoprotein)
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_spike_surfa__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_spike_surfa;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NS3 (ORF3a protein)
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_ns3_orf3a_p__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_ns3_orf3a_p;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT E (envelope protein)
+DROP INDEX IF EXISTS epi_2697049_e_envelope___cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_e_envelope___virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_e_envelope_;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT M (membrane glycoprotein)
+DROP INDEX IF EXISTS epi_2697049_m_membrane___cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_m_membrane___virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_m_membrane_;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NS6 (ORF6 protein)
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_ns6_orf6_pr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_ns6_orf6_pr;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NS7a (ORF7a protein)
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_ns7a_orf7a___virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_ns7a_orf7a_;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NS7b (ORF7b)
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_ns7b_orf7b__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_ns7b_orf7b;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT NS8 (ORF8 protein)
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_ns8_orf8_pr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_ns8_orf8_pr;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT N (nucleocapsid phosphoprotein)
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_n_nucleocap__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_n_nucleocap;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_2 and PROT ORF10 protein
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__cell_type__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__is_linear__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__product_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2697049_orf10_prote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2697049_orf10_prote;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT ORF1ab polyprotein
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_orf1ab_poly__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_orf1ab_poly;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT RNA-dependent RNA polymerase
+DROP INDEX IF EXISTS epi_694009_rna_depende__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_rna_depende__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_rna_depende__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_rna_depende__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_rna_depende__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_rna_depende__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_rna_depende__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_rna_depende__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_rna_depende__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_rna_depende__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_rna_depende__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_rna_depende;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT helicase/NTPase
+DROP INDEX IF EXISTS epi_694009_helicase_nt__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_helicase_nt__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_helicase_nt;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT 3' to 5' exonuclease
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_3_to_5_exon__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_3_to_5_exon;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT endoribonuclease
+DROP INDEX IF EXISTS epi_694009_endoribonuc__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_endoribonuc__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_endoribonuc;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT 2'-O-MTase
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_2_o_mtase__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_2_o_mtase;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT ORF1a polyprotein
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_orf1a_polyp__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_orf1a_polyp;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT nsp1
+DROP INDEX IF EXISTS epi_694009_nsp1__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp1__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_nsp1__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp1__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_nsp1__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_nsp1__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp1__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_nsp1__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_nsp1__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_nsp1__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_nsp1__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_nsp1;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT nsp2
+DROP INDEX IF EXISTS epi_694009_nsp2__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp2__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_nsp2__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp2__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_nsp2__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_nsp2__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp2__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_nsp2__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_nsp2__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_nsp2__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_nsp2__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_nsp2;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT nsp3
+DROP INDEX IF EXISTS epi_694009_nsp3__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp3__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_nsp3__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp3__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_nsp3__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_nsp3__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp3__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_nsp3__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_nsp3__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_nsp3__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_nsp3__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_nsp3;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT nsp4
+DROP INDEX IF EXISTS epi_694009_nsp4__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp4__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_nsp4__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp4__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_nsp4__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_nsp4__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp4__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_nsp4__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_nsp4__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_nsp4__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_nsp4__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_nsp4;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT 3C-like protease
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_3c_like_pro__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_3c_like_pro;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT nsp6
+DROP INDEX IF EXISTS epi_694009_nsp6__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp6__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_nsp6__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp6__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_nsp6__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_nsp6__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp6__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_nsp6__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_nsp6__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_nsp6__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_nsp6__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_nsp6;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT nsp7
+DROP INDEX IF EXISTS epi_694009_nsp7__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp7__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_nsp7__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp7__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_nsp7__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_nsp7__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp7__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_nsp7__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_nsp7__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_nsp7__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_nsp7__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_nsp7;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT nsp8
+DROP INDEX IF EXISTS epi_694009_nsp8__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp8__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_nsp8__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp8__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_nsp8__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_nsp8__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp8__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_nsp8__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_nsp8__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_nsp8__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_nsp8__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_nsp8;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT nsp9
+DROP INDEX IF EXISTS epi_694009_nsp9__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp9__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_nsp9__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp9__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_nsp9__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_nsp9__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp9__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_nsp9__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_nsp9__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_nsp9__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_nsp9__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_nsp9;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT nsp10
+DROP INDEX IF EXISTS epi_694009_nsp10__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp10__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_nsp10__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_nsp10__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_nsp10__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_nsp10__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_nsp10__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_nsp10__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_nsp10__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_nsp10__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_nsp10__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_nsp10;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT ndp11
+DROP INDEX IF EXISTS epi_694009_ndp11__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_ndp11__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_ndp11__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_ndp11__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_ndp11__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_ndp11__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_ndp11__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_ndp11__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_ndp11__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_ndp11__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_ndp11__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_ndp11;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT spike glycoprotein
+DROP INDEX IF EXISTS epi_694009_spike_glyco__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_spike_glyco__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_spike_glyco;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT ORF3a protein
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_orf3a_prote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_orf3a_prote;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT ORF3b protein
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_orf3b_prote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_orf3b_prote;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT small envelope protein
+DROP INDEX IF EXISTS epi_694009_small_envel__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_small_envel__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_small_envel__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_small_envel__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_small_envel__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_small_envel__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_small_envel__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_small_envel__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_small_envel__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_small_envel__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_small_envel__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_small_envel;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT membrane glycoprotein M
+DROP INDEX IF EXISTS epi_694009_membrane_gl__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_membrane_gl__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_membrane_gl;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT ORF6 protein
+DROP INDEX IF EXISTS epi_694009_orf6_protei__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_orf6_protei__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_orf6_protei;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT ORF7a protein
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_orf7a_prote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_orf7a_prote;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT ORF7b protein
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_orf7b_prote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_orf7b_prote;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT ORF8a protein
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_orf8a_prote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_orf8a_prote;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT ORF8b protein
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_orf8b_prote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_orf8b_prote;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT nucleocapsid protein
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_nucleocapsi__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_nucleocapsi;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT ORF9b protein
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_orf9b_prote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_orf9b_prote;
+
+
+
+-- DROP ITEMS OF VIR sars_cov_1 and PROT ORF9a protein
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__cell_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__is_linear__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__product_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_694009_orf9a_prote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_694009_orf9a_prote;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT polyprotein
+DROP INDEX IF EXISTS epi_11053_polyprotein__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_polyprotein__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_polyprotein__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_polyprotein__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_polyprotein__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_polyprotein__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_polyprotein__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_polyprotein__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_polyprotein__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_polyprotein__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_polyprotein__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_polyprotein;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT anchored capsid protein ancC
+DROP INDEX IF EXISTS epi_11053_anchored_ca__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_anchored_ca__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_anchored_ca;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT capsid protein C
+DROP INDEX IF EXISTS epi_11053_capsid_prot__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_capsid_prot__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_capsid_prot;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT membrane glycoprotein precursor prM
+DROP INDEX IF EXISTS epi_11053_membrane_gl__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_membrane_gl;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT protein pr
+DROP INDEX IF EXISTS epi_11053_protein_pr__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_protein_pr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_protein_pr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_protein_pr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_protein_pr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_protein_pr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_protein_pr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_protein_pr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_protein_pr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_protein_pr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_protein_pr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_protein_pr;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT membrane glycoprotein M
+DROP INDEX IF EXISTS epi_11053_membrane_gl__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_membrane_gl__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_membrane_gl;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT envelope protein E
+DROP INDEX IF EXISTS epi_11053_envelope_pr__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_envelope_pr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_envelope_pr;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT nonstructural protein NS1
+DROP INDEX IF EXISTS epi_11053_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT nonstructural protein NS2A
+DROP INDEX IF EXISTS epi_11053_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT nonstructural protein NS2B
+DROP INDEX IF EXISTS epi_11053_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT nonstructural protein NS3
+DROP INDEX IF EXISTS epi_11053_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT nonstructural protein NS4A
+DROP INDEX IF EXISTS epi_11053_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT protein 2K
+DROP INDEX IF EXISTS epi_11053_protein_2k__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_protein_2k__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_protein_2k__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_protein_2k__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_protein_2k__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_protein_2k__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_protein_2k__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_protein_2k__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_protein_2k__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_protein_2k__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_protein_2k__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_protein_2k;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT nonstructural protein NS4B
+DROP INDEX IF EXISTS epi_11053_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_1 and PROT RNA-dependent RNA polymerase NS5
+DROP INDEX IF EXISTS epi_11053_rna_depende__cell_type__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11053_rna_depende__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11053_rna_depende__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__is_linear__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__product_lower__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11053_rna_depende__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11053_rna_depende__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11053_rna_depende__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11053_rna_depende__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11053_rna_depende__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11053_rna_depende__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11053_rna_depende__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11053_rna_depende__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11053_rna_depende;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT polyprotein
+DROP INDEX IF EXISTS epi_11060_polyprotein__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_polyprotein__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_polyprotein__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_polyprotein__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_polyprotein__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_polyprotein__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_polyprotein__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_polyprotein__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_polyprotein__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_polyprotein__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_polyprotein__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_polyprotein;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT anchored capsid protein ancC
+DROP INDEX IF EXISTS epi_11060_anchored_ca__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_anchored_ca__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_anchored_ca;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT capsid protein C
+DROP INDEX IF EXISTS epi_11060_capsid_prot__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_capsid_prot__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_capsid_prot;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT membrane glycoprotein precursor prM
+DROP INDEX IF EXISTS epi_11060_membrane_gl__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_membrane_gl;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT protein pr
+DROP INDEX IF EXISTS epi_11060_protein_pr__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_protein_pr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_protein_pr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_protein_pr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_protein_pr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_protein_pr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_protein_pr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_protein_pr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_protein_pr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_protein_pr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_protein_pr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_protein_pr;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT membrane glycoprotein M
+DROP INDEX IF EXISTS epi_11060_membrane_gl__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_membrane_gl__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_membrane_gl;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT envelope protein E
+DROP INDEX IF EXISTS epi_11060_envelope_pr__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_envelope_pr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_envelope_pr;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT nonstructural protein NS1
+DROP INDEX IF EXISTS epi_11060_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT nonstructural protein NS2A
+DROP INDEX IF EXISTS epi_11060_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT nonstructural protein NS2B
+DROP INDEX IF EXISTS epi_11060_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT nonstructural protein NS3
+DROP INDEX IF EXISTS epi_11060_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT nonstructural protein NS4A
+DROP INDEX IF EXISTS epi_11060_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT protein 2K
+DROP INDEX IF EXISTS epi_11060_protein_2k__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_protein_2k__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_protein_2k__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_protein_2k__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_protein_2k__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_protein_2k__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_protein_2k__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_protein_2k__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_protein_2k__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_protein_2k__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_protein_2k__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_protein_2k;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT nonstructural protein NS4B
+DROP INDEX IF EXISTS epi_11060_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_2 and PROT RNA-dependent RNA polymerase NS5
+DROP INDEX IF EXISTS epi_11060_rna_depende__cell_type__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11060_rna_depende__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11060_rna_depende__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__is_linear__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__product_lower__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11060_rna_depende__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11060_rna_depende__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11060_rna_depende__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11060_rna_depende__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11060_rna_depende__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11060_rna_depende__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11060_rna_depende__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11060_rna_depende__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11060_rna_depende;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT polyprotein
+DROP INDEX IF EXISTS epi_11069_polyprotein__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_polyprotein__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_polyprotein__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_polyprotein__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_polyprotein__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_polyprotein__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_polyprotein__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_polyprotein__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_polyprotein__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_polyprotein__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_polyprotein__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_polyprotein;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT anchored capsid protein ancC
+DROP INDEX IF EXISTS epi_11069_anchored_ca__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_anchored_ca__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_anchored_ca;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT capsid protein C
+DROP INDEX IF EXISTS epi_11069_capsid_prot__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_capsid_prot__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_capsid_prot;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT membrane glycoprotein precursor prM
+DROP INDEX IF EXISTS epi_11069_membrane_gl__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_membrane_gl;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT protein pr
+DROP INDEX IF EXISTS epi_11069_protein_pr__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_protein_pr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_protein_pr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_protein_pr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_protein_pr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_protein_pr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_protein_pr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_protein_pr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_protein_pr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_protein_pr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_protein_pr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_protein_pr;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT membrane glycoprotein M
+DROP INDEX IF EXISTS epi_11069_membrane_gl__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_membrane_gl__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_membrane_gl;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT envelope protein E
+DROP INDEX IF EXISTS epi_11069_envelope_pr__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_envelope_pr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_envelope_pr;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT nonstructural protein NS1
+DROP INDEX IF EXISTS epi_11069_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT nonstructural protein NS2A
+DROP INDEX IF EXISTS epi_11069_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT nonstructural protein NS2B
+DROP INDEX IF EXISTS epi_11069_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT nonstructural protein NS3
+DROP INDEX IF EXISTS epi_11069_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT nonstructural protein NS4A
+DROP INDEX IF EXISTS epi_11069_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT protein 2K
+DROP INDEX IF EXISTS epi_11069_protein_2k__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_protein_2k__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_protein_2k__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_protein_2k__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_protein_2k__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_protein_2k__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_protein_2k__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_protein_2k__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_protein_2k__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_protein_2k__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_protein_2k__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_protein_2k;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT nonstructural protein NS4B
+DROP INDEX IF EXISTS epi_11069_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_3 and PROT RNA-dependent RNA polymerase NS5
+DROP INDEX IF EXISTS epi_11069_rna_depende__cell_type__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11069_rna_depende__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11069_rna_depende__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__is_linear__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__product_lower__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11069_rna_depende__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11069_rna_depende__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11069_rna_depende__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11069_rna_depende__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11069_rna_depende__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11069_rna_depende__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11069_rna_depende__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11069_rna_depende__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11069_rna_depende;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT polyprotein
+DROP INDEX IF EXISTS epi_11070_polyprotein__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_polyprotein__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_polyprotein__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_polyprotein__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_polyprotein__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_polyprotein__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_polyprotein__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_polyprotein__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_polyprotein__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_polyprotein__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_polyprotein__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_polyprotein;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT anchored capsid protein ancC
+DROP INDEX IF EXISTS epi_11070_anchored_ca__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_anchored_ca__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_anchored_ca;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT capsid protein C
+DROP INDEX IF EXISTS epi_11070_capsid_prot__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_capsid_prot__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_capsid_prot;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT membrane glycoprotein precursor prM
+DROP INDEX IF EXISTS epi_11070_membrane_gl__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_membrane_gl;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT protein pr
+DROP INDEX IF EXISTS epi_11070_protein_pr__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_protein_pr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_protein_pr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_protein_pr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_protein_pr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_protein_pr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_protein_pr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_protein_pr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_protein_pr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_protein_pr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_protein_pr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_protein_pr;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT membrane glycoprotein M
+DROP INDEX IF EXISTS epi_11070_membrane_gl__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_membrane_gl__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_membrane_gl;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT envelope protein E
+DROP INDEX IF EXISTS epi_11070_envelope_pr__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_envelope_pr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_envelope_pr;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT nonstructural protein NS1
+DROP INDEX IF EXISTS epi_11070_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT nonstructural protein NS2A
+DROP INDEX IF EXISTS epi_11070_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT nonstructural protein NS2B
+DROP INDEX IF EXISTS epi_11070_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT nonstructural protein NS3
+DROP INDEX IF EXISTS epi_11070_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT nonstructural protein NS4A
+DROP INDEX IF EXISTS epi_11070_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT protein 2K
+DROP INDEX IF EXISTS epi_11070_protein_2k__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_protein_2k__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_protein_2k__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_protein_2k__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_protein_2k__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_protein_2k__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_protein_2k__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_protein_2k__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_protein_2k__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_protein_2k__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_protein_2k__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_protein_2k;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT nonstructural protein NS4B
+DROP INDEX IF EXISTS epi_11070_nonstructur__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_nonstructur__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_nonstructur__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_nonstructur;
+
+
+
+-- DROP ITEMS OF VIR dengue_4 and PROT RNA-dependent RNA polymerase NS5
+DROP INDEX IF EXISTS epi_11070_rna_depende__cell_type__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_11070_rna_depende__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_11070_rna_depende__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__is_linear__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__product_lower__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__taxon_id__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_11070_rna_depende__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_11070_rna_depende__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_11070_rna_depende__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_11070_rna_depende__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_11070_rna_depende__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_11070_rna_depende__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_11070_rna_depende__virus_host_product__i;
+DROP INDEX IF EXISTS epi_11070_rna_depende__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_11070_rna_depende;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT 1AB polyprotein
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_1ab_polypro__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_1ab_polypro;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT RNA-dependent RNA polymerase
+DROP INDEX IF EXISTS epi_1335626_rna_depende__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_rna_depende__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_rna_depende;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT Hel
+DROP INDEX IF EXISTS epi_1335626_hel__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_hel__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_hel__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_hel__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_hel__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_hel__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_hel__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_hel__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_hel__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_hel__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_hel__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_hel;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT ExoN
+DROP INDEX IF EXISTS epi_1335626_exon__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_exon__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_exon__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_exon__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_exon__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_exon__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_exon__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_exon__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_exon__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_exon__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_exon__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_exon;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT NendoU
+DROP INDEX IF EXISTS epi_1335626_nendou__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_nendou__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_nendou__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nendou__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_nendou__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_nendou__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_nendou__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_nendou__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_nendou__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_nendou__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_nendou__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_nendou;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT 2'-O-methyltransferase
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_2_o_methylt__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_2_o_methylt;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT 1A polyprotein
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_1a_polyprot__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_1a_polyprot;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT nsp1 protein
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_nsp1_protei__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_nsp1_protei;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT nsp2 protein
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_nsp2_protei__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_nsp2_protei;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT nsp3 protein
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_nsp3_protei__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_nsp3_protei;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT nsp4 protein
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_nsp4_protei__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_nsp4_protei;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT nsp5 protein
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_nsp5_protei__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_nsp5_protei;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT nsp6 protein
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_nsp6_protei__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_nsp6_protei;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT nsp7 protein
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_nsp7_protei__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_nsp7_protei;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT nsp8 protein
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_nsp8_protei__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_nsp8_protei;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT nsp9 protein
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_nsp9_protei__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_nsp9_protei;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT nsp10 protein
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_nsp10_prote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_nsp10_prote;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT nsp11 protein
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_nsp11_prote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_nsp11_prote;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT spike protein
+DROP INDEX IF EXISTS epi_1335626_spike_prote__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_spike_prote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_spike_prote;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT NS3 protein
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_ns3_protein__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_ns3_protein;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT NS4A protein
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_ns4a_protei__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_ns4a_protei;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT NS4B protein
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_ns4b_protei__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_ns4b_protei;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT NS5 protein
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_ns5_protein__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_ns5_protein;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT envelope protein
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_envelope_pr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_envelope_pr;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT membrane protein
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_membrane_pr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_membrane_pr;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT nucleocapsid protein
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_nucleocapsi__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_nucleocapsi;
+
+
+
+-- DROP ITEMS OF VIR mers and PROT ORF8b protein
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__cell_type__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__is_linear__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__product_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_1335626_orf8b_prote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_1335626_orf8b_prote;
+
+
+
+-- DROP ITEMS OF VIR zaire_ebolavirus and PROT nucleoprotein
+DROP INDEX IF EXISTS epi_186538_nucleoprote__cell_type__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__is_linear__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__product_lower__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186538_nucleoprote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186538_nucleoprote;
+
+
+
+-- DROP ITEMS OF VIR zaire_ebolavirus and PROT polymerase complex protein
+DROP INDEX IF EXISTS epi_186538_polymerase___cell_type__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186538_polymerase___epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186538_polymerase___host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___is_linear__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___product_lower__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186538_polymerase___virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186538_polymerase___virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186538_polymerase___virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186538_polymerase___virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186538_polymerase___virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186538_polymerase___virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186538_polymerase___virus_host_product__i;
+DROP INDEX IF EXISTS epi_186538_polymerase___virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186538_polymerase_;
+
+
+
+-- DROP ITEMS OF VIR zaire_ebolavirus and PROT matrix protein
+DROP INDEX IF EXISTS epi_186538_matrix_prot__cell_type__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__is_linear__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__product_lower__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186538_matrix_prot__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186538_matrix_prot;
+
+
+
+-- DROP ITEMS OF VIR zaire_ebolavirus and PROT spike glycoprotein
+DROP INDEX IF EXISTS epi_186538_spike_glyco__cell_type__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__is_linear__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__product_lower__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186538_spike_glyco__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186538_spike_glyco;
+
+
+
+-- DROP ITEMS OF VIR zaire_ebolavirus and PROT small secreted glycoprotein
+DROP INDEX IF EXISTS epi_186538_small_secre__cell_type__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186538_small_secre__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186538_small_secre__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__is_linear__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__product_lower__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186538_small_secre__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186538_small_secre__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186538_small_secre__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186538_small_secre__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186538_small_secre__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186538_small_secre__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186538_small_secre__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186538_small_secre__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186538_small_secre;
+
+
+
+-- DROP ITEMS OF VIR zaire_ebolavirus and PROT second secreted glycoprotein
+DROP INDEX IF EXISTS epi_186538_second_secr__cell_type__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186538_second_secr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186538_second_secr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__is_linear__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__product_lower__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186538_second_secr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186538_second_secr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186538_second_secr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186538_second_secr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186538_second_secr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186538_second_secr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186538_second_secr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186538_second_secr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186538_second_secr;
+
+
+
+-- DROP ITEMS OF VIR zaire_ebolavirus and PROT minor nucleoprotein
+DROP INDEX IF EXISTS epi_186538_minor_nucle__cell_type__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__is_linear__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__product_lower__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186538_minor_nucle__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186538_minor_nucle;
+
+
+
+-- DROP ITEMS OF VIR zaire_ebolavirus and PROT membrane-associated protein
+DROP INDEX IF EXISTS epi_186538_membrane_as__cell_type__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186538_membrane_as__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186538_membrane_as__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__is_linear__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__product_lower__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186538_membrane_as__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186538_membrane_as__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186538_membrane_as__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186538_membrane_as__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186538_membrane_as__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186538_membrane_as__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186538_membrane_as__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186538_membrane_as__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186538_membrane_as;
+
+
+
+-- DROP ITEMS OF VIR zaire_ebolavirus and PROT RNA-dependent RNA polymerase
+DROP INDEX IF EXISTS epi_186538_rna_depende__cell_type__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186538_rna_depende__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186538_rna_depende__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__is_linear__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__product_lower__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186538_rna_depende__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186538_rna_depende__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186538_rna_depende__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186538_rna_depende__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186538_rna_depende__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186538_rna_depende__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186538_rna_depende__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186538_rna_depende__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186538_rna_depende;
+
+
+
+-- DROP ITEMS OF VIR sudan_ebolavirus and PROT nucleoprotein
+DROP INDEX IF EXISTS epi_186540_nucleoprote__cell_type__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__is_linear__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__product_lower__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186540_nucleoprote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186540_nucleoprote;
+
+
+
+-- DROP ITEMS OF VIR sudan_ebolavirus and PROT polymerase complex protein
+DROP INDEX IF EXISTS epi_186540_polymerase___cell_type__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186540_polymerase___epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186540_polymerase___host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___is_linear__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___product_lower__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186540_polymerase___virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186540_polymerase___virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186540_polymerase___virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186540_polymerase___virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186540_polymerase___virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186540_polymerase___virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186540_polymerase___virus_host_product__i;
+DROP INDEX IF EXISTS epi_186540_polymerase___virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186540_polymerase_;
+
+
+
+-- DROP ITEMS OF VIR sudan_ebolavirus and PROT matrix protein
+DROP INDEX IF EXISTS epi_186540_matrix_prot__cell_type__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__is_linear__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__product_lower__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186540_matrix_prot__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186540_matrix_prot;
+
+
+
+-- DROP ITEMS OF VIR sudan_ebolavirus and PROT spike glycoprotein
+DROP INDEX IF EXISTS epi_186540_spike_glyco__cell_type__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__is_linear__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__product_lower__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186540_spike_glyco__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186540_spike_glyco;
+
+
+
+-- DROP ITEMS OF VIR sudan_ebolavirus and PROT small secreted glycoprotein
+DROP INDEX IF EXISTS epi_186540_small_secre__cell_type__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186540_small_secre__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186540_small_secre__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__is_linear__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__product_lower__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186540_small_secre__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186540_small_secre__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186540_small_secre__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186540_small_secre__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186540_small_secre__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186540_small_secre__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186540_small_secre__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186540_small_secre__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186540_small_secre;
+
+
+
+-- DROP ITEMS OF VIR sudan_ebolavirus and PROT second secreted glycoprotein
+DROP INDEX IF EXISTS epi_186540_second_secr__cell_type__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186540_second_secr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186540_second_secr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__is_linear__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__product_lower__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186540_second_secr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186540_second_secr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186540_second_secr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186540_second_secr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186540_second_secr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186540_second_secr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186540_second_secr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186540_second_secr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186540_second_secr;
+
+
+
+-- DROP ITEMS OF VIR sudan_ebolavirus and PROT minor nucleoprotein
+DROP INDEX IF EXISTS epi_186540_minor_nucle__cell_type__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__is_linear__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__product_lower__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186540_minor_nucle__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186540_minor_nucle;
+
+
+
+-- DROP ITEMS OF VIR sudan_ebolavirus and PROT membrane-associated protein
+DROP INDEX IF EXISTS epi_186540_membrane_as__cell_type__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186540_membrane_as__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186540_membrane_as__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__is_linear__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__product_lower__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186540_membrane_as__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186540_membrane_as__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186540_membrane_as__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186540_membrane_as__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186540_membrane_as__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186540_membrane_as__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186540_membrane_as__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186540_membrane_as__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186540_membrane_as;
+
+
+
+-- DROP ITEMS OF VIR sudan_ebolavirus and PROT RNA-dependent RNA polymerase
+DROP INDEX IF EXISTS epi_186540_rna_depende__cell_type__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186540_rna_depende__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186540_rna_depende__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__is_linear__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__product_lower__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186540_rna_depende__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186540_rna_depende__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186540_rna_depende__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186540_rna_depende__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186540_rna_depende__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186540_rna_depende__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186540_rna_depende__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186540_rna_depende__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186540_rna_depende;
+
+
+
+-- DROP ITEMS OF VIR reston_ebolavirus and PROT nucleoprotein
+DROP INDEX IF EXISTS epi_186539_nucleoprote__cell_type__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__is_linear__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__product_lower__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186539_nucleoprote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186539_nucleoprote;
+
+
+
+-- DROP ITEMS OF VIR reston_ebolavirus and PROT polymerase complex protein
+DROP INDEX IF EXISTS epi_186539_polymerase___cell_type__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186539_polymerase___epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186539_polymerase___host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___is_linear__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___product_lower__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186539_polymerase___virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186539_polymerase___virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186539_polymerase___virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186539_polymerase___virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186539_polymerase___virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186539_polymerase___virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186539_polymerase___virus_host_product__i;
+DROP INDEX IF EXISTS epi_186539_polymerase___virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186539_polymerase_;
+
+
+
+-- DROP ITEMS OF VIR reston_ebolavirus and PROT matrix protein
+DROP INDEX IF EXISTS epi_186539_matrix_prot__cell_type__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__is_linear__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__product_lower__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186539_matrix_prot__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186539_matrix_prot;
+
+
+
+-- DROP ITEMS OF VIR reston_ebolavirus and PROT spike glycoprotein
+DROP INDEX IF EXISTS epi_186539_spike_glyco__cell_type__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__is_linear__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__product_lower__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186539_spike_glyco__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186539_spike_glyco;
+
+
+
+-- DROP ITEMS OF VIR reston_ebolavirus and PROT small secreted glycoprotein
+DROP INDEX IF EXISTS epi_186539_small_secre__cell_type__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186539_small_secre__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186539_small_secre__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__is_linear__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__product_lower__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186539_small_secre__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186539_small_secre__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186539_small_secre__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186539_small_secre__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186539_small_secre__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186539_small_secre__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186539_small_secre__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186539_small_secre__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186539_small_secre;
+
+
+
+-- DROP ITEMS OF VIR reston_ebolavirus and PROT second secreted glycoprotein
+DROP INDEX IF EXISTS epi_186539_second_secr__cell_type__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186539_second_secr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186539_second_secr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__is_linear__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__product_lower__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186539_second_secr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186539_second_secr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186539_second_secr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186539_second_secr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186539_second_secr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186539_second_secr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186539_second_secr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186539_second_secr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186539_second_secr;
+
+
+
+-- DROP ITEMS OF VIR reston_ebolavirus and PROT minor nucleoprotein
+DROP INDEX IF EXISTS epi_186539_minor_nucle__cell_type__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__is_linear__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__product_lower__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186539_minor_nucle__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186539_minor_nucle;
+
+
+
+-- DROP ITEMS OF VIR reston_ebolavirus and PROT membrane-associated protein
+DROP INDEX IF EXISTS epi_186539_membrane_as__cell_type__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186539_membrane_as__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186539_membrane_as__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__is_linear__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__product_lower__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186539_membrane_as__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186539_membrane_as__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186539_membrane_as__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186539_membrane_as__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186539_membrane_as__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186539_membrane_as__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186539_membrane_as__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186539_membrane_as__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186539_membrane_as;
+
+
+
+-- DROP ITEMS OF VIR reston_ebolavirus and PROT RNA-dependent RNA polymerase
+DROP INDEX IF EXISTS epi_186539_rna_depende__cell_type__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186539_rna_depende__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186539_rna_depende__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__is_linear__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__product_lower__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186539_rna_depende__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186539_rna_depende__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186539_rna_depende__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186539_rna_depende__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186539_rna_depende__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186539_rna_depende__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186539_rna_depende__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186539_rna_depende__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186539_rna_depende;
+
+
+
+-- DROP ITEMS OF VIR bundibugyo_ebolavirus and PROT nucleoprotein
+DROP INDEX IF EXISTS epi_565995_nucleoprote__cell_type__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__is_linear__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__product_lower__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_565995_nucleoprote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_565995_nucleoprote;
+
+
+
+-- DROP ITEMS OF VIR bundibugyo_ebolavirus and PROT polymerase complex protein
+DROP INDEX IF EXISTS epi_565995_polymerase___cell_type__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_565995_polymerase___epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_565995_polymerase___host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___is_linear__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___mhc_allele__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___product_lower__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___start_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_565995_polymerase___virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_565995_polymerase___virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_565995_polymerase___virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_565995_polymerase___virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_565995_polymerase___virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_565995_polymerase___virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_565995_polymerase___virus_host_product__i;
+DROP INDEX IF EXISTS epi_565995_polymerase___virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_565995_polymerase_;
+
+
+
+-- DROP ITEMS OF VIR bundibugyo_ebolavirus and PROT matrix protein
+DROP INDEX IF EXISTS epi_565995_matrix_prot__cell_type__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__is_linear__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__product_lower__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__virus_host_product__i;
+DROP INDEX IF EXISTS epi_565995_matrix_prot__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_565995_matrix_prot;
+
+
+
+-- DROP ITEMS OF VIR bundibugyo_ebolavirus and PROT spike glycoprotein
+DROP INDEX IF EXISTS epi_565995_spike_glyco__cell_type__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__is_linear__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__product_lower__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__virus_host_product__i;
+DROP INDEX IF EXISTS epi_565995_spike_glyco__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_565995_spike_glyco;
+
+
+
+-- DROP ITEMS OF VIR bundibugyo_ebolavirus and PROT small secreted glycoprotein
+DROP INDEX IF EXISTS epi_565995_small_secre__cell_type__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_565995_small_secre__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_565995_small_secre__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__is_linear__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__product_lower__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_565995_small_secre__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_565995_small_secre__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_565995_small_secre__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_565995_small_secre__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_565995_small_secre__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_565995_small_secre__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_565995_small_secre__virus_host_product__i;
+DROP INDEX IF EXISTS epi_565995_small_secre__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_565995_small_secre;
+
+
+
+-- DROP ITEMS OF VIR bundibugyo_ebolavirus and PROT second secreted glycoprotein
+DROP INDEX IF EXISTS epi_565995_second_secr__cell_type__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_565995_second_secr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_565995_second_secr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__is_linear__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__product_lower__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_565995_second_secr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_565995_second_secr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_565995_second_secr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_565995_second_secr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_565995_second_secr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_565995_second_secr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_565995_second_secr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_565995_second_secr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_565995_second_secr;
+
+
+
+-- DROP ITEMS OF VIR bundibugyo_ebolavirus and PROT minor nucleoprotein
+DROP INDEX IF EXISTS epi_565995_minor_nucle__cell_type__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__is_linear__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__product_lower__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__virus_host_product__i;
+DROP INDEX IF EXISTS epi_565995_minor_nucle__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_565995_minor_nucle;
+
+
+
+-- DROP ITEMS OF VIR bundibugyo_ebolavirus and PROT membrane-associated protein
+DROP INDEX IF EXISTS epi_565995_membrane_as__cell_type__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_565995_membrane_as__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_565995_membrane_as__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__is_linear__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__product_lower__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_565995_membrane_as__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_565995_membrane_as__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_565995_membrane_as__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_565995_membrane_as__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_565995_membrane_as__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_565995_membrane_as__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_565995_membrane_as__virus_host_product__i;
+DROP INDEX IF EXISTS epi_565995_membrane_as__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_565995_membrane_as;
+
+
+
+-- DROP ITEMS OF VIR bundibugyo_ebolavirus and PROT RNA-dependent RNA polymerase
+DROP INDEX IF EXISTS epi_565995_rna_depende__cell_type__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_565995_rna_depende__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_565995_rna_depende__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__is_linear__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__product_lower__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__taxon_id__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_565995_rna_depende__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_565995_rna_depende__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_565995_rna_depende__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_565995_rna_depende__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_565995_rna_depende__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_565995_rna_depende__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_565995_rna_depende__virus_host_product__i;
+DROP INDEX IF EXISTS epi_565995_rna_depende__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_565995_rna_depende;
+
+
+
+-- DROP ITEMS OF VIR bombali_ebolavirus and PROT nucleoprotein
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__cell_type__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__is_linear__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__product_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2010960_nucleoprote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2010960_nucleoprote;
+
+
+
+-- DROP ITEMS OF VIR bombali_ebolavirus and PROT polymerase complex protein
+DROP INDEX IF EXISTS epi_2010960_polymerase___cell_type__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2010960_polymerase___epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2010960_polymerase___host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___is_linear__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___product_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2010960_polymerase___virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2010960_polymerase___virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2010960_polymerase___virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2010960_polymerase___virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2010960_polymerase___virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2010960_polymerase___virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2010960_polymerase___virus_host_product__i;
+DROP INDEX IF EXISTS epi_2010960_polymerase___virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2010960_polymerase_;
+
+
+
+-- DROP ITEMS OF VIR bombali_ebolavirus and PROT matrix protein
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__cell_type__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__is_linear__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__product_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2010960_matrix_prot__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2010960_matrix_prot;
+
+
+
+-- DROP ITEMS OF VIR bombali_ebolavirus and PROT spike glycoprotein
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__cell_type__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__is_linear__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__product_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2010960_spike_glyco__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2010960_spike_glyco;
+
+
+
+-- DROP ITEMS OF VIR bombali_ebolavirus and PROT small secreted glycoprotein
+DROP INDEX IF EXISTS epi_2010960_small_secre__cell_type__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2010960_small_secre__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2010960_small_secre__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__is_linear__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__product_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2010960_small_secre__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2010960_small_secre__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2010960_small_secre__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2010960_small_secre__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2010960_small_secre__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2010960_small_secre__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2010960_small_secre__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2010960_small_secre__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2010960_small_secre;
+
+
+
+-- DROP ITEMS OF VIR bombali_ebolavirus and PROT second secreted glycoprotein
+DROP INDEX IF EXISTS epi_2010960_second_secr__cell_type__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2010960_second_secr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2010960_second_secr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__is_linear__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__product_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2010960_second_secr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2010960_second_secr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2010960_second_secr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2010960_second_secr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2010960_second_secr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2010960_second_secr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2010960_second_secr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2010960_second_secr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2010960_second_secr;
+
+
+
+-- DROP ITEMS OF VIR bombali_ebolavirus and PROT minor nucleoprotein
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__cell_type__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__is_linear__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__product_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2010960_minor_nucle__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2010960_minor_nucle;
+
+
+
+-- DROP ITEMS OF VIR bombali_ebolavirus and PROT membrane-associated protein
+DROP INDEX IF EXISTS epi_2010960_membrane_as__cell_type__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__is_linear__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__product_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2010960_membrane_as__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2010960_membrane_as;
+
+
+
+-- DROP ITEMS OF VIR bombali_ebolavirus and PROT RNA-dependent RNA polymerase
+DROP INDEX IF EXISTS epi_2010960_rna_depende__cell_type__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__is_linear__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__product_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__taxon_id__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__virus_host_product__i;
+DROP INDEX IF EXISTS epi_2010960_rna_depende__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_2010960_rna_depende;
+
+
+
+-- DROP ITEMS OF VIR tai_forest_ebolavirus and PROT nucleoprotein
+DROP INDEX IF EXISTS epi_186541_nucleoprote__cell_type__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__is_linear__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__product_lower__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186541_nucleoprote__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186541_nucleoprote;
+
+
+
+-- DROP ITEMS OF VIR tai_forest_ebolavirus and PROT polymerase complex protein
+DROP INDEX IF EXISTS epi_186541_polymerase___cell_type__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186541_polymerase___epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186541_polymerase___host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___is_linear__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___product_lower__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186541_polymerase___virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186541_polymerase___virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186541_polymerase___virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186541_polymerase___virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186541_polymerase___virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186541_polymerase___virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186541_polymerase___virus_host_product__i;
+DROP INDEX IF EXISTS epi_186541_polymerase___virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186541_polymerase_;
+
+
+
+-- DROP ITEMS OF VIR tai_forest_ebolavirus and PROT matrix protein
+DROP INDEX IF EXISTS epi_186541_matrix_prot__cell_type__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__is_linear__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__product_lower__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186541_matrix_prot__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186541_matrix_prot;
+
+
+
+-- DROP ITEMS OF VIR tai_forest_ebolavirus and PROT spike glycoprotein
+DROP INDEX IF EXISTS epi_186541_spike_glyco__cell_type__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__is_linear__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__product_lower__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186541_spike_glyco__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186541_spike_glyco;
+
+
+
+-- DROP ITEMS OF VIR tai_forest_ebolavirus and PROT small secreted glycoprotein
+DROP INDEX IF EXISTS epi_186541_small_secre__cell_type__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186541_small_secre__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186541_small_secre__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__is_linear__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__product_lower__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186541_small_secre__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186541_small_secre__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186541_small_secre__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186541_small_secre__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186541_small_secre__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186541_small_secre__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186541_small_secre__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186541_small_secre__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186541_small_secre;
+
+
+
+-- DROP ITEMS OF VIR tai_forest_ebolavirus and PROT second secreted glycoprotein
+DROP INDEX IF EXISTS epi_186541_second_secr__cell_type__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186541_second_secr__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186541_second_secr__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__is_linear__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__product_lower__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186541_second_secr__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186541_second_secr__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186541_second_secr__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186541_second_secr__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186541_second_secr__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186541_second_secr__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186541_second_secr__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186541_second_secr__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186541_second_secr;
+
+
+
+-- DROP ITEMS OF VIR tai_forest_ebolavirus and PROT minor nucleoprotein
+DROP INDEX IF EXISTS epi_186541_minor_nucle__cell_type__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__is_linear__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__product_lower__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186541_minor_nucle__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186541_minor_nucle;
+
+
+
+-- DROP ITEMS OF VIR tai_forest_ebolavirus and PROT membrane-associated protein
+DROP INDEX IF EXISTS epi_186541_membrane_as__cell_type__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186541_membrane_as__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186541_membrane_as__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__is_linear__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__product_lower__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186541_membrane_as__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186541_membrane_as__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186541_membrane_as__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186541_membrane_as__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186541_membrane_as__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186541_membrane_as__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186541_membrane_as__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186541_membrane_as__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186541_membrane_as;
+
+
+
+-- DROP ITEMS OF VIR tai_forest_ebolavirus and PROT RNA-dependent RNA polymerase
+DROP INDEX IF EXISTS epi_186541_rna_depende__cell_type__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_186541_rna_depende__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_186541_rna_depende__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__is_linear__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__product_lower__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__taxon_id__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_186541_rna_depende__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_186541_rna_depende__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_186541_rna_depende__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_186541_rna_depende__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_186541_rna_depende__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_186541_rna_depende__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_186541_rna_depende__virus_host_product__i;
+DROP INDEX IF EXISTS epi_186541_rna_depende__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_186541_rna_depende;
+
+
+

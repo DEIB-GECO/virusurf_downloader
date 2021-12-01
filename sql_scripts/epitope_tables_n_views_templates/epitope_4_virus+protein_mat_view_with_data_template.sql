@@ -186,3 +186,4 @@ CREATE INDEX epi_$virus_id_$short_prot_name__virus_host_resp_freq__i
     (taxon_id, host_taxon_id, response_frequency_pos)
     WITH (FILLFACTOR=100)
     TABLESPACE default_ts;
+

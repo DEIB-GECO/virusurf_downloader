@@ -1,0 +1,31 @@
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__cell_type__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__epi_annotation_start__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__epi_annotation_stop__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__epi_frag_annotation_start__i;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__epi_frag_annotation_stop__id;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__host_taxon_id__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__host_taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__iedb_epitope_id__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__is_linear__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__mhc_allele__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__mhc_class_lower__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__product_lower__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__response_frequency_pos__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__sequence_aa_alternative__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__sequence_aa_original__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__start_aa_original__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__taxon_id__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__taxon_name_lower__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__variant_aa_length__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__variant_aa_type__idx;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__virus_taxon_and_host_taxon_id__i;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__virus_host_cell_type__i;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__virus_host_epi_start__i;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__virus_host_epi_stop__i;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__virus_host_is_linear__i;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__virus_host_mhc_allele__i;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__virus_host_product__i;
+DROP INDEX IF EXISTS epi_$virus_id_$short_prot_name__virus_host_resp_freq__i;
+
+DROP MATERIALIZED VIEW IF EXISTS public.epitope_$virus_id_$short_prot_name;
+

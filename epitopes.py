@@ -15,8 +15,8 @@ from locations import remove_file
 from data_sources.ncbi_any_virus.settings import known_settings
 
 epitope_id_mappings = dict()
-mat_view_with_data_template_path = f'.{sep}sql_scripts{sep}epitope_views_n_indexes{sep}template{sep}epitope_4_virus+protein_mat_view_with_data_template.sql'
-mat_view_with_no_data_template_path = f'.{sep}sql_scripts{sep}epitope_views_n_indexes{sep}template{sep}epitope_4_virus+protein_mat_view_with_no_data_template.sql'
+mat_view_with_data_template_path = f'.{sep}sql_scripts{sep}epitope_tables_n_views_templates{sep}epitope_4_virus+protein_mat_view_with_data_template.sql'
+mat_view_with_no_data_template_path = f'.{sep}sql_scripts{sep}epitope_tables_n_views_templates{sep}epitope_4_virus+protein_mat_view_with_no_data_template.sql'
 
 
 def import_epitopes(virus_taxon_id: int):
@@ -577,7 +577,7 @@ def generate_drop_m_views():
             short_protein_name = short_protein_name[:min(11, len(short_protein_name))]
 
             with open(
-                    "/Users/tom/PycharmProjects/virusurf_downloader/sql_scripts/epitope_views_n_indexes/template/drop_epitope_4_virus+protein_mat_view_template.sql",
+                    "/Users/tom/PycharmProjects/virusurf_downloader/sql_scripts/epitope_tables_n_views_templates/drop_epitope_4_virus+protein_mat_view_template.sql",
                     "r") as template:
                 with open(output_file_path, "a") as output_file:
                     output_file.write(f"-- DROP ITEMS OF VIR {virus_short_name} and PROT {protein}\n")
@@ -609,7 +609,7 @@ def generate_create_tables():
             short_protein_name = short_protein_name[:min(28, len(short_protein_name))]
 
             with open(
-                    "/Users/tom/PycharmProjects/virusurf_downloader/sql_scripts/epitope_views_n_indexes/template/epitope_4_virus+protein_table_template.sql",
+                    "/Users/tom/PycharmProjects/virusurf_downloader/sql_scripts/epitope_tables_n_views_templates/epitope_4_virus+protein_table_template.sql",
                     "r") as template:
                 with open(output_file_path, "a") as output_file:
                     output_file.write(f"-- CREATE TABLES 'N INDEXES OF VIR {virus_short_name} and PROT {protein}\n")
@@ -639,7 +639,7 @@ def generate_truncate_fill_tables():
             short_protein_name = short_protein_name[:min(28, len(short_protein_name))]
 
             with open(
-                    "/Users/tom/PycharmProjects/virusurf_downloader/sql_scripts/epitope_views_n_indexes/template/truncate_fill_epitope_4_virus+protein_table_template.sql",
+                    "/sql_scripts/epitope_tables_n_views_templates/refresh_epitope_4_virus+protein_table_template.sql",
                     "r") as template:
                 with open(output_file_path, "a") as output_file:
                     output_file.write(f"-- CREATE TABLES 'N INDEXES OF VIR {virus_short_name} and PROT {protein}\n")
@@ -669,7 +669,7 @@ def generate_drop_tables():
             short_protein_name = short_protein_name[:min(28, len(short_protein_name))]
 
             with open(
-                    "/Users/tom/PycharmProjects/virusurf_downloader/sql_scripts/epitope_views_n_indexes/template/drop_epitope_4_virus+protein_table_template.sql",
+                    "/Users/tom/PycharmProjects/virusurf_downloader/sql_scripts/epitope_tables_n_views_templates/drop_epitope_4_virus+protein_table_template.sql",
                     "r") as template:
                 with open(output_file_path, "a") as output_file:
                     output_file.write(f"-- DROP TABLES 'N INDEXES OF VIR {virus_short_name} and PROT {protein}\n")
