@@ -289,7 +289,7 @@ def get_samples_accession_ids(samples_query: str) -> List[int]:
         # get pages
         accessions_ids = list()
         # noinspection PyPep8Naming
-        RECORDS_PER_PAGE = 5000
+        RECORDS_PER_PAGE = 10000
         page_number = 0
         import time
         with tqdm(total=total_records) as progress_bar:
