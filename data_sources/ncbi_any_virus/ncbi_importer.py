@@ -29,13 +29,14 @@ from db_config import read_db_import_configuration as db_import_config, database
 from data_sources.ncbi_any_virus import settings
 from logger_settings import send_message
 from http.client import HTTPException
-from multiprocessing import Lock
+from multiprocessing import Lock, BoundedSemaphore
 import signal
 
 
 DOWNLOAD_ATTEMPTS = 3
 DOWNLOAD_FAILED_PAUSE_SECONDS = 30
-snpeff_semaphore = Lock()
+# snpeff_semaphore = Lock()
+snpeff_semaphore = BoundedSemaphore(20)
 
 
 class AnyNCBITaxon:
@@ -814,7 +815,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
     db_params: dict = db_import_config.get_database_config_params()
     database.config_db_engine(db_params["db_name"], db_params["db_user"], db_params["db_psw"], db_params["db_port"])
     # prepare multiprocessor
-    task_manager = TaskManager(30, 22, TheWorker)
+    task_manager = TaskManager(60, 45, TheWorker)
 
     def check_user_query():
         """

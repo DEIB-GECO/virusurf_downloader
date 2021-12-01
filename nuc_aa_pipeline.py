@@ -12,7 +12,7 @@ import json
 import datetime
 from loguru import logger
 from Bio.SubsMat import MatrixInfo as matlist
-from multiprocessing import Lock
+from multiprocessing import BoundedSemaphore
 
 nuc_aligner: Optional[Align.PairwiseAligner] = None
 allowed_nucleotide_characters = {"a", "g", "c", "t", "y", "r", "w", "s", "k", "m", "d", "v", "h", "b", "n"}
@@ -471,7 +471,7 @@ def add_variant_factory(chr_name):
 
 
 def call_nucleotide_variants(sequence_id, reference, sequence, ref_aligned, seq_aligned, ref_positions, seq_positions,
-                             chr_name, snpeff_database_name, semaphore: Lock):
+                             chr_name, snpeff_database_name, semaphore: BoundedSemaphore):
 
     add_variant = add_variant_factory(chr_name)
     variants = []
@@ -681,7 +681,7 @@ def get_nuc_aligner() -> Align.PairwiseAligner:
 
 
 def sequence_aligner(sequence_id, reference, sequence, chr_name, annotation_file, snpeff_database_name,
-                     snpeff_semaphore: Lock):
+                     snpeff_semaphore: BoundedSemaphore):
     global nuc_aligner
     if not nuc_aligner:
         nuc_aligner = get_nuc_aligner()

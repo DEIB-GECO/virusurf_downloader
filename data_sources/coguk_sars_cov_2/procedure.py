@@ -10,7 +10,7 @@ from queuable_tasks import max_number_of_workers
 from vcm import vcm as vcm
 from data_sources.coguk_sars_cov_2.sample import COGUKSarsCov2Sample
 from data_sources.coguk_sars_cov_2.virus import COGUKSarsCov2
-from multiprocessing import JoinableQueue, cpu_count, Process, Lock
+from multiprocessing import JoinableQueue, cpu_count, Process, Lock, BoundedSemaphore
 from sqlalchemy.orm.session import Session
 from db_config import read_db_import_configuration as import_config, database
 from data_sources.ncbi_any_virus.settings import known_settings as ncbi_known_settings
@@ -22,7 +22,8 @@ from logger_settings import send_message
 sc2_chromosome = ncbi_known_settings["sars_cov_2"]["chromosome_name"]
 sc2_annotations_file_path = ncbi_known_settings["sars_cov_2"]["annotation_file_path"]
 sc2_snpeff_db_name = ncbi_known_settings["sars_cov_2"]["snpeff_db_name"]
-snpeff_semaphore = Lock()
+# snpeff_semaphore = Lock()
+snpeff_semaphore = BoundedSemaphore(20)
 
 
 reference_sequence = None
@@ -108,7 +109,7 @@ class Sequential:
 
 class Parallel:
 
-    MAX_PROCESSES = max_number_of_workers(22)
+    MAX_PROCESSES = max_number_of_workers(45)
 
     def __init__(self):
         # empty job queue
