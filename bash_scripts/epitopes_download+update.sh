@@ -5,7 +5,8 @@
 
 echo "Assumptions for the proper execution of this script:
 - command line arguments: <virusurf_directory_path> <target_database_name>;
-- the postgres password file contains one entry for the given database formatted as host:port:dat_name:user:psw;"
+- the postgres password file contains one entry for the given database formatted as host:port:dat_name:user:psw;
+- a conda environment named 'vcm' exists and it has the packages necessary for virusurf_downlaoder already installed;"
 echo "THIS SCRIPT DOES NOT UPDATE EPITOPE ASSOCIATED MATERIALIZED VIEWS"
 
 # input parameters
@@ -34,6 +35,14 @@ check_exit_code() {    # expects exit status code as argument
 }
 
 echo "The output of this script is appended to ${log_file_path}"
+
+
+# switch to conda environment vcm
+echo "Switching to  conda environment 'vcm'."
+source ~/anaconda3_new/etc/profile.d/conda.sh  # finds command conda
+check_exit_code "$?"
+conda activate vcm
+check_exit_code "$?"
 
 # Begin logging of operations
 echo "################################          ##################################" | tee -a $log_file_path

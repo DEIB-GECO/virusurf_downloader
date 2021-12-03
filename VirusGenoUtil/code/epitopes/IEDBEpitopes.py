@@ -918,7 +918,15 @@ class IEDBEpitopes:
 				for normalized, region in normalized2regions.items():
 					if region[0] == -1 and region[-1] == -1:  # discontinuous epitope
 						is_linear = False
-						reg_start, reg_end = self.get_discontinous_epi_start_stop(normalized)
+						try:
+							reg_start, reg_end = self.get_discontinous_epi_start_stop(normalized)
+						except AssertionError as e:
+							logger.error(f"input data for epitope {normalized} is badly formatted. This epitope is being ignored. Detail: {str(e)}")
+							continue
+							# DO not update normalize2regions because it is a variable local to this function and
+							# is never read again outside this loop. However you cannot just update normalized.
+							# You need to update normalized2unique and all the other "normalized2..." dictionaries.
+							# And the bug still exists anyway
 					elif not (region[0] == region[-1] and region[0] == 0):  # linear epitope with known start and end positions
 						is_linear = True
 						reg_start, reg_end = region[0], region[-1]

@@ -172,7 +172,7 @@ def download_epitope_data() -> (str, str, str):
     - mhc_ligand_full_v3
     """
     tcell_url = "http://www.iedb.org/downloader.php?file_name=doc/tcell_full_v3.zip"
-    bcell_url = "http://www.iedb.org/downloader.php?file_name=doc/bcell_full_v3.zip"
+    bcell_url = "http://www.iedb.org/downloader.php?file_name=doc/bcell_full_v3_single_file.zip"
     mhc_ligand_url = "http://www.iedb.org/downloader.php?file_name=doc/mhc_ligand_full_single_file.zip"
     download_dir = f".{sep}VirusGenoUtil{sep}data{sep}iedb_input{sep}cell_epitopes{sep}"
 
@@ -725,7 +725,8 @@ if __name__ == '__main__':
 
     # generate_truncate_fill_tables()
 
-    generate_truncate_tables()
+    # generate_truncate_tables()
 
     # generate_drop_tables()
 
+    download_epitope_data()
