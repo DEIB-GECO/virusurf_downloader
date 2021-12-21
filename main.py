@@ -15,7 +15,7 @@ from generate_fasta import generate_fasta
 from datetime import date
 from locations import get_local_folder_for, FileType
 import psutil
-from datetime import datetime
+from datetime import datetime, timedelta
 
 log_file_keyword = ""
 
@@ -57,15 +57,16 @@ def cancel_an_old_run_with_parameters(args: list):
             logger.info(f"Terminating old instance: {' '.join(process_to_terminate.cmdline())} with PID "
                         f"{process_to_terminate.pid}")
             process_to_terminate.send_signal(signal.SIGINT)
-            TINE_TO_WAIT_FOR_TERMINATION = 60 * 60
+            SECONDS_TO_WAIT_FOR_TERMINATION = 60 * 60 * 4
+            time_to_wait_timedelta_string = timedelta(seconds=SECONDS_TO_WAIT_FOR_TERMINATION)
             try:
-                logger.info(f"Waiting at most {TINE_TO_WAIT_FOR_TERMINATION} seconds for process PID "
+                logger.info(f"Waiting at most {time_to_wait_timedelta_string} (h:m:s) for process PID "
                             f"{process_to_terminate.pid} to terminate itself.")
-                process_to_terminate.wait(TINE_TO_WAIT_FOR_TERMINATION)     # Keyboard Interrupt handled outside
+                process_to_terminate.wait(SECONDS_TO_WAIT_FOR_TERMINATION)     # Keyboard Interrupt handled outside
             except psutil.TimeoutExpired:
                 raise TimeoutError(f"Process {' '.join(process_to_terminate.cmdline())} with PID "
                                    f"{process_to_terminate.pid} is still alive after "
-                                   f"{TINE_TO_WAIT_FOR_TERMINATION} seconds. Maybe there is a bug. "
+                                   f"{time_to_wait_timedelta_string} (h:m:s). Maybe there is a bug. "
                                    f"Current time is {datetime.now()} LOCAL TIME.")
     else:
         logger.info(f"No old instance found.")

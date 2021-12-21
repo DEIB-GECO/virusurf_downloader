@@ -79,7 +79,7 @@ echo "* ViruSurf automatic data update script started at $(timestamp)" | tee -a 
 # # Import COG-UK
 cd $virusurf_dir
 echo "* Begin update of COGUK SC2 at $(timestamp)" | tee -a $log_file_path
-python main.py import ${database_name} coguk 0 60000
+python main.py import ${database_name} coguk
 check_exit_code "$?"
 
 

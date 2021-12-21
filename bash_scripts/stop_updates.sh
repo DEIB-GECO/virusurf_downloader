@@ -53,18 +53,24 @@ cd $virusurf_dir
 if [ -z $operation_to_stop ]; then
   echo "Stopping import of genbank sars cov 2 on ${database_name}"
   python main.py stop import ${database_name} sars_cov_2
+  check_exit_code "$?"
   echo "Stopping import of coguk sars cov 2 on ${database_name}"
   python main.py stop import ${database_name} coguk
+  check_exit_code "$?"
   echo "Stopping import of gisaid on ${database_name_gisaid}"
   python main.py stop import ${database_name_gisaid} gisaid
+  check_exit_code "$?"
 elif [ $operation_to_stop == "genbank" ]; then
   echo "Stopping import of genbank sars cov 2 on ${database_name}"
   python main.py stop import ${database_name} sars_cov_2
+  check_exit_code "$?"
 elif [ $operation_to_stop == "coguk" ]; then
   echo "Stopping import of coguk sars cov 2 on ${database_name}"
   python main.py stop import ${database_name} coguk
+  check_exit_code "$?"
 elif [ $operation_to_stop == "gisaid" ]; then
   echo "Stopping import of gisaid on ${database_name_gisaid}"
   python main.py stop import ${database_name_gisaid} gisaid
+  check_exit_code "$?"
 fi
 

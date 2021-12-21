@@ -79,7 +79,7 @@ echo "* ViruSurf automatic data update script started at $(timestamp)" | tee -a 
 # # Update GISAID
 cd $virusurf_dir
 echo "* Begin update of GISAID SC2 at $(timestamp)" | tee -a $log_file_path
-python main.py import ${database_name_gisaid} gisaid 0 140000
+python main.py import ${database_name_gisaid} gisaid
 check_exit_code "$?"
 
 

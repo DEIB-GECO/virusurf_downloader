@@ -78,7 +78,7 @@ echo "* ViruSurf automatic data update script started at $(timestamp)" | tee -a 
 # # Update DB with new sequences
 cd $virusurf_dir
 echo "* Begin update of NCBI SC2 at $(timestamp)" | tee -a $log_file_path
-python main.py import ${database_name} sars_cov_2 0 60000
+python main.py import ${database_name} sars_cov_2
 check_exit_code "$?"
 
 # echo "* Begin update of NCBI Bombali at $(timestamp)" | tee -a $log_file_path
