@@ -36,7 +36,7 @@ import signal
 DOWNLOAD_ATTEMPTS = 3
 DOWNLOAD_FAILED_PAUSE_SECONDS = 30
 # snpeff_semaphore = Lock()
-snpeff_semaphore = BoundedSemaphore(30)
+snpeff_semaphore = BoundedSemaphore(25)
 
 
 class AnyNCBITaxon:

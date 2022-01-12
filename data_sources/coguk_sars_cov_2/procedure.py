@@ -23,7 +23,7 @@ sc2_chromosome = ncbi_known_settings["sars_cov_2"]["chromosome_name"]
 sc2_annotations_file_path = ncbi_known_settings["sars_cov_2"]["annotation_file_path"]
 sc2_snpeff_db_name = ncbi_known_settings["sars_cov_2"]["snpeff_db_name"]
 # snpeff_semaphore = Lock()
-snpeff_semaphore = BoundedSemaphore(30)
+snpeff_semaphore = BoundedSemaphore(25)
 
 
 reference_sequence = None
