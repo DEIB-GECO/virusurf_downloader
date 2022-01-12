@@ -57,7 +57,7 @@ def cancel_an_old_run_with_parameters(args: list):
             logger.info(f"Terminating old instance: {' '.join(process_to_terminate.cmdline())} with PID "
                         f"{process_to_terminate.pid}")
             process_to_terminate.send_signal(signal.SIGINT)
-            SECONDS_TO_WAIT_FOR_TERMINATION = 60 * 60 * 4
+            SECONDS_TO_WAIT_FOR_TERMINATION = 60 * 60 * 24
             time_to_wait_timedelta_string = timedelta(seconds=SECONDS_TO_WAIT_FOR_TERMINATION)
             try:
                 logger.info(f"Waiting at most {time_to_wait_timedelta_string} (h:m:s) for process PID "

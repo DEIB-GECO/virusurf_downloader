@@ -13,6 +13,7 @@ sleep 10
 # input parameters
 virusurf_dir=${1}/
 virusurf_updating_databases_path=$2
+notifier_script_path=${virusurf_dir}bash_scripts/notify_me.sh
 operation_to_stop=$3
 database_name=$(head -1 "$virusurf_updating_databases_path")
 database_name_gisaid=$(head -2 "$virusurf_updating_databases_path" | tail -1)
@@ -30,9 +31,18 @@ sleep 10
 timestamp() {
   TZ=Europe/Rome date +"%Y_%m_%d__%H_%M_%S" # current time
 }
+notify_me() { # expects a message as argument
+  if test -f "$notifier_script_path"; then
+    /bin/bash "$notifier_script_path" "$1"
+  else
+    echo "virusurf self-update notification not available"
+  fi
+}
 check_exit_code() {    # expects exit status code as argument
   if [ "$1" -ne 0 ]; then
     echo "* Last command terminated abnormally (exit code ${1}). Script interrupted."
+    notify_me "* $(timestamp) stop-updates notification. Last attempt to stop a running update failed.
+     Check the logs to know more."
     echo ""
     echo ""
     echo ""
