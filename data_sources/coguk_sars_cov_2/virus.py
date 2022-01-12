@@ -416,8 +416,7 @@ def download_or_get_sample_data(containing_directory: str) -> (str, str):
                 success = True
             except timeout as e:
                 if attempts <= 3:
-                    logger.error(f"download attempt #{attempts}/3 failed")
-                    logger.error(str(e))
+                    logger.error(f"download attempt #{attempts}/3 failed -- socket.timeout error. The read operation timed out.")
                 if attempts == 3:
                     raise e
 
