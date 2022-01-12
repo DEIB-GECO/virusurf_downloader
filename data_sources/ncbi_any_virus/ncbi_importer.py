@@ -1016,6 +1016,7 @@ def import_samples_into_vcm(source_name: str, SampleWrapperClass=AnyNCBIVNucSamp
             logger.exception("Removal of metadata leftovers in the DB and XML files of the samples that failed was not successful.")
 
         database.try_py_function(vcm.insert_data_update_pipeline_event, pipeline_event)
+        # return interrupted_by_user
 
 # !!!!! ARE YOU LOOKING FOR prepared_parameters ? Use instead data_source.ncbi_any_virus.settings -> known_settings !!!!
-#########################################################################################################################
+########################################################################################################################

@@ -143,6 +143,7 @@ def start():
         return
 
     #   ###################################     PERFORM <action>       ########################
+    interrupted_by_user = False
     try:
         if 'download' in action:
             _what_to_download = sys.argv[2]
@@ -159,12 +160,12 @@ def start():
             # noinspection PyUnboundLocalVariable
             if source in ['coguk', 'cog-uk']:
                 from data_sources.coguk_sars_cov_2.procedure import run as run_coguk
-                run_coguk(from_sample=_from, to_sample=to)
+                interrupted_by_user = run_coguk(from_sample=_from, to_sample=to)
             elif source == 'gisaid':
                 from data_sources.gisaid_sars_cov_2.procedure import run as run_gisaid
-                run_gisaid(from_sample=_from, to_sample=to)
+                interrupted_by_user = run_gisaid(from_sample=_from, to_sample=to)
             elif source in known_settings.keys():
-                import_samples_into_vcm(source, from_sample=_from, to_sample=to)
+                interrupted_by_user = import_samples_into_vcm(source, from_sample=_from, to_sample=to)
             elif 'nmdc' in source:
                 nmdc.import_samples_into_vcm()
             else:
@@ -200,6 +201,8 @@ def start():
         if 'import' in action:
             stats_module.check_samples_imported()
         logger.complete()
+        if interrupted_by_user:
+            sys.exit(2)
 
 
 if __name__ == '__main__':

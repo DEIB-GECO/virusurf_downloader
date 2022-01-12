@@ -247,3 +247,4 @@ def run(from_sample: Optional[int] = None, to_sample: Optional[int] = None):
         pipeline_event.changed_items = changed_items
         pipeline_event.added_items = added_items
         database.try_py_function(vcm.insert_data_update_pipeline_event, pipeline_event)
+        # return interrupted_by_user
