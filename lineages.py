@@ -7,7 +7,7 @@ from os.path import sep, abspath
 from db_config.read_db_import_configuration import get_database_config_params
 
 
-conda_install_path = '/home/metadata/anaconda3_new/etc/profile.d/conda.sh'
+conda_install_path = '/home/ec2-user/anaconda3_new/etc/profile.d/conda.sh'
 logger.warning(f'Assume to find conda installed at path: {conda_install_path}. If not, change the address in module '
                f'lineages.py')
 logger.warning('This action requires pangolin to be installed in a pangolin conda environment.')
